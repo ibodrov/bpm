@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://jet.msk.su/scdp/cpa">
+  <process id="cpaCheckAbonentStatus" name="CPA Check Abonent Status" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <sequenceFlow id="flow26" sourceRef="startevent1" targetRef="getSubProfileTask"></sequenceFlow>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <sequenceFlow id="flow27" name="active" sourceRef="exclusivegateway1" targetRef="endevent1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${spaStatus == 'A'}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="getSubProfileTask" name="Get Sub Profile" activiti:delegateExpression="${getSubProfileTask}"></serviceTask>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow28" sourceRef="getSubProfileTask" targetRef="logAbonentStatusTask"></sequenceFlow>
+    <endEvent id="errorendevent1" name="ErrorEnd">
+      <errorEventDefinition errorRef="notActive"></errorEventDefinition>
+    </endEvent>
+    <sequenceFlow id="flow29" name="not active" sourceRef="exclusivegateway1" targetRef="errorendevent1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${spaStatus != 'A'}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="logAbonentStatusTask" name="Log Abonent Status Task" activiti:expression="${cpaLogAbonentStatusTask.ok(execution)}"></serviceTask>
+    <sequenceFlow id="flow30" sourceRef="logAbonentStatusTask" targetRef="exclusivegateway1"></sequenceFlow>
+    <serviceTask id="logAbonentStatusErrorTask" name="Log Abonent Status Error Task" activiti:expression="${cpaLogAbonentStatusTask.error(execution)}"></serviceTask>
+    <boundaryEvent id="boundaryerror1" name="Error" attachedToRef="getSubProfileTask">
+      <errorEventDefinition></errorEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="flow31" name="error" sourceRef="boundaryerror1" targetRef="logAbonentStatusErrorTask"></sequenceFlow>
+    <endEvent id="errorendevent2" name="ErrorEnd">
+      <errorEventDefinition errorRef="checkAbonentStatusError"></errorEventDefinition>
+    </endEvent>
+    <sequenceFlow id="flow32" sourceRef="logAbonentStatusErrorTask" targetRef="errorendevent2"></sequenceFlow>
+    <textAnnotation id="textannotation1">
+      <text>in:
+scdpTxId
+subscriberId
+partnerId</text>
+    </textAnnotation>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_cpaCheckAbonentStatus">
+    <bpmndi:BPMNPlane bpmnElement="cpaCheckAbonentStatus" id="BPMNPlane_cpaCheckAbonentStatus">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="305.0" y="112.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="305.0" y="487.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="getSubProfileTask" id="BPMNShape_getSubProfileTask">
+        <omgdc:Bounds height="55.0" width="105.0" x="270.0" y="182.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundaryerror1" id="BPMNShape_boundaryerror1">
+        <omgdc:Bounds height="30.0" width="30.0" x="360.0" y="220.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="302.0" y="380.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="errorendevent1" id="BPMNShape_errorendevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="210.0" y="487.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="logAbonentStatusTask" id="BPMNShape_logAbonentStatusTask">
+        <omgdc:Bounds height="59.0" width="105.0" x="270.0" y="282.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="logAbonentStatusErrorTask" id="BPMNShape_logAbonentStatusErrorTask">
+        <omgdc:Bounds height="61.0" width="105.0" x="430.0" y="280.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="errorendevent2" id="BPMNShape_errorendevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="465.0" y="487.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation1" id="BPMNShape_textannotation1">
+        <omgdc:Bounds height="83.0" width="100.0" x="90.0" y="88.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow26" id="BPMNEdge_flow26">
+        <omgdi:waypoint x="322.0" y="147.0"></omgdi:waypoint>
+        <omgdi:waypoint x="322.0" y="182.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow27" id="BPMNEdge_flow27">
+        <omgdi:waypoint x="322.0" y="420.0"></omgdi:waypoint>
+        <omgdi:waypoint x="322.0" y="487.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="29.0" x="277.0" y="429.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow28" id="BPMNEdge_flow28">
+        <omgdi:waypoint x="322.0" y="237.0"></omgdi:waypoint>
+        <omgdi:waypoint x="322.0" y="282.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow29" id="BPMNEdge_flow29">
+        <omgdi:waypoint x="302.0" y="400.0"></omgdi:waypoint>
+        <omgdi:waypoint x="227.0" y="400.0"></omgdi:waypoint>
+        <omgdi:waypoint x="227.0" y="487.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="47.0" x="232.0" y="380.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow30" id="BPMNEdge_flow30">
+        <omgdi:waypoint x="322.0" y="341.0"></omgdi:waypoint>
+        <omgdi:waypoint x="322.0" y="380.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow31" id="BPMNEdge_flow31">
+        <omgdi:waypoint x="390.0" y="235.0"></omgdi:waypoint>
+        <omgdi:waypoint x="482.0" y="234.0"></omgdi:waypoint>
+        <omgdi:waypoint x="482.0" y="280.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="24.0" x="421.0" y="196.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow32" id="BPMNEdge_flow32">
+        <omgdi:waypoint x="482.0" y="341.0"></omgdi:waypoint>
+        <omgdi:waypoint x="482.0" y="487.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
