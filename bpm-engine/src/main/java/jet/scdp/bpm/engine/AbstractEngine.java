@@ -80,12 +80,10 @@ public abstract class AbstractEngine implements Engine {
 
     @Override
     public void resume(String processBusinessKey, String eventId, Map<String, Object> variables) throws ExecutionException {
-        EventManager em = getEventManager();
         LockManager lm = getLockManager();
-        
         lm.lock(processBusinessKey);
-        
         try {
+            EventManager em = getEventManager();
             Event e = em.find(processBusinessKey, eventId);
             if (e == null) {
                 throw new ExecutionException("No event '" + eventId + "' found for process '" + processBusinessKey + "'");
