@@ -22,7 +22,7 @@ public final class ProcessDefinitionUtils {
     public static ProcessDefinition findProcess(ProcessDefinitionProvider provider, String id) throws ExecutionException {
         ProcessDefinition pd = provider.getById(id);
         if (pd == null) {
-            throw new ExecutionException("Unknown process definition: '" + id);
+            throw new ExecutionException("Unknown process definition '%s'", id);
         }
         return pd;
     }
@@ -40,7 +40,7 @@ public final class ProcessDefinitionUtils {
     public static ProcessDefinition findElementProcess(ProcessDefinition pd, String id) throws ExecutionException {
         ProcessDefinition sub = findElementProcess0(pd, id);
         if (sub == null) {
-            throw new ExecutionException("Invalid process definition '" + pd.getId() + "': unknown element '" + id + "'");
+            throw new ExecutionException("Invalid process definition '%s': unknown element '%s'", pd.getId(), id);
         }
         return sub;
     }
@@ -87,7 +87,7 @@ public final class ProcessDefinitionUtils {
         if (e instanceof SubProcess) {
             return (SubProcess) e;
         } else {
-            throw new ExecutionException("Invalid process definition '" + pd.getId() + "': element '" + id + "' is not a subprocess element");
+            throw new ExecutionException("Invalid process definition '%s': element '%s' is not a subprocess element", pd.getId(), id);
         }
     }
 
@@ -113,7 +113,7 @@ public final class ProcessDefinitionUtils {
         }
 
         if (result.isEmpty()) {
-            throw new ExecutionException("Invalid process definition '" + pd.getId() + "': no flows from '" + from + "'");
+            throw new ExecutionException("Invalid process definition '%s': no flows from '%s'", pd.getId(), from);
         }
 
         return result;
@@ -141,7 +141,7 @@ public final class ProcessDefinitionUtils {
         }
 
         if (result.isEmpty()) {
-            throw new ExecutionException("Invalid process definition '" + pd.getId() + "': no flows to '" + to + "'");
+            throw new ExecutionException("Invalid process definition '%s': no flows to '%s'", pd.getId(), to);
         }
 
         return result;
@@ -162,7 +162,7 @@ public final class ProcessDefinitionUtils {
             }
         }
 
-        throw new ExecutionException("Invalid process definition '" + pd.getId() + "': no start event defined");
+        throw new ExecutionException("Invalid process definition '%s': no start event defined", pd.getId());
     }
 
     public static BoundaryEvent findBoundaryEvent(ProcessDefinition pd, String attachedToRef, String errorRef) throws ExecutionException {

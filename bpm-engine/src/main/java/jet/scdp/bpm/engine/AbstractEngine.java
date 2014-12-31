@@ -86,7 +86,7 @@ public abstract class AbstractEngine implements Engine {
             EventManager em = getEventManager();
             Event e = em.find(processBusinessKey, eventId);
             if (e == null) {
-                throw new ExecutionException("No event '" + eventId + "' found for process '" + processBusinessKey + "'");
+                throw new ExecutionException("No event '%s' found for process '%s'", eventId, processBusinessKey);
             }
             
             if (e.isExclusive()) {
@@ -101,7 +101,7 @@ public abstract class AbstractEngine implements Engine {
             PersistenceManager pm = getPersistenceManager();
             DefaultExecution s = pm.remove(eid);
             if (s == null) {
-                throw new ExecutionException("Execution not found: " + eid);
+                throw new ExecutionException("No execution '%s' found for process '%s'", eid, processBusinessKey);
             }
             
             s.setSuspended(false);
@@ -135,7 +135,7 @@ public abstract class AbstractEngine implements Engine {
                     String pid = s.getParentId();
                     s = pm.remove(pid);
                     if (s == null) {
-                        throw new ExecutionException("Parent execution not found: " + pid);
+                        throw new ExecutionException("Parent execution '%s' not found", pid);
                     }
                     
                     s.setSuspended(false);

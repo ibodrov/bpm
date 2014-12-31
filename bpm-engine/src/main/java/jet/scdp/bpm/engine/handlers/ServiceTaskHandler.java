@@ -67,7 +67,7 @@ public class ServiceTaskHandler extends AbstractElementHandler {
                         break;
                     }
                     default: {
-                        throw new ExecutionException("Unsupported expression type: " + type);
+                        throw new ExecutionException("Unsupported expression type '%s'", type);
                     }
                 }
                 FlowUtils.followFlows(getEngine(), s, c);

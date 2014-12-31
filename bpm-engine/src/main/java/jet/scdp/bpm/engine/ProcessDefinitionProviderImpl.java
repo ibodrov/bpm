@@ -17,7 +17,7 @@ public class ProcessDefinitionProviderImpl implements ProcessDefinitionProvider 
     public ProcessDefinition getById(String id) throws ExecutionException {
         ProcessDefinition pd = defs.get(id);
         if (pd == null) {
-            throw new ExecutionException("Unknown process definition: " + id);
+            throw new ExecutionException("Unknown process definition '%s'", id);
         }
         return pd;
     }

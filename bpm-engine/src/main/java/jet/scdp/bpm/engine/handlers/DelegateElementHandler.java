@@ -66,7 +66,7 @@ public class DelegateElementHandler implements ElementHandler {
         if (h != null) {
             h.handle(s, c);
         } else {
-            throw new ExecutionException("Unsupported element " + e.getClass().getSimpleName() + " '" + e.getId() + "' of process '" + pd.getId() + "'");
+            throw new ExecutionException("Unsupported element %s '%s' of process '%s'", e.getClass().getSimpleName(), e.getId(), pd.getId());
         }
     }
 }

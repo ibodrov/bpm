@@ -72,7 +72,7 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
         if (nextId == null) {
             // ничего не найдено или ни один flow с EL-выражением не был
             // вычислен в true
-            throw new ExecutionException("No valid outgoing flows for " + c.getElementId() + " and no default flows");
+            throw new ExecutionException("No valid outgoing flows for '%s' and no default flow", c.getElementId());
         }
 
         log.debug("'{}' was selected", nextId);
