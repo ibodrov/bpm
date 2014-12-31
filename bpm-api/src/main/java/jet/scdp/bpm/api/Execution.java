@@ -13,6 +13,4 @@ public interface Execution extends Serializable {
     public boolean isDone();
     
     public boolean isSuspended();
-
-    public void setSuspended(boolean suspended);
 }

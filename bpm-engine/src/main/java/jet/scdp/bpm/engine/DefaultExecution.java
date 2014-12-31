@@ -24,22 +24,27 @@ public class DefaultExecution implements Execution {
         this.processBusinessKey = processBusinessKey;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public String getParentId() {
         return parentId;
     }
 
+    @Override
     public String getProcessBusinessKey() {
         return processBusinessKey;
     }
 
+    @Override
     public boolean isDone() {
         return commands.isEmpty();
     }
 
+    @Override
     public boolean isSuspended() {
         return suspended;
     }
