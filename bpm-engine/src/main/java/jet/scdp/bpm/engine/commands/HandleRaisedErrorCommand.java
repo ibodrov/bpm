@@ -6,7 +6,7 @@ import jet.scdp.bpm.api.ExecutionException;
 import jet.scdp.bpm.engine.AbstractEngine;
 import jet.scdp.bpm.engine.BpmnErrorHelper;
 import jet.scdp.bpm.engine.DefaultExecution;
-import jet.scdp.bpm.engine.ExecutionContext;
+import jet.scdp.bpm.api.ExecutionContext;
 import jet.scdp.bpm.engine.FlowUtils;
 import jet.scdp.bpm.engine.ProcessDefinitionProvider;
 import jet.scdp.bpm.engine.ProcessDefinitionUtils;

@@ -1,6 +1,4 @@
-package jet.scdp.bpm.engine.task;
-
-import jet.scdp.bpm.engine.ExecutionContext;
+package jet.scdp.bpm.api;
 
 public interface JavaDelegate {
 

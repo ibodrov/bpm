@@ -1,5 +1,7 @@
 package jet.scdp.bpm.engine;
 
+import jet.scdp.bpm.api.ExecutionContext;
+
 public final class BpmnErrorHelper {
 
     private static final String KEY = "__bpmn_raised_error";

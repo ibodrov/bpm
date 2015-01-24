@@ -5,7 +5,7 @@ import jet.scdp.bpm.api.ExecutionException;
 import jet.scdp.bpm.engine.AbstractEngine;
 import jet.scdp.bpm.engine.BpmnErrorHelper;
 import jet.scdp.bpm.engine.DefaultExecution;
-import jet.scdp.bpm.engine.ExecutionContext;
+import jet.scdp.bpm.api.ExecutionContext;
 import jet.scdp.bpm.engine.ExecutionContextHelper;
 import jet.scdp.bpm.model.VariableMapping;
 import org.slf4j.Logger;

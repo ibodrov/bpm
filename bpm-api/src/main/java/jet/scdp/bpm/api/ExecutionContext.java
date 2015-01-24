@@ -1,9 +1,8 @@
-package jet.scdp.bpm.engine;
+package jet.scdp.bpm.api;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
-import jet.scdp.bpm.api.ActivationListener;
 
 public interface ExecutionContext extends ActivationListener, Serializable {
 

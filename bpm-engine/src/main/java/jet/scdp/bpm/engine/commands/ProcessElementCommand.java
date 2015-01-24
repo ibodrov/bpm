@@ -3,7 +3,7 @@ package jet.scdp.bpm.engine.commands;
 import jet.scdp.bpm.api.ExecutionException;
 import jet.scdp.bpm.engine.AbstractEngine;
 import jet.scdp.bpm.engine.DefaultExecution;
-import jet.scdp.bpm.engine.ExecutionContext;
+import jet.scdp.bpm.api.ExecutionContext;
 
 public class ProcessElementCommand implements ExecutionCommand {
 

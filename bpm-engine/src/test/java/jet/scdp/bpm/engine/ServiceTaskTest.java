@@ -1,7 +1,8 @@
 package jet.scdp.bpm.engine;
 
+import jet.scdp.bpm.api.ExecutionContext;
 import jet.scdp.bpm.api.BpmnError;
-import jet.scdp.bpm.engine.task.JavaDelegate;
+import jet.scdp.bpm.api.JavaDelegate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

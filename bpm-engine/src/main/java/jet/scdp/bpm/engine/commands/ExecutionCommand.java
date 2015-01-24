@@ -4,7 +4,7 @@ import java.io.Serializable;
 import jet.scdp.bpm.api.ExecutionException;
 import jet.scdp.bpm.engine.AbstractEngine;
 import jet.scdp.bpm.engine.DefaultExecution;
-import jet.scdp.bpm.engine.ExecutionContext;
+import jet.scdp.bpm.api.ExecutionContext;
 
 /**
  * Команда выполнения процесса. Реализации обычно предназначены для изменения

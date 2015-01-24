@@ -1,5 +1,6 @@
 package jet.scdp.bpm.engine;
 
+import jet.scdp.bpm.api.ExecutionContext;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;

@@ -1,4 +1,6 @@
-package jet.scdp.bpm.engine;
+package jet.scdp.bpm.api;
+
+import jet.scdp.bpm.api.ExecutionContext;
 
 public interface ExecutionListener {
 

@@ -2,7 +2,7 @@ package jet.scdp.bpm.engine.handlers;
 
 import jet.scdp.bpm.api.Engine;
 import jet.scdp.bpm.api.ExecutionException;
-import jet.scdp.bpm.engine.ExecutionContext;
+import jet.scdp.bpm.api.ExecutionContext;
 import jet.scdp.bpm.engine.IdGenerator;
 import jet.scdp.bpm.engine.AbstractEngine;
 import jet.scdp.bpm.engine.DefaultExecution;

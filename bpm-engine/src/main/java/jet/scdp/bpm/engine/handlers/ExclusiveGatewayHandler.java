@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import jet.scdp.bpm.api.ExecutionException;
 import jet.scdp.bpm.engine.DefaultExecution;
-import jet.scdp.bpm.engine.ExecutionContext;
+import jet.scdp.bpm.api.ExecutionContext;
 import jet.scdp.bpm.engine.AbstractEngine;
 import jet.scdp.bpm.engine.ProcessDefinitionUtils;
 import jet.scdp.bpm.engine.commands.ProcessElementCommand;

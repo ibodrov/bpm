@@ -4,7 +4,7 @@ import java.beans.FeatureDescriptor;
 import java.util.Iterator;
 import javax.el.ELContext;
 import javax.el.ELResolver;
-import jet.scdp.bpm.engine.ExecutionContext;
+import jet.scdp.bpm.api.ExecutionContext;
 
 public class ExecutionContextVariableResolver extends ELResolver {
 

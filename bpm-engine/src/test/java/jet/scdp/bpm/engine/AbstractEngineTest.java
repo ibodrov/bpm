@@ -9,7 +9,7 @@ import java.util.Map;
 import jet.scdp.bpm.api.Execution;
 import jet.scdp.bpm.engine.event.EventManager;
 import jet.scdp.bpm.engine.event.EventManagerImpl;
-import jet.scdp.bpm.engine.task.JavaDelegate;
+import jet.scdp.bpm.api.JavaDelegate;
 import jet.scdp.bpm.engine.task.ServiceTaskRegistry;
 import jet.scdp.bpm.engine.task.ServiceTaskRegistryImpl;
 import jet.scdp.bpm.model.ProcessDefinition;

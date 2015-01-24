@@ -1,6 +1,6 @@
 package jet.scdp.bpm.engine.el;
 
-import jet.scdp.bpm.engine.ExecutionContext;
+import jet.scdp.bpm.api.ExecutionContext;
 
 public interface ExpressionManager {
 

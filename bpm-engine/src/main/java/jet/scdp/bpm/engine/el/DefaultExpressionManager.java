@@ -11,7 +11,7 @@ import javax.el.ExpressionFactory;
 import javax.el.ListELResolver;
 import javax.el.MapELResolver;
 import javax.el.ValueExpression;
-import jet.scdp.bpm.engine.ExecutionContext;
+import jet.scdp.bpm.api.ExecutionContext;
 import jet.scdp.bpm.engine.task.ServiceTaskRegistry;
 import jet.scdp.bpm.engine.task.ServiceTaskResolver;
 import org.slf4j.Logger;

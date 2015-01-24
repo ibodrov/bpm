@@ -4,7 +4,7 @@ import jet.scdp.bpm.engine.AbstractEngine;
 import jet.scdp.bpm.api.Engine;
 import jet.scdp.bpm.api.ExecutionException;
 import jet.scdp.bpm.engine.DefaultExecution;
-import jet.scdp.bpm.engine.ExecutionContext;
+import jet.scdp.bpm.api.ExecutionContext;
 
 /**
  * Команда приостановки процесса. Вызывает сохранение текущего состояния
