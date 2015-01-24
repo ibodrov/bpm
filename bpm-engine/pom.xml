@@ -64,8 +64,9 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>*</Import-Package>
                         <Export-Package>
-                            jet.scdp.bpm.api,
-                            jet.scdp.bpm.model
+                            jet.scdp.bpm.engine,
+                            jet.scdp.bpm.engine.*,
+                            jet.scdp.bpm.xml
                         </Export-Package>
                     </instructions>
                 </configuration>
