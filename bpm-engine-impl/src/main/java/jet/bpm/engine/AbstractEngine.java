@@ -153,6 +153,7 @@ public abstract class AbstractEngine implements Engine {
         }
         
         log.debug("run ['{}'] -> (done: {}, suspended: {})", s.getId(), s.isDone(), s.isSuspended());
+        
     }
 
     private static final class ActivationListenerHolder {

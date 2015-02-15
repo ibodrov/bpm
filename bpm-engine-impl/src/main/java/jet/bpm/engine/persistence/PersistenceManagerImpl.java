@@ -15,7 +15,7 @@ public class PersistenceManagerImpl implements PersistenceManager {
     @Override
     public DefaultExecution remove(String id) {
         synchronized (states) {
-            DefaultExecution s = states.get(id);
+            DefaultExecution s = states.remove(id);
             log.debug("remove ['{}'] -> done", id);
             return s;
         }
