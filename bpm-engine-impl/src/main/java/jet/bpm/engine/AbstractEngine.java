@@ -91,13 +91,14 @@ public abstract class AbstractEngine implements Engine {
             }
             
             if (e.isExclusive()) {
-                // эксклюзивное событие означает, что может возникнуть только одно
-                // событие из группы. А значит все остальные события надо удалить
+                // эксклюзивное событие означает, что может возникнуть только
+                // одно событие из группы. А значит все остальные события надо
+                // удалить
                 em.clearGroup(processBusinessKey, e.getGroupId());
             }
             
             String eid = e.getExecutionId();
-            log.debug("wakeUp ['{}', '{}'] -> got execution id {}", processBusinessKey, eventId, eid);
+            log.debug("resume ['{}', '{}'] -> got execution id {}", processBusinessKey, eventId, eid);
             
             PersistenceManager pm = getPersistenceManager();
             DefaultExecution s = pm.remove(eid);
@@ -139,6 +140,11 @@ public abstract class AbstractEngine implements Engine {
                     log.debug("run ['{}'] -> switching to {}", s.getId(), pid);
                     DefaultExecution parent = pm.remove(pid);
                     if (parent == null) {
+                        // это типичная в случае использования inclusive gateway
+                        // ситуация: родитель завершает свое выполнение после
+                        // того, как отработает последний побочный процесс.
+                        // Фактически, последний побочный процесс и становится
+                        // продолжением родительского.
                         log.debug("run ['{}'] -> parent execution not found", pid);
                         break;
                     } else {
