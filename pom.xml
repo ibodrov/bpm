@@ -10,6 +10,7 @@
     <modules>
         <module>bpm-engine-api</module>
         <module>bpm-engine-impl</module>
+        <module>activiti-compat</module>
     </modules>
 
     <properties>

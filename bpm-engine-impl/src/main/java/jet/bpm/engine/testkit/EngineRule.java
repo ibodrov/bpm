@@ -11,7 +11,6 @@ import jet.bpm.engine.DefaultEngine;
 import jet.bpm.engine.event.EventManager;
 import jet.bpm.engine.event.EventManagerImpl;
 import jet.bpm.engine.model.ProcessDefinition;
-import jet.bpm.engine.xml.ActivitiParser;
 import jet.bpm.engine.xml.Parser;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -23,12 +22,16 @@ public class EngineRule implements TestRule {
     
     private static final Logger log = LoggerFactory.getLogger(EngineRule.class);
     
-    private final Parser parser = new ActivitiParser();
+    private final Parser parser;
     
     private ProcessDefinitionProviderImpl processDefinitionProvider;
     private EventManager eventManager;
     private Engine engine;
 
+    public EngineRule(Parser parser) {
+        this.parser = parser;
+    }
+    
     @Override
     public Statement apply(final Statement base, final Description description) {
         return new Statement() {

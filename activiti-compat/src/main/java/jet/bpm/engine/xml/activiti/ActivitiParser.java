@@ -1,4 +1,4 @@
-package jet.bpm.engine.xml;
+package jet.bpm.engine.xml.activiti;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +23,8 @@ import jet.bpm.engine.model.IntermediateCatchEvent;
 import jet.bpm.engine.model.SequenceFlow.ExecutionListener;
 import jet.bpm.engine.model.StartEvent;
 import jet.bpm.engine.model.VariableMapping;
+import jet.bpm.engine.xml.Parser;
+import jet.bpm.engine.xml.ParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;

@@ -1,10 +1,10 @@
-package jet.bpm.engine.xml;
+package jet.bpm.engine.xml.activiti;
 
-import jet.bpm.engine.xml.Parser;
-import jet.bpm.engine.xml.ActivitiParser;
+import jet.bpm.engine.xml.activiti.ActivitiParser;
 import java.io.InputStream;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
+import jet.bpm.engine.xml.Parser;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
