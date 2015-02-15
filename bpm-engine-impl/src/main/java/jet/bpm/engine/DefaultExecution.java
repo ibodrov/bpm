@@ -1,18 +1,19 @@
 package jet.bpm.engine;
 
+import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import jet.bpm.engine.api.Execution;
 import jet.bpm.engine.commands.ExecutionCommand;
 
-public class DefaultExecution implements Execution {
+public class DefaultExecution implements Execution, Serializable {
 
     private final String id;
     private final String parentId;
     private final String processBusinessKey;
     private final Deque<ExecutionCommand> commands = new ArrayDeque<>();
 
-    private transient boolean suspended = false;
+    private boolean suspended = false;
 
     public DefaultExecution(String id, String processBusinessKey) {
         this(id, null, processBusinessKey);

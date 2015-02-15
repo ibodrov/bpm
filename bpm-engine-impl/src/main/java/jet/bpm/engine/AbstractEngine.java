@@ -127,22 +127,24 @@ public abstract class AbstractEngine implements Engine {
     }
 
     private void run(DefaultExecution s) throws ExecutionException {
+        PersistenceManager pm = getPersistenceManager();
+        
         while (!s.isSuspended()) {
             if (s.isDone()) {
-                if (s.getParentId() != null) {
-                    log.debug("run ['{}'] -> switching to {}", s.getId(), s.getParentId());
-                    PersistenceManager pm = getPersistenceManager();
-                    
-                    String pid = s.getParentId();
-                    s = pm.remove(pid);
-                    if (s == null) {
-                        throw new ExecutionException("Parent execution '%s' not found", pid);
-                    }
-                    
-                    s.setSuspended(false);
-                } else {
+                String pid = s.getParentId();
+                if (pid == null) {
                     log.debug("run ['{}'] -> no parent execution, breaking", s.getId());
                     break;
+                } else {    
+                    log.debug("run ['{}'] -> switching to {}", s.getId(), pid);
+                    DefaultExecution parent = pm.remove(pid);
+                    if (parent == null) {
+                        log.debug("run ['{}'] -> parent execution not found", pid);
+                        break;
+                    } else {
+                        parent.setSuspended(false);
+                        s = parent;
+                    }
                 }
             }
 

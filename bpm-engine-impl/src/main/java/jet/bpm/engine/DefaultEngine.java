@@ -1,6 +1,6 @@
 package jet.bpm.engine;
 
-import jet.bpm.engine.persistence.PersistenceManagerImpl;
+import jet.bpm.engine.persistence.DummyPersistenceManager;
 import jet.bpm.engine.persistence.PersistenceManager;
 import jet.bpm.engine.api.Engine;
 import jet.bpm.engine.lock.LockManager;
@@ -17,7 +17,7 @@ import jet.bpm.engine.task.ServiceTaskRegistryImpl;
 public class DefaultEngine extends AbstractEngine implements Engine {
     
     private final ElementHandler elementHandler = new DelegateElementHandler(this);
-    private final PersistenceManager persistenceManager = new PersistenceManagerImpl();
+    private final PersistenceManager persistenceManager = new DummyPersistenceManager();
     private final LockManager lockManager = new NoopLockManager();
     private final IdGenerator idGenerator = new UuidGenerator();
     
