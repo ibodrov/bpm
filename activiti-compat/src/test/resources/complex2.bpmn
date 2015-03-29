@@ -1,0 +1,983 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://jet.msk.su/scdp/cpa">
+  <message id="cpaPartnerMwRespMessage" name="cpaPartnerMwRespMessage"></message>
+  <message id="cpaSingleRequestContentDelivery" name="cpaSingleRequestContentDelivery"></message>
+  <message id="cpaSinglerequestProcessed" name="cpaSinglerequestProcessed"></message>
+  <message id="smsSingleRequestAllContentProcessedMessage" name="smsSingleRequestAllContentProcessedMessage"></message>
+  <message id="smsSingleRequestContentReceivedMessage" name="smsSingleRequestContentReceivedMessage"></message>
+  <message id="NOOP" name="NOOP"></message>
+  <process id="cpaSingleRequest" name="CPA Single Request" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <serviceTask id="incrementCostCounterTask" name="Increment Cost Counter" activiti:expression="${incrementCostCounterTask.inc(execution, chargeAmount)}"></serviceTask>
+    <exclusiveGateway id="exclusivegateway3" name="Exclusive Gateway" default="hasMaxContentCountFlow"></exclusiveGateway>
+    <sequenceFlow id="flow14" name="maxContentCounter is null or 0" sourceRef="exclusivegateway3" targetRef="logOkTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getLong('cpaMaxContentCount') == null || evalActivator.getLongProperty('cpaMaxContentCount') == 0}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <sequenceFlow id="hasMaxContentCountFlow" name="maxContentCounter &gt; 0" sourceRef="exclusivegateway3" targetRef="servicetask14"></sequenceFlow>
+    <subProcess id="reserveSubprocess" name="Rollback">
+      <startEvent id="startevent2" name="Start"></startEvent>
+      <endEvent id="endevent3" name="End"></endEvent>
+      <callActivity id="chargingRollbackCall" name="Charging Rollback" calledElement="cpaChargingRollback">
+        <extensionElements>
+          <activiti:in source="scdpTxId" target="scdpTxId"></activiti:in>
+          <activiti:in source="subscriberId" target="subscriberId"></activiti:in>
+          <activiti:in source="chargePrice" target="chargePrice"></activiti:in>
+          <activiti:in source="chargePriceCode" target="priceCode"></activiti:in>
+          <activiti:in source="partner" target="partner"></activiti:in>
+          <activiti:in source="service" target="service"></activiti:in>
+          <activiti:in sourceExpression="${evalActivator.getString(&quot;simbrellaChannel&quot;)}" target="simbrellaChannelId"></activiti:in>
+          <activiti:in source="chargingServiceSessionId" target="chargingServiceSessionId"></activiti:in>
+          <activiti:in source="simbrellaSessionId" target="simbrellaSessionId"></activiti:in>
+          <activiti:in source="notifySourceAddr" target="notifySourceAddr"></activiti:in>
+          <activiti:out sourceExpression="${execution.getVariable('chargingServiceSessionId')  != null ? 'rollback' : execution.getVariable('csResult')}" target="csResult"></activiti:out>
+          <activiti:out sourceExpression="${execution.getVariable('simbrellaSessionId') != null ? 'rollback' : execution.getVariable('rebillingResult')} " target="rebillingResult"></activiti:out>
+        </extensionElements>
+      </callActivity>
+      <serviceTask id="raiseErrorTask" name="Raise Error" activiti:delegateExpression="${ret}"></serviceTask>
+      <sequenceFlow id="flow38" sourceRef="raiseErrorTask" targetRef="endevent3"></sequenceFlow>
+      <sequenceFlow id="flow57" sourceRef="startevent2" targetRef="chargingRollbackCall"></sequenceFlow>
+      <sequenceFlow id="flow73" sourceRef="chargingRollbackCall" targetRef="raiseErrorTask"></sequenceFlow>
+    </subProcess>
+    <sequenceFlow id="flow31" sourceRef="startevent1" targetRef="tarifficationTypeExclusiveGateway"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway5" name="Exclusive Gateway" default="mtOrWithoutTarifficationFlow2"></exclusiveGateway>
+    <sequenceFlow id="flow39" sourceRef="subprocess1" targetRef="exclusivegateway5"></sequenceFlow>
+    <callActivity id="chargingCommitCall" name="Charging Commit" calledElement="chargingCommit">
+      <extensionElements>
+        <activiti:in source="scdpTxId" target="scdpTxId"></activiti:in>
+        <activiti:in source="needCommit" target="needCommit"></activiti:in>
+        <activiti:in sourceExpression="SMS-CPA" target="product"></activiti:in>
+        <activiti:in source="chargePriceCode" target="priceCode"></activiti:in>
+        <activiti:in source="chargingServiceSessionId" target="chargingServiceSessionId"></activiti:in>
+        <activiti:in source="subscriberId" target="subscriberId"></activiti:in>
+        <activiti:in sourceExpression="${partner.id}" target="partnerGuid"></activiti:in>
+        <activiti:in sourceExpression="${partner.externalId}" target="partnerExternalId"></activiti:in>
+        <activiti:in sourceExpression="${service.externalId}" target="serviceExternalId"></activiti:in>
+        <activiti:in source="notifySourceAddr" target="notifySourceAddr"></activiti:in>
+        <activiti:out sourceExpression="${chargingServiceSessionId != null ? 'success' : 'unused'}" target="csResult"></activiti:out>
+      </extensionElements>
+    </callActivity>
+    <sequenceFlow id="flow40" name="MO + tarifficationControl = o" sourceRef="exclusivegateway5" targetRef="chargingCommitCall">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getString("tarifficationControl") == 'o' && evalActivator.getString("chargingSchema") == 'MO' && evalActivator.getLong('tarifficationType') == 1}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="mtOrWithoutTarifficationFlow2" name="MT or without tariffication" sourceRef="exclusivegateway5" targetRef="exclusivegateway10">
+      <extensionElements>
+        <activiti:executionListener event="take" expression="${execution.setVariable('csResult', 'unused')}"></activiti:executionListener>
+      </extensionElements>
+    </sequenceFlow>
+    <sequenceFlow id="flow41" sourceRef="chargingCommitCall" targetRef="exclusivegateway18"></sequenceFlow>
+    <exclusiveGateway id="tarifficationTypeExclusiveGateway" name="Exclusive Gateway" default="withoutTarifficationFlow"></exclusiveGateway>
+    <sequenceFlow id="flow2" name="MO                      tarifficationControl = o tarifficationType = 1" sourceRef="tarifficationTypeExclusiveGateway" targetRef="moReserveSubscriptionCallActivity">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getString("tarifficationControl") == 'o' && evalActivator.getString("chargingSchema") == 'MO' && evalActivator.getLong('tarifficationType') == 1}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="mtOrWithoutTarifficationFlow" name="MT             tarifficationType = 1" sourceRef="tarifficationTypeExclusiveGateway" targetRef="exclusivegateway12">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getString("chargingSchema") != 'MO'  && evalActivator.getLong('tarifficationType') == 1}]]></conditionExpression>
+    </sequenceFlow>
+    <callActivity id="moReserveSubscriptionCallActivity" name="Charging Reserve" calledElement="cpaSmsChargingReserve">
+      <extensionElements>
+        <activiti:in source="scdpTxId" target="scdpTxId"></activiti:in>
+        <activiti:in source="subscriberId" target="subscriberId"></activiti:in>
+        <activiti:in source="chargePrice" target="chargePrice"></activiti:in>
+        <activiti:in source="chargePriceCode" target="chargePriceCode"></activiti:in>
+        <activiti:in source="service" target="service"></activiti:in>
+        <activiti:in source="partner" target="partner"></activiti:in>
+        <activiti:in source="evalActivator" target="evalActivator"></activiti:in>
+        <activiti:in source="activatorInfo" target="activatorInfo"></activiti:in>
+        <activiti:in sourceExpression="singleRequest" target="chargeRequestType"></activiti:in>
+        <activiti:in source="evalRequestType" target="evalRequestType"></activiti:in>
+        <activiti:in source="notifySourceAddr" target="notifySourceAddr"></activiti:in>
+        <activiti:in source="requestStoredMessageId" target="requestStoredMessageId"></activiti:in>
+        <activiti:in sourceExpression="MO" target="direction"></activiti:in>
+        <activiti:in source="smsRequestText" target="requestText"></activiti:in>
+        <activiti:out source="chargeAmount" target="chargeAmount"></activiti:out>
+        <activiti:out source="chargingServiceSessionId" target="chargingServiceSessionId"></activiti:out>
+        <activiti:out source="needCommit" target="needCommit"></activiti:out>
+        <activiti:out source="accountType" target="accountType"></activiti:out>
+        <activiti:out source="simbrellaSessionId" target="simbrellaSessionId"></activiti:out>
+        <activiti:out source="billingType" target="billingType"></activiti:out>
+        <activiti:out sourceExpression="${execution.getVariable('chargingServiceSessionId') != null ? 'reserved': 'unused'}" target="csResult"></activiti:out>
+        <activiti:out sourceExpression="${execution.getVariable('rebilling') == true ? 'success' : 'unused'}" target="rebillingResult"></activiti:out>
+      </extensionElements>
+    </callActivity>
+    <boundaryEvent id="noMoneyBoundaryError" name="noMoney" attachedToRef="moReserveSubscriptionCallActivity">
+      <errorEventDefinition errorRef="noMoney"></errorEventDefinition>
+    </boundaryEvent>
+    <boundaryEvent id="boundaryerror2" name="Error" attachedToRef="moReserveSubscriptionCallActivity">
+      <errorEventDefinition errorRef="chargeRestrictionDeny"></errorEventDefinition>
+    </boundaryEvent>
+    <serviceTask id="notifyChargeRestrictionDenyTask" name="Notify &quot;Charge restriction&quot;" activiti:delegateExpression="${cpaNotifySingleRequestChargeRestrictionDenyTask}"></serviceTask>
+    <serviceTask id="logChargeRestrictionDenyTask" name="Log Charge Restriction Deny" activiti:expression="${cpaLogProcessSingleSmsRequestTask.chargeRestrictionDeny(execution)}"></serviceTask>
+    <sequenceFlow id="flow49" sourceRef="boundaryerror2" targetRef="notifyChargeRestrictionDenyTask"></sequenceFlow>
+    <sequenceFlow id="flow50" sourceRef="notifyChargeRestrictionDenyTask" targetRef="logChargeRestrictionDenyTask"></sequenceFlow>
+    <serviceTask id="notifyNoMoneyTask" name="Notify &quot;No money&quot;" activiti:delegateExpression="${cpaNotifySubscriberNoMoneyTask}"></serviceTask>
+    <sequenceFlow id="flow51" sourceRef="noMoneyBoundaryError" targetRef="notifyNoMoneyTask">
+      <extensionElements>
+        <activiti:executionListener event="take" expression="${execution.setVariable('csResult', 'noMoney')}"></activiti:executionListener>
+      </extensionElements>
+    </sequenceFlow>
+    <serviceTask id="logAbonentNoMoneyTask" name="Log Abonent No Money" activiti:expression="${cpaLogProcessSingleSmsRequestTask.abonentNoMoney(execution)}"></serviceTask>
+    <sequenceFlow id="flow52" sourceRef="notifyNoMoneyTask" targetRef="logAbonentNoMoneyTask"></sequenceFlow>
+    <serviceTask id="notifyServiceUnavailableTask" name="Notify &quot;Service Unavailable&quot;" activiti:delegateExpression="${cpaNotifyServiceUnavailableTask}"></serviceTask>
+    <serviceTask id="logChargeErrorTask" name="Log Charge Error" activiti:expression="${cpaLogProcessSingleSmsRequestTask.reserveError(execution)}"></serviceTask>
+    <boundaryEvent id="boundaryerror3" name="Error" attachedToRef="moReserveSubscriptionCallActivity">
+      <errorEventDefinition></errorEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="flow53" sourceRef="boundaryerror3" targetRef="notifyServiceUnavailableTask">
+      <extensionElements>
+        <activiti:executionListener event="take" expression="${execution.setVariable('csResult', 'error')}"></activiti:executionListener>
+      </extensionElements>
+    </sequenceFlow>
+    <sequenceFlow id="flow54" sourceRef="notifyServiceUnavailableTask" targetRef="logChargeErrorTask"></sequenceFlow>
+    <subProcess id="subprocess1" name="Process Request">
+      <startEvent id="startevent3" name="Start"></startEvent>
+      <serviceTask id="cpaSendPartnerSingleRequestTask" name="Send Partner Single Request" activiti:delegateExpression="${cpaSendSingleRequestToPartnerTask}"></serviceTask>
+      <sequenceFlow id="flow5" sourceRef="cpaSendPartnerSingleRequestTask" targetRef="eventgateway1"></sequenceFlow>
+      <eventBasedGateway id="eventgateway1" name="Event Gateway"></eventBasedGateway>
+      <sequenceFlow id="flow6" sourceRef="eventgateway1" targetRef="timerintermediatecatchevent1"></sequenceFlow>
+      <sequenceFlow id="flow7" sourceRef="eventgateway1" targetRef="messageintermediatecatchevent1"></sequenceFlow>
+      <intermediateCatchEvent id="messageintermediatecatchevent1" name="MessageCatchEvent">
+        <messageEventDefinition messageRef="cpaPartnerMwRespMessage"></messageEventDefinition>
+      </intermediateCatchEvent>
+      <sequenceFlow id="flow8" sourceRef="messageintermediatecatchevent1" targetRef="exclusivegateway1"></sequenceFlow>
+      <intermediateCatchEvent id="timerintermediatecatchevent1" name="TimerCatchEvent">
+        <timerEventDefinition>
+          <timeDate>${service.getStringProperty('partnerResponseTimeout')}</timeDate>
+        </timerEventDefinition>
+      </intermediateCatchEvent>
+      <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway" default="errorRespFlow"></exclusiveGateway>
+      <sequenceFlow id="errorRespFlow" name="error resp" sourceRef="exclusivegateway1" targetRef="exclusivegateway8"></sequenceFlow>
+      <endEvent id="errorendevent1" name="ErrorEnd">
+        <errorEventDefinition errorRef="respError"></errorEventDefinition>
+      </endEvent>
+      <endEvent id="errorendevent2" name="ErrorEnd">
+        <errorEventDefinition errorRef="respTimeoutError"></errorEventDefinition>
+      </endEvent>
+      <sequenceFlow id="flow55" sourceRef="startevent3" targetRef="cpaSendPartnerSingleRequestTask"></sequenceFlow>
+      <exclusiveGateway id="exclusivegateway6" name="Exclusive Gateway"></exclusiveGateway>
+      <sequenceFlow id="flow76" sourceRef="timerintermediatecatchevent1" targetRef="exclusivegateway6"></sequenceFlow>
+      <serviceTask id="cpaSendTimeoutErrorAutoAnswerTask" name="Send Error Auto Answer" activiti:expression="${cpaSendAutoAnswerTask.sendErrorAutoAnswer(execution)}"></serviceTask>
+      <sequenceFlow id="flow77" name="with auto answer" sourceRef="exclusivegateway6" targetRef="cpaSendTimeoutErrorAutoAnswerTask">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getStringProperty('cpaAutoAnswerErrorText') != null}]]></conditionExpression>
+      </sequenceFlow>
+      <sequenceFlow id="flow78" sourceRef="cpaSendTimeoutErrorAutoAnswerTask" targetRef="errorendevent2"></sequenceFlow>
+      <sequenceFlow id="flow79" name="without auto answer" sourceRef="exclusivegateway6" targetRef="errorendevent2">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getStringProperty('cpaAutoAnswerErrorText') == null}]]></conditionExpression>
+      </sequenceFlow>
+      <endEvent id="endevent6" name="End"></endEvent>
+      <sequenceFlow id="flow80" name="ok resp" sourceRef="exclusivegateway1" targetRef="exclusivegateway7">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${cpaPartnerMwResponseStatusCode == 0}]]></conditionExpression>
+      </sequenceFlow>
+      <exclusiveGateway id="exclusivegateway7" name="Exclusive Gateway"></exclusiveGateway>
+      <serviceTask id="cpaSendOkAutoAnswerTask" name="Send Ok Auto Answer" activiti:expression="${cpaSendAutoAnswerTask.sendOkAutoAnswer(execution)}"></serviceTask>
+      <sequenceFlow id="flow81" name="with auto answer" sourceRef="exclusivegateway7" targetRef="cpaSendOkAutoAnswerTask">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getStringProperty('cpaAutoAnswerOkText') != null}]]></conditionExpression>
+      </sequenceFlow>
+      <sequenceFlow id="flow82" sourceRef="cpaSendOkAutoAnswerTask" targetRef="endevent6"></sequenceFlow>
+      <sequenceFlow id="flow83" name="without auto answer" sourceRef="exclusivegateway7" targetRef="endevent6">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getStringProperty('cpaAutoAnswerOkText') == null}]]></conditionExpression>
+      </sequenceFlow>
+      <exclusiveGateway id="exclusivegateway8" name="Exclusive Gateway"></exclusiveGateway>
+      <serviceTask id="cpaSendRejectErrorAutoAnswerTask" name="Send Error Auto Answer" activiti:expression="${cpaSendAutoAnswerTask.sendErrorAutoAnswer(execution)}"></serviceTask>
+      <sequenceFlow id="flow84" name="with auto answer" sourceRef="exclusivegateway8" targetRef="cpaSendRejectErrorAutoAnswerTask">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getStringProperty('cpaAutoAnswerErrorText') != null}]]></conditionExpression>
+      </sequenceFlow>
+      <sequenceFlow id="flow85" sourceRef="cpaSendRejectErrorAutoAnswerTask" targetRef="errorendevent1"></sequenceFlow>
+      <sequenceFlow id="flow86" name="without auto answer" sourceRef="exclusivegateway8" targetRef="errorendevent1">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getStringProperty('cpaAutoAnswerErrorText') == null}]]></conditionExpression>
+      </sequenceFlow>
+    </subProcess>
+    <sequenceFlow id="flow56" sourceRef="moReserveSubscriptionCallActivity" targetRef="subprocess1"></sequenceFlow>
+    <serviceTask id="servicetask1" name="Log Error Partner Response" activiti:expression="${cpaLogProcessSingleSmsRequestTask.errorPartnerResponse(execution)}"></serviceTask>
+    <boundaryEvent id="boundaryerror4" name="Error" attachedToRef="reserveSubprocess">
+      <errorEventDefinition errorRef="respError"></errorEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="flow58" sourceRef="boundaryerror4" targetRef="servicetask6"></sequenceFlow>
+    <sequenceFlow id="flow59" sourceRef="servicetask6" targetRef="servicetask1"></sequenceFlow>
+    <serviceTask id="servicetask2" name="Log Response Timeout" activiti:expression="${cpaLogProcessSingleSmsRequestTask.partnerResponseTimeout(execution)}"></serviceTask>
+    <serviceTask id="servicetask3" name="Notify &quot;Service Unavailable&quot;" activiti:delegateExpression="${cpaNotifyServiceUnavailableTask}"></serviceTask>
+    <serviceTask id="servicetask4" name="Log Internal Error" activiti:expression="${cpaLogProcessSingleSmsRequestTask.internalError(execution)}"></serviceTask>
+    <sequenceFlow id="flow62" sourceRef="servicetask3" targetRef="servicetask4"></sequenceFlow>
+    <boundaryEvent id="boundaryerror6" name="Error" attachedToRef="reserveSubprocess">
+      <errorEventDefinition></errorEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="flow63" sourceRef="boundaryerror6" targetRef="servicetask3"></sequenceFlow>
+    <endEvent id="endevent4" name="End"></endEvent>
+    <sequenceFlow id="flow64" sourceRef="servicetask4" targetRef="endevent4"></sequenceFlow>
+    <sequenceFlow id="flow65" sourceRef="servicetask2" targetRef="endevent4"></sequenceFlow>
+    <sequenceFlow id="flow66" sourceRef="servicetask1" targetRef="endevent4"></sequenceFlow>
+    <endEvent id="endevent5" name="End"></endEvent>
+    <sequenceFlow id="flow67" sourceRef="logChargeErrorTask" targetRef="endevent5"></sequenceFlow>
+    <sequenceFlow id="flow68" sourceRef="logAbonentNoMoneyTask" targetRef="endevent5"></sequenceFlow>
+    <sequenceFlow id="flow69" sourceRef="logChargeRestrictionDenyTask" targetRef="endevent5"></sequenceFlow>
+    <boundaryEvent id="boundaryerror7" name="Error" attachedToRef="subprocess1">
+      <errorEventDefinition></errorEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="flow70" sourceRef="boundaryerror7" targetRef="reserveSubprocess"></sequenceFlow>
+    <serviceTask id="logOkTask" name="Log Ok" activiti:expression="${cpaLogProcessSingleSmsRequestTask.ok(execution)}"></serviceTask>
+    <sequenceFlow id="flow72" sourceRef="logOkTask" targetRef="endevent1"></sequenceFlow>
+    <boundaryEvent id="boundaryerror8" name="Error" attachedToRef="reserveSubprocess">
+      <errorEventDefinition errorRef="respTimeoutError"></errorEventDefinition>
+    </boundaryEvent>
+    <serviceTask id="servicetask5" name="Notify &quot;Service Unavailable&quot;" activiti:delegateExpression="${cpaNotifyServiceUnavailableTask}"></serviceTask>
+    <sequenceFlow id="flow74" sourceRef="boundaryerror8" targetRef="servicetask5"></sequenceFlow>
+    <sequenceFlow id="flow75" sourceRef="servicetask5" targetRef="servicetask2"></sequenceFlow>
+    <serviceTask id="servicetask6" name="Notify &quot;Service Unavailable&quot;" activiti:delegateExpression="${cpaNotifyServiceUnavailableTask}"></serviceTask>
+    <exclusiveGateway id="exclusivegateway10" name="Exclusive Gateway"></exclusiveGateway>
+    <serviceTask id="cpaNotifyDelayedContentDeliveryTask" name="Notify Delayed Content Delivery" activiti:delegateExpression="${cpaNotifyDelayedContentDeliveryTask}"></serviceTask>
+    <sequenceFlow id="flow90" name="is delayed delivery" sourceRef="exclusivegateway10" targetRef="cpaNotifyDelayedContentDeliveryTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getLongProperty('cpaRequestReplyTime') != null}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow91" sourceRef="cpaNotifyDelayedContentDeliveryTask" targetRef="exclusivegateway3"></sequenceFlow>
+    <sequenceFlow id="flow93" name="not delayed delivery" sourceRef="exclusivegateway10" targetRef="exclusivegateway3">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getLongProperty('cpaRequestReplyTime') == null}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="getSubscriberBillingTypeTask" name="Get Subscriber Billing Type" activiti:delegateExpression="${getSubscriberBillingTypeTask}"></serviceTask>
+    <sequenceFlow id="flow96" name="can't get billing type or is charge control restriction" sourceRef="exclusivegateway11" targetRef="notifyChargeRestrictionDenyTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${billingType == null || chargeControlRestriction != billingType}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="withoutTarifficationFlow" name="without tariffication" sourceRef="tarifficationTypeExclusiveGateway" targetRef="subprocess1"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway11" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow98" sourceRef="getSubscriberBillingTypeTask" targetRef="exclusivegateway11"></sequenceFlow>
+    <sequenceFlow id="flow99" name="pass charge control" sourceRef="exclusivegateway11" targetRef="subprocess1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${billingType != null && chargeControlRestriction == billingType}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway12" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow101" name="need check charge control restriction" sourceRef="exclusivegateway12" targetRef="getSubscriberBillingTypeTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${execution.hasVariable('chargeControlRestriction') == true && chargeControlRestriction != null}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow102" name="not need check control restriction" sourceRef="exclusivegateway12" targetRef="subprocess1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${execution.hasVariable('chargeControlRestriction') == false || chargeControlRestriction == null}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow112" sourceRef="incrementCostCounterTask" targetRef="exclusivegateway10"></sequenceFlow>
+    <serviceTask id="cpaSendSingleRequestReceiptTask" name="Send Single Request Receipt" activiti:delegateExpression="${cpaSendSingleRequestReceiptTask}"></serviceTask>
+    <serviceTask id="logReceiptSendTask" name="Log Receipt Send" activiti:delegateExpression="${cpaLogSingleRequestReceiptTask}"></serviceTask>
+    <sequenceFlow id="flow119" sourceRef="cpaSendSingleRequestReceiptTask" targetRef="logReceiptSendTask"></sequenceFlow>
+    <intermediateCatchEvent id="timerintermediatecatchevent2" name="TimerCatchEvent">
+      <timerEventDefinition>
+        <timeDuration>${processContentAwaitTime}</timeDuration>
+      </timerEventDefinition>
+    </intermediateCatchEvent>
+    <intermediateCatchEvent id="messageintermediatecatchevent2" name="MessageCatchEvent">
+      <messageEventDefinition messageRef="NOOP"></messageEventDefinition>
+    </intermediateCatchEvent>
+    <eventBasedGateway id="eventgateway2" name="Event Gateway"></eventBasedGateway>
+    <sequenceFlow id="flow121" sourceRef="eventgateway2" targetRef="timerintermediatecatchevent2"></sequenceFlow>
+    <sequenceFlow id="flow122" sourceRef="eventgateway2" targetRef="messageintermediatecatchevent2"></sequenceFlow>
+    <sequenceFlow id="flow135" sourceRef="messageintermediatecatchevent2" targetRef="servicetask17"></sequenceFlow>
+    <serviceTask id="servicetask14" name="Calculate Content Await Time" activiti:delegateExpression="${cpaCalculateContentAwaitTimeTask}"></serviceTask>
+    <sequenceFlow id="flow136" sourceRef="servicetask14" targetRef="eventgateway2"></sequenceFlow>
+    <serviceTask id="cpaNotifyServiceUnavailableTask2" name="Notify &quot;Service Unavailable&quot;" activiti:delegateExpression="${cpaNotifyServiceUnavailableTask}"></serviceTask>
+    <serviceTask id="servicetask16" name="Log Error" activiti:expression="${cpaLogProcessSingleSmsRequestTask.internalError(execution)}"></serviceTask>
+    <sequenceFlow id="flow137" sourceRef="tarifficationTypeExclusiveGateway" targetRef="cpaNotifyServiceUnavailableTask2">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getString("chargingSchema") == 'MO'  && evalActivator.getLong('tarifficationType') == 1 && evalActivator.getString("tarifficationControl") == 'p'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow138" sourceRef="cpaNotifyServiceUnavailableTask2" targetRef="servicetask16"></sequenceFlow>
+    <endEvent id="endevent7" name="End"></endEvent>
+    <sequenceFlow id="flow139" sourceRef="servicetask16" targetRef="endevent7"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway18" name="Exclusive Gateway" default="notNeedReceiptFlow"></exclusiveGateway>
+    <sequenceFlow id="flow140" name="need receipt" sourceRef="exclusivegateway18" targetRef="cpaSendSingleRequestReceiptTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${chargeAmount != null && chargeAmount > 0 && evalActivator.getBoolean('needReceipt') == true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow141" sourceRef="logReceiptSendTask" targetRef="incrementCostCounterTask"></sequenceFlow>
+    <sequenceFlow id="notNeedReceiptFlow" name="not need receipt" sourceRef="exclusivegateway18" targetRef="incrementCostCounterTask"></sequenceFlow>
+    <serviceTask id="servicetask17" name="Check Content Received" activiti:delegateExpression="${cpaCheckContentReceivedTask}"></serviceTask>
+    <sequenceFlow id="flow142" sourceRef="servicetask17" targetRef="exclusivegateway20"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway20" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow147" name="content received" sourceRef="exclusivegateway20" targetRef="endevent1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${contentReceived == true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow148" sourceRef="timerintermediatecatchevent2" targetRef="servicetask17"></sequenceFlow>
+    <sequenceFlow id="flow149" name="no content" sourceRef="exclusivegateway20" targetRef="exclusivegateway21">
+      <extensionElements>
+        <activiti:executionListener event="take" expression="${execution.setVariable('processedContent', 0)}"></activiti:executionListener>
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${contentReceived == false}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="servicetask19" name="Log &quot;Not All Content Received&quot;" activiti:expression="${cpaLogProcessSingleSmsRequestTask.notAllContentReceived(execution)}"></serviceTask>
+    <sequenceFlow id="flow152" sourceRef="servicetask19" targetRef="endevent1"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway21" name="Exclusive Gateway" default="expectedContentFlow154"></exclusiveGateway>
+    <sequenceFlow id="flow153" name="min content 0" sourceRef="exclusivegateway21" targetRef="logOkTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${evalActivator.getLong('cpaMinContentCount') == null || evalActivator.getLong('cpaMinContentCount') == 0}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="expectedContentFlow154" name="expected content" sourceRef="exclusivegateway21" targetRef="servicetask19"></sequenceFlow>
+    <textAnnotation id="textannotation1">
+      <text>in:
+scdpTxId
+subscriberId
+evalActivator
+activatorInfo
+evalRequestType
+chargePriceCode
+chargePrice
+partner
+partnerId
+service
+serviceId
+activatorId
+
+notifySourceAddr
+SmppDestAddr
+requestStoredMessageId
+
+chargeControlRestriction (+/-)</text>
+    </textAnnotation>
+    <textAnnotation id="textannotation2">
+      <text>message (cpaPartnerMwRespMessage):
+                cpaPartnerMwResponseStatusCode</text>
+    </textAnnotation>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_cpaSingleRequest">
+    <bpmndi:BPMNPlane bpmnElement="cpaSingleRequest" id="BPMNPlane_cpaSingleRequest">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="523.0" y="-450.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="incrementCostCounterTask" id="BPMNShape_incrementCostCounterTask">
+        <omgdc:Bounds height="61.0" width="105.0" x="489.0" y="1620.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway3" id="BPMNShape_exclusivegateway3">
+        <omgdc:Bounds height="40.0" width="40.0" x="521.0" y="1874.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="524.0" y="2480.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="reserveSubprocess" id="BPMNShape_reserveSubprocess">
+        <omgdc:Bounds height="363.0" width="161.0" x="924.0" y="523.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="startevent2" id="BPMNShape_startevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="989.0" y="551.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent3" id="BPMNShape_endevent3">
+        <omgdc:Bounds height="35.0" width="35.0" x="989.0" y="831.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="chargingRollbackCall" id="BPMNShape_chargingRollbackCall">
+        <omgdc:Bounds height="55.0" width="105.0" x="954.0" y="621.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="raiseErrorTask" id="BPMNShape_raiseErrorTask">
+        <omgdc:Bounds height="55.0" width="105.0" x="954.0" y="745.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundaryerror4" id="BPMNShape_boundaryerror4">
+        <omgdc:Bounds height="30.0" width="30.0" x="1071.0" y="581.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundaryerror6" id="BPMNShape_boundaryerror6">
+        <omgdc:Bounds height="30.0" width="30.0" x="1071.0" y="771.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundaryerror8" id="BPMNShape_boundaryerror8">
+        <omgdc:Bounds height="30.0" width="30.0" x="1071.0" y="671.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway5" id="BPMNShape_exclusivegateway5">
+        <omgdc:Bounds height="40.0" width="40.0" x="520.0" y="1150.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="chargingCommitCall" id="BPMNShape_chargingCommitCall">
+        <omgdc:Bounds height="55.0" width="105.0" x="488.0" y="1228.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="tarifficationTypeExclusiveGateway" id="BPMNShape_tarifficationTypeExclusiveGateway">
+        <omgdc:Bounds height="40.0" width="40.0" x="521.0" y="-211.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="moReserveSubscriptionCallActivity" id="BPMNShape_moReserveSubscriptionCallActivity">
+        <omgdc:Bounds height="174.0" width="120.0" x="482.0" y="153.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="noMoneyBoundaryError" id="BPMNShape_noMoneyBoundaryError">
+        <omgdc:Bounds height="30.0" width="30.0" x="588.0" y="225.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundaryerror2" id="BPMNShape_boundaryerror2">
+        <omgdc:Bounds height="30.0" width="30.0" x="588.0" y="157.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundaryerror3" id="BPMNShape_boundaryerror3">
+        <omgdc:Bounds height="30.0" width="30.0" x="588.0" y="292.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="notifyChargeRestrictionDenyTask" id="BPMNShape_notifyChargeRestrictionDenyTask">
+        <omgdc:Bounds height="61.0" width="105.0" x="750.0" y="141.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="logChargeRestrictionDenyTask" id="BPMNShape_logChargeRestrictionDenyTask">
+        <omgdc:Bounds height="61.0" width="105.0" x="893.0" y="141.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="notifyNoMoneyTask" id="BPMNShape_notifyNoMoneyTask">
+        <omgdc:Bounds height="57.0" width="105.0" x="750.0" y="211.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="logAbonentNoMoneyTask" id="BPMNShape_logAbonentNoMoneyTask">
+        <omgdc:Bounds height="57.0" width="105.0" x="893.0" y="211.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="notifyServiceUnavailableTask" id="BPMNShape_notifyServiceUnavailableTask">
+        <omgdc:Bounds height="57.0" width="105.0" x="750.0" y="278.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="logChargeErrorTask" id="BPMNShape_logChargeErrorTask">
+        <omgdc:Bounds height="57.0" width="105.0" x="893.0" y="278.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="subprocess1" id="BPMNShape_subprocess1">
+        <omgdc:Bounds height="633.0" width="585.0" x="248.0" y="458.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="startevent3" id="BPMNShape_startevent3">
+        <omgdc:Bounds height="35.0" width="35.0" x="470.0" y="480.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cpaSendPartnerSingleRequestTask" id="BPMNShape_cpaSendPartnerSingleRequestTask">
+        <omgdc:Bounds height="61.0" width="120.0" x="428.0" y="550.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="eventgateway1" id="BPMNShape_eventgateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="467.0" y="630.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="messageintermediatecatchevent1" id="BPMNShape_messageintermediatecatchevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="626.0" y="690.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="timerintermediatecatchevent1" id="BPMNShape_timerintermediatecatchevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="346.0" y="690.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="623.0" y="757.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="errorendevent1" id="BPMNShape_errorendevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="739.0" y="1020.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="errorendevent2" id="BPMNShape_errorendevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="346.0" y="1020.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway6" id="BPMNShape_exclusivegateway6">
+        <omgdc:Bounds height="40.0" width="40.0" x="343.0" y="830.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cpaSendTimeoutErrorAutoAnswerTask" id="BPMNShape_cpaSendTimeoutErrorAutoAnswerTask">
+        <omgdc:Bounds height="65.0" width="105.0" x="311.0" y="906.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent6" id="BPMNShape_endevent6">
+        <omgdc:Bounds height="35.0" width="35.0" x="519.0" y="1020.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway7" id="BPMNShape_exclusivegateway7">
+        <omgdc:Bounds height="40.0" width="40.0" x="516.0" y="830.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cpaSendOkAutoAnswerTask" id="BPMNShape_cpaSendOkAutoAnswerTask">
+        <omgdc:Bounds height="65.0" width="105.0" x="484.0" y="906.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway8" id="BPMNShape_exclusivegateway8">
+        <omgdc:Bounds height="40.0" width="40.0" x="736.0" y="830.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cpaSendRejectErrorAutoAnswerTask" id="BPMNShape_cpaSendRejectErrorAutoAnswerTask">
+        <omgdc:Bounds height="65.0" width="105.0" x="704.0" y="906.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundaryerror7" id="BPMNShape_boundaryerror7">
+        <omgdc:Bounds height="30.0" width="30.0" x="819.0" y="690.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask1" id="BPMNShape_servicetask1">
+        <omgdc:Bounds height="61.0" width="105.0" x="1404.0" y="565.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask2" id="BPMNShape_servicetask2">
+        <omgdc:Bounds height="61.0" width="105.0" x="1404.0" y="655.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask3" id="BPMNShape_servicetask3">
+        <omgdc:Bounds height="62.0" width="105.0" x="1264.0" y="754.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask4" id="BPMNShape_servicetask4">
+        <omgdc:Bounds height="62.0" width="105.0" x="1404.0" y="754.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent4" id="BPMNShape_endevent4">
+        <omgdc:Bounds height="35.0" width="35.0" x="1554.0" y="767.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent5" id="BPMNShape_endevent5">
+        <omgdc:Bounds height="35.0" width="35.0" x="1050.0" y="289.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="logOkTask" id="BPMNShape_logOkTask">
+        <omgdc:Bounds height="58.0" width="105.0" x="489.0" y="2390.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask5" id="BPMNShape_servicetask5">
+        <omgdc:Bounds height="59.0" width="105.0" x="1264.0" y="656.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask6" id="BPMNShape_servicetask6">
+        <omgdc:Bounds height="61.0" width="105.0" x="1264.0" y="565.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway10" id="BPMNShape_exclusivegateway10">
+        <omgdc:Bounds height="40.0" width="40.0" x="521.0" y="1710.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cpaNotifyDelayedContentDeliveryTask" id="BPMNShape_cpaNotifyDelayedContentDeliveryTask">
+        <omgdc:Bounds height="61.0" width="105.0" x="489.0" y="1788.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="getSubscriberBillingTypeTask" id="BPMNShape_getSubscriberBillingTypeTask">
+        <omgdc:Bounds height="62.0" width="105.0" x="750.0" y="-60.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway11" id="BPMNShape_exclusivegateway11">
+        <omgdc:Bounds height="40.0" width="40.0" x="782.0" y="37.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway12" id="BPMNShape_exclusivegateway12">
+        <omgdc:Bounds height="40.0" width="40.0" x="782.0" y="-140.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cpaSendSingleRequestReceiptTask" id="BPMNShape_cpaSendSingleRequestReceiptTask">
+        <omgdc:Bounds height="58.0" width="105.0" x="489.0" y="1420.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="logReceiptSendTask" id="BPMNShape_logReceiptSendTask">
+        <omgdc:Bounds height="59.0" width="105.0" x="489.0" y="1500.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="timerintermediatecatchevent2" id="BPMNShape_timerintermediatecatchevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="675.0" y="2055.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="messageintermediatecatchevent2" id="BPMNShape_messageintermediatecatchevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="893.0" y="2055.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="eventgateway2" id="BPMNShape_eventgateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="782.0" y="2001.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask14" id="BPMNShape_servicetask14">
+        <omgdc:Bounds height="59.0" width="105.0" x="750.0" y="1925.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="cpaNotifyServiceUnavailableTask2" id="BPMNShape_cpaNotifyServiceUnavailableTask2">
+        <omgdc:Bounds height="57.0" width="105.0" x="350.0" y="-107.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask16" id="BPMNShape_servicetask16">
+        <omgdc:Bounds height="55.0" width="105.0" x="350.0" y="-24.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent7" id="BPMNShape_endevent7">
+        <omgdc:Bounds height="35.0" width="35.0" x="385.0" y="67.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway18" id="BPMNShape_exclusivegateway18">
+        <omgdc:Bounds height="40.0" width="40.0" x="521.0" y="1330.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask17" id="BPMNShape_servicetask17">
+        <omgdc:Bounds height="57.0" width="118.0" x="744.0" y="2126.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway20" id="BPMNShape_exclusivegateway20">
+        <omgdc:Bounds height="40.0" width="40.0" x="782.0" y="2211.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask19" id="BPMNShape_servicetask19">
+        <omgdc:Bounds height="58.0" width="105.0" x="648.0" y="2390.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway21" id="BPMNShape_exclusivegateway21">
+        <omgdc:Bounds height="40.0" width="40.0" x="680.0" y="2280.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation1" id="BPMNShape_textannotation1">
+        <omgdc:Bounds height="262.0" width="191.0" x="30.0" y="-299.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="textannotation2" id="BPMNShape_textannotation2">
+        <omgdc:Bounds height="58.0" width="223.0" x="10.0" y="676.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow14" id="BPMNEdge_flow14">
+        <omgdi:waypoint x="541.0" y="1914.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="2390.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="100.0" x="441.0" y="1924.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="hasMaxContentCountFlow" id="BPMNEdge_hasMaxContentCountFlow">
+        <omgdi:waypoint x="561.0" y="1894.0"></omgdi:waypoint>
+        <omgdi:waypoint x="802.0" y="1894.0"></omgdi:waypoint>
+        <omgdi:waypoint x="802.0" y="1925.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="100.0" x="586.0" y="1875.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow38" id="BPMNEdge_flow38">
+        <omgdi:waypoint x="1006.0" y="800.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1006.0" y="831.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow57" id="BPMNEdge_flow57">
+        <omgdi:waypoint x="1006.0" y="586.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1006.0" y="621.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow73" id="BPMNEdge_flow73">
+        <omgdi:waypoint x="1006.0" y="676.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1006.0" y="745.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow31" id="BPMNEdge_flow31">
+        <omgdi:waypoint x="540.0" y="-415.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="-211.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow39" id="BPMNEdge_flow39">
+        <omgdi:waypoint x="540.0" y="1091.0"></omgdi:waypoint>
+        <omgdi:waypoint x="540.0" y="1150.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow40" id="BPMNEdge_flow40">
+        <omgdi:waypoint x="540.0" y="1190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="540.0" y="1228.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="100.0" x="433.0" y="1189.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="mtOrWithoutTarifficationFlow2" id="BPMNEdge_mtOrWithoutTarifficationFlow2">
+        <omgdi:waypoint x="560.0" y="1170.0"></omgdi:waypoint>
+        <omgdi:waypoint x="662.0" y="1170.0"></omgdi:waypoint>
+        <omgdi:waypoint x="662.0" y="1688.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1688.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1710.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="100.0" x="600.0" y="1150.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow41" id="BPMNEdge_flow41">
+        <omgdi:waypoint x="540.0" y="1283.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1330.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="541.0" y="-171.0"></omgdi:waypoint>
+        <omgdi:waypoint x="542.0" y="153.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="52.0" width="100.0" x="547.0" y="-161.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="mtOrWithoutTarifficationFlow" id="BPMNEdge_mtOrWithoutTarifficationFlow">
+        <omgdi:waypoint x="561.0" y="-191.0"></omgdi:waypoint>
+        <omgdi:waypoint x="801.0" y="-191.0"></omgdi:waypoint>
+        <omgdi:waypoint x="802.0" y="-140.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="100.0" x="642.0" y="-210.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow49" id="BPMNEdge_flow49">
+        <omgdi:waypoint x="618.0" y="172.0"></omgdi:waypoint>
+        <omgdi:waypoint x="750.0" y="171.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow50" id="BPMNEdge_flow50">
+        <omgdi:waypoint x="855.0" y="171.0"></omgdi:waypoint>
+        <omgdi:waypoint x="893.0" y="171.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow51" id="BPMNEdge_flow51">
+        <omgdi:waypoint x="618.0" y="240.0"></omgdi:waypoint>
+        <omgdi:waypoint x="750.0" y="239.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow52" id="BPMNEdge_flow52">
+        <omgdi:waypoint x="855.0" y="239.0"></omgdi:waypoint>
+        <omgdi:waypoint x="893.0" y="239.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow53" id="BPMNEdge_flow53">
+        <omgdi:waypoint x="618.0" y="307.0"></omgdi:waypoint>
+        <omgdi:waypoint x="750.0" y="306.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow54" id="BPMNEdge_flow54">
+        <omgdi:waypoint x="855.0" y="306.0"></omgdi:waypoint>
+        <omgdi:waypoint x="893.0" y="306.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="488.0" y="611.0"></omgdi:waypoint>
+        <omgdi:waypoint x="487.0" y="630.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
+        <omgdi:waypoint x="467.0" y="650.0"></omgdi:waypoint>
+        <omgdi:waypoint x="363.0" y="650.0"></omgdi:waypoint>
+        <omgdi:waypoint x="363.0" y="690.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
+        <omgdi:waypoint x="507.0" y="650.0"></omgdi:waypoint>
+        <omgdi:waypoint x="643.0" y="650.0"></omgdi:waypoint>
+        <omgdi:waypoint x="643.0" y="690.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
+        <omgdi:waypoint x="643.0" y="725.0"></omgdi:waypoint>
+        <omgdi:waypoint x="643.0" y="757.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="errorRespFlow" id="BPMNEdge_errorRespFlow">
+        <omgdi:waypoint x="663.0" y="777.0"></omgdi:waypoint>
+        <omgdi:waypoint x="755.0" y="776.0"></omgdi:waypoint>
+        <omgdi:waypoint x="756.0" y="830.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="48.0" x="954.0" y="1195.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow55" id="BPMNEdge_flow55">
+        <omgdi:waypoint x="487.0" y="515.0"></omgdi:waypoint>
+        <omgdi:waypoint x="488.0" y="550.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow76" id="BPMNEdge_flow76">
+        <omgdi:waypoint x="363.0" y="725.0"></omgdi:waypoint>
+        <omgdi:waypoint x="363.0" y="830.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow77" id="BPMNEdge_flow77">
+        <omgdi:waypoint x="363.0" y="870.0"></omgdi:waypoint>
+        <omgdi:waypoint x="363.0" y="906.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="81.0" x="550.0" y="1326.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow78" id="BPMNEdge_flow78">
+        <omgdi:waypoint x="363.0" y="971.0"></omgdi:waypoint>
+        <omgdi:waypoint x="363.0" y="1020.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow79" id="BPMNEdge_flow79">
+        <omgdi:waypoint x="343.0" y="850.0"></omgdi:waypoint>
+        <omgdi:waypoint x="267.0" y="849.0"></omgdi:waypoint>
+        <omgdi:waypoint x="267.0" y="1037.0"></omgdi:waypoint>
+        <omgdi:waypoint x="346.0" y="1037.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="96.0" x="501.0" y="1269.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow80" id="BPMNEdge_flow80">
+        <omgdi:waypoint x="623.0" y="777.0"></omgdi:waypoint>
+        <omgdi:waypoint x="535.0" y="777.0"></omgdi:waypoint>
+        <omgdi:waypoint x="536.0" y="830.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="35.0" x="770.0" y="1195.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow81" id="BPMNEdge_flow81">
+        <omgdi:waypoint x="536.0" y="870.0"></omgdi:waypoint>
+        <omgdi:waypoint x="536.0" y="906.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="81.0" x="723.0" y="1328.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow82" id="BPMNEdge_flow82">
+        <omgdi:waypoint x="536.0" y="971.0"></omgdi:waypoint>
+        <omgdi:waypoint x="536.0" y="1020.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow83" id="BPMNEdge_flow83">
+        <omgdi:waypoint x="516.0" y="850.0"></omgdi:waypoint>
+        <omgdi:waypoint x="439.0" y="850.0"></omgdi:waypoint>
+        <omgdi:waypoint x="439.0" y="1037.0"></omgdi:waypoint>
+        <omgdi:waypoint x="519.0" y="1037.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="96.0" x="673.0" y="1269.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow84" id="BPMNEdge_flow84">
+        <omgdi:waypoint x="756.0" y="870.0"></omgdi:waypoint>
+        <omgdi:waypoint x="756.0" y="906.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="81.0" x="943.0" y="1328.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow85" id="BPMNEdge_flow85">
+        <omgdi:waypoint x="756.0" y="971.0"></omgdi:waypoint>
+        <omgdi:waypoint x="756.0" y="1020.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow86" id="BPMNEdge_flow86">
+        <omgdi:waypoint x="736.0" y="850.0"></omgdi:waypoint>
+        <omgdi:waypoint x="663.0" y="849.0"></omgdi:waypoint>
+        <omgdi:waypoint x="663.0" y="1037.0"></omgdi:waypoint>
+        <omgdi:waypoint x="739.0" y="1037.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="96.0" x="899.0" y="1269.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow56" id="BPMNEdge_flow56">
+        <omgdi:waypoint x="542.0" y="327.0"></omgdi:waypoint>
+        <omgdi:waypoint x="540.0" y="458.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow58" id="BPMNEdge_flow58">
+        <omgdi:waypoint x="1101.0" y="596.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1264.0" y="595.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow59" id="BPMNEdge_flow59">
+        <omgdi:waypoint x="1369.0" y="595.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1404.0" y="595.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow62" id="BPMNEdge_flow62">
+        <omgdi:waypoint x="1369.0" y="785.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1404.0" y="785.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow63" id="BPMNEdge_flow63">
+        <omgdi:waypoint x="1101.0" y="786.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1264.0" y="785.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow64" id="BPMNEdge_flow64">
+        <omgdi:waypoint x="1509.0" y="785.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1554.0" y="784.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow65" id="BPMNEdge_flow65">
+        <omgdi:waypoint x="1509.0" y="685.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1571.0" y="685.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1571.0" y="767.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow66" id="BPMNEdge_flow66">
+        <omgdi:waypoint x="1509.0" y="595.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1571.0" y="595.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1571.0" y="767.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow67" id="BPMNEdge_flow67">
+        <omgdi:waypoint x="998.0" y="306.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1050.0" y="306.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow68" id="BPMNEdge_flow68">
+        <omgdi:waypoint x="998.0" y="239.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1067.0" y="239.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1067.0" y="289.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow69" id="BPMNEdge_flow69">
+        <omgdi:waypoint x="998.0" y="171.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1067.0" y="171.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1067.0" y="289.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow70" id="BPMNEdge_flow70">
+        <omgdi:waypoint x="849.0" y="705.0"></omgdi:waypoint>
+        <omgdi:waypoint x="924.0" y="704.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow72" id="BPMNEdge_flow72">
+        <omgdi:waypoint x="541.0" y="2448.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="2480.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow74" id="BPMNEdge_flow74">
+        <omgdi:waypoint x="1101.0" y="686.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1264.0" y="685.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow75" id="BPMNEdge_flow75">
+        <omgdi:waypoint x="1369.0" y="685.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1404.0" y="685.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow90" id="BPMNEdge_flow90">
+        <omgdi:waypoint x="541.0" y="1750.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1788.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="86.0" x="488.0" y="1749.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow91" id="BPMNEdge_flow91">
+        <omgdi:waypoint x="541.0" y="1849.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1874.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow93" id="BPMNEdge_flow93">
+        <omgdi:waypoint x="521.0" y="1730.0"></omgdi:waypoint>
+        <omgdi:waypoint x="385.0" y="1730.0"></omgdi:waypoint>
+        <omgdi:waypoint x="385.0" y="1894.0"></omgdi:waypoint>
+        <omgdi:waypoint x="521.0" y="1894.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="97.0" x="415.0" y="1710.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow96" id="BPMNEdge_flow96">
+        <omgdi:waypoint x="802.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="802.0" y="141.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="52.0" width="100.0" x="703.0" y="76.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="withoutTarifficationFlow" id="BPMNEdge_withoutTarifficationFlow">
+        <omgdi:waypoint x="521.0" y="-191.0"></omgdi:waypoint>
+        <omgdi:waypoint x="288.0" y="-191.0"></omgdi:waypoint>
+        <omgdi:waypoint x="288.0" y="398.0"></omgdi:waypoint>
+        <omgdi:waypoint x="543.0" y="398.0"></omgdi:waypoint>
+        <omgdi:waypoint x="540.0" y="458.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="88.0" x="329.0" y="-211.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow98" id="BPMNEdge_flow98">
+        <omgdi:waypoint x="802.0" y="2.0"></omgdi:waypoint>
+        <omgdi:waypoint x="802.0" y="37.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow99" id="BPMNEdge_flow99">
+        <omgdi:waypoint x="822.0" y="57.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1126.0" y="57.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1126.0" y="399.0"></omgdi:waypoint>
+        <omgdi:waypoint x="543.0" y="399.0"></omgdi:waypoint>
+        <omgdi:waypoint x="540.0" y="458.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="93.0" x="895.0" y="37.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow101" id="BPMNEdge_flow101">
+        <omgdi:waypoint x="802.0" y="-100.0"></omgdi:waypoint>
+        <omgdi:waypoint x="802.0" y="-60.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="100.0" x="812.0" y="-100.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow102" id="BPMNEdge_flow102">
+        <omgdi:waypoint x="822.0" y="-120.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1170.0" y="-120.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1170.0" y="400.0"></omgdi:waypoint>
+        <omgdi:waypoint x="540.0" y="400.0"></omgdi:waypoint>
+        <omgdi:waypoint x="540.0" y="458.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="39.0" width="100.0" x="831.0" y="-160.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow112" id="BPMNEdge_flow112">
+        <omgdi:waypoint x="541.0" y="1681.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1710.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow119" id="BPMNEdge_flow119">
+        <omgdi:waypoint x="541.0" y="1478.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1500.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow121" id="BPMNEdge_flow121">
+        <omgdi:waypoint x="782.0" y="2021.0"></omgdi:waypoint>
+        <omgdi:waypoint x="692.0" y="2020.0"></omgdi:waypoint>
+        <omgdi:waypoint x="692.0" y="2055.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow122" id="BPMNEdge_flow122">
+        <omgdi:waypoint x="822.0" y="2021.0"></omgdi:waypoint>
+        <omgdi:waypoint x="910.0" y="2021.0"></omgdi:waypoint>
+        <omgdi:waypoint x="910.0" y="2055.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow135" id="BPMNEdge_flow135">
+        <omgdi:waypoint x="910.0" y="2090.0"></omgdi:waypoint>
+        <omgdi:waypoint x="910.0" y="2153.0"></omgdi:waypoint>
+        <omgdi:waypoint x="862.0" y="2154.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow136" id="BPMNEdge_flow136">
+        <omgdi:waypoint x="802.0" y="1984.0"></omgdi:waypoint>
+        <omgdi:waypoint x="802.0" y="2001.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow137" id="BPMNEdge_flow137">
+        <omgdi:waypoint x="541.0" y="-171.0"></omgdi:waypoint>
+        <omgdi:waypoint x="402.0" y="-107.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow138" id="BPMNEdge_flow138">
+        <omgdi:waypoint x="402.0" y="-50.0"></omgdi:waypoint>
+        <omgdi:waypoint x="402.0" y="-24.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow139" id="BPMNEdge_flow139">
+        <omgdi:waypoint x="402.0" y="31.0"></omgdi:waypoint>
+        <omgdi:waypoint x="402.0" y="67.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow140" id="BPMNEdge_flow140">
+        <omgdi:waypoint x="541.0" y="1370.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1420.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="60.0" x="482.0" y="1379.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow141" id="BPMNEdge_flow141">
+        <omgdi:waypoint x="541.0" y="1559.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1620.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="notNeedReceiptFlow" id="BPMNEdge_notNeedReceiptFlow">
+        <omgdi:waypoint x="521.0" y="1350.0"></omgdi:waypoint>
+        <omgdi:waypoint x="377.0" y="1350.0"></omgdi:waypoint>
+        <omgdi:waypoint x="377.0" y="1580.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1580.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="1620.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="78.0" x="425.0" y="1330.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow142" id="BPMNEdge_flow142">
+        <omgdi:waypoint x="803.0" y="2183.0"></omgdi:waypoint>
+        <omgdi:waypoint x="802.0" y="2211.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow147" id="BPMNEdge_flow147">
+        <omgdi:waypoint x="802.0" y="2251.0"></omgdi:waypoint>
+        <omgdi:waypoint x="801.0" y="2497.0"></omgdi:waypoint>
+        <omgdi:waypoint x="559.0" y="2497.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="81.0" x="812.0" y="2251.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow148" id="BPMNEdge_flow148">
+        <omgdi:waypoint x="692.0" y="2090.0"></omgdi:waypoint>
+        <omgdi:waypoint x="692.0" y="2153.0"></omgdi:waypoint>
+        <omgdi:waypoint x="744.0" y="2154.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow149" id="BPMNEdge_flow149">
+        <omgdi:waypoint x="782.0" y="2231.0"></omgdi:waypoint>
+        <omgdi:waypoint x="700.0" y="2231.0"></omgdi:waypoint>
+        <omgdi:waypoint x="700.0" y="2280.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="100.0" x="708.0" y="2211.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow152" id="BPMNEdge_flow152">
+        <omgdi:waypoint x="700.0" y="2448.0"></omgdi:waypoint>
+        <omgdi:waypoint x="700.0" y="2497.0"></omgdi:waypoint>
+        <omgdi:waypoint x="559.0" y="2497.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow153" id="BPMNEdge_flow153">
+        <omgdi:waypoint x="680.0" y="2300.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="2299.0"></omgdi:waypoint>
+        <omgdi:waypoint x="541.0" y="2390.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="100.0" x="581.0" y="2281.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="expectedContentFlow154" id="BPMNEdge_expectedContentFlow154">
+        <omgdi:waypoint x="700.0" y="2320.0"></omgdi:waypoint>
+        <omgdi:waypoint x="700.0" y="2390.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="100.0" x="610.0" y="2349.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

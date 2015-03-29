@@ -1,5 +1,6 @@
 package jet.bpm.engine.handlers;
 
+import java.util.Map;
 import java.util.Set;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.api.ExecutionContext;
@@ -37,9 +38,9 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
         // TODO refactor out
         Set<VariableMapping> inVariables = null;
         Set<VariableMapping> outVariables = null;
-
+        
         ProcessDefinition pd = getProcessDefinition(c);
-        AbstractElement e = pd.getChild(c.getElementId());
+        AbstractElement e = ProcessDefinitionUtils.findElement(pd, c.getElementId());
         if (e instanceof CallActivity) {
             inVariables = ((CallActivity)e).getIn();
             outVariables = ((CallActivity)e).getOut();
@@ -47,7 +48,7 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
 
         // create new child context (variables of the called process)
         ExecutionContext parent = c.getContext();
-        ExecutionContext child = new ExecutionContextImpl();
+        ExecutionContext child = createNewContext(parent);
 
         // IN-parameters of the called process
         ExecutionContextHelper.copyVariables(getEngine().getExpressionManager(), parent, child, inVariables);
@@ -70,4 +71,6 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
     protected abstract ProcessDefinition findCalledProcess(ProcessElementCommand c) throws ExecutionException;
 
     protected abstract String getCalledProcessId(ProcessElementCommand c, ProcessDefinition sub) throws ExecutionException;
+    
+    protected abstract ExecutionContext createNewContext(ExecutionContext parent);
 }

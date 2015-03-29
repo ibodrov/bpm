@@ -5,7 +5,6 @@ import de.odysseus.el.util.SimpleContext;
 import javax.el.ArrayELResolver;
 import javax.el.BeanELResolver;
 import javax.el.CompositeELResolver;
-import javax.el.ELException;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
 import javax.el.ListELResolver;
@@ -53,7 +52,7 @@ public class DefaultExpressionManager implements ExpressionManager {
             
             ValueExpression x = expressionFactory.createValueExpression(sc, expr, type);
             return (T) x.getValue(sc);
-        } catch (ELException e) {
+        } catch (Exception e) {
             log.error("eval ['{}', '{}'] -> error", expr, type, e);
             throw e;
         }

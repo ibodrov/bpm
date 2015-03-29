@@ -3,7 +3,9 @@ package jet.bpm.engine.handlers;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.ProcessDefinitionProvider;
 import jet.bpm.engine.AbstractEngine;
+import jet.bpm.engine.ExecutionContextImpl;
 import jet.bpm.engine.ProcessDefinitionUtils;
+import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.model.CallActivity;
 import jet.bpm.engine.model.ProcessDefinition;
@@ -26,5 +28,10 @@ public class CallActivityElementHandler extends AbstractCallHandler {
     @Override
     protected String getCalledProcessId(ProcessElementCommand c, ProcessDefinition sub) throws ExecutionException {
         return sub.getId();
+    }
+
+    @Override
+    protected ExecutionContext createNewContext(ExecutionContext parent) {
+        return new ExecutionContextImpl();
     }
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Stack;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -22,6 +23,7 @@ import jet.bpm.engine.model.ExpressionType;
 import jet.bpm.engine.model.IntermediateCatchEvent;
 import jet.bpm.engine.model.SequenceFlow.ExecutionListener;
 import jet.bpm.engine.model.StartEvent;
+import jet.bpm.engine.model.SubProcess;
 import jet.bpm.engine.model.VariableMapping;
 import jet.bpm.engine.xml.Parser;
 import jet.bpm.engine.xml.ParserException;
@@ -55,7 +57,17 @@ public class ActivitiParser implements Parser {
     }
 
     private static final class Handler extends DefaultHandler {
+        
+        private static final class Item {
+            private final String processId;
+            private final Collection<AbstractElement> children;
 
+            public Item(String processId, Collection<AbstractElement> children) {
+                this.processId = processId;
+                this.children = children;
+            }
+        }
+        
         private String id;
         private String processId;
         private String attachedToRef;
@@ -70,6 +82,8 @@ public class ActivitiParser implements Parser {
 
         private ProcessDefinition process;
         private Collection<AbstractElement> children;
+        private final Stack<Item> items = new Stack<>();
+        
         private Collection<ExecutionListener> listeners;
         private Set<VariableMapping> in;
         private Set<VariableMapping> out;
@@ -80,6 +94,12 @@ public class ActivitiParser implements Parser {
 
             switch (qName) {
                 case "process":
+                    processId = attributes.getValue("id");
+                    children = new ArrayList<>();
+                    break;
+                    
+                case "subProcess":
+                    items.push(new Item(processId, children));
                     processId = attributes.getValue("id");
                     children = new ArrayList<>();
                     break;
@@ -231,6 +251,16 @@ public class ActivitiParser implements Parser {
                 case "process":
                     process = new ProcessDefinition(processId, children);
                     children = null;
+                    break;
+                    
+                case "subProcess":
+                    SubProcess p = new SubProcess(processId, children);
+                    
+                    Item i = items.pop();
+                    processId = i.processId;
+                    children = i.children;
+                    
+                    children.add(p);
                     break;
 
                 case "boundaryEvent":
