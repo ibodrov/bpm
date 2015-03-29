@@ -17,7 +17,7 @@ import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.VariableMapping;
 
 /**
- * Общая логика обработки элементов вызова (под)процессов.
+ * Common logic of (sub)process calling.
  */
 public abstract class AbstractCallHandler extends AbstractElementHandler {
 
@@ -28,11 +28,10 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
     @Override
     public void handle(DefaultExecution s, ProcessElementCommand c) throws ExecutionException {
         s.pop();
-
-        // находим вызываемый процесс BPM
+        
         ProcessDefinition sub = findCalledProcess(c);
 
-        // помещаем на стек команду обработки ошибок BPM
+        // add error handling command to stack
         s.push(new HandleRaisedErrorCommand(c));
 
         // TODO refactor out
@@ -46,26 +45,24 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
             outVariables = ((CallActivity)e).getOut();
         }
 
-        // создаем новый побочный контекст (фактически, набор параметров
-        // вызываемого процесса)
+        // create new child context (variables of the called process)
         ExecutionContext parent = c.getContext();
         ExecutionContext child = new ExecutionContextImpl();
 
-        // IN-параметры
+        // IN-parameters of the called process
         ExecutionContextHelper.copyVariables(getEngine().getExpressionManager(), parent, child, inVariables);
 
-        // помещаем на стек команду объединения контекстов вызываемого процесса
-        // и вызывающего процесса. Тем самым обеспечивается передача
-        // OUT-параметров
+        // add context merging command to the current stack. It will perform
+        // OUT-parametes handling
         s.push(new MergeExecutionContextCommand(parent, child, outVariables));
 
-        // определяем ID вызываемого процесса. В зависимости от типа вызова
-        // ('sub-process' или 'call activity') это может быть:
-        // - ID процесса, содержащего в себе элемент вызываемого процесса;
-        // - ID независимого процесса, отдельно установленного в реестре
+        // get the ID of the called process. Depends on call type ('sub-process'
+        // or 'call activity') it can be:
+        // - ID of process, which contains the element of calling process;
+        // - ID of external process from separate process definition
         String id = getCalledProcessId(c, sub);
 
-        // помещаем на стек начальный элемент процесса
+        // first command is put to the called process' stack
         AbstractElement start = ProcessDefinitionUtils.findStartEvent(sub);
         s.push(new ProcessElementCommand(id, start.getId(), child));
     }

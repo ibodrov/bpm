@@ -6,9 +6,6 @@ import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.model.ProcessDefinition;
 
-/**
- * Обработчик элемента 'sub-process'.
- */
 public class SubProcessElementHandler extends AbstractCallHandler {
 
     public SubProcessElementHandler(AbstractEngine engine) {

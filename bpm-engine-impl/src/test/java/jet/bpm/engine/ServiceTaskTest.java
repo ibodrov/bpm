@@ -51,7 +51,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
         String key = UUID.randomUUID().toString();
         Map<String, Object> vars = new HashMap<>();
         vars.put("name", "world");
-        getEngine().run(key, processId, vars);
+        getEngine().start(key, processId, vars);
 
         // ---
 
@@ -102,7 +102,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
         // ---
 
         String key = UUID.randomUUID().toString();
-        getEngine().run(key, processId, null);
+        getEngine().start(key, processId, null);
 
         // ---
 
@@ -143,7 +143,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
         String key = UUID.randomUUID().toString();
         Map<String, Object> vars = new HashMap<>();
         vars.put("name", "world");
-        getEngine().run(key, processId, vars);
+        getEngine().start(key, processId, vars);
 
         // ---
 

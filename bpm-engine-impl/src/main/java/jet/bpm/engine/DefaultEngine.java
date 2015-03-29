@@ -8,7 +8,7 @@ import jet.bpm.engine.el.DefaultExpressionManager;
 import jet.bpm.engine.el.ExpressionManager;
 import jet.bpm.engine.event.EventManager;
 import jet.bpm.engine.event.EventManagerImpl;
-import jet.bpm.engine.handlers.DelegateElementHandler;
+import jet.bpm.engine.handlers.DelegatingElementHandler;
 import jet.bpm.engine.handlers.ElementHandler;
 import jet.bpm.engine.lock.NoopLockManager;
 import jet.bpm.engine.task.ServiceTaskRegistry;
@@ -16,7 +16,7 @@ import jet.bpm.engine.task.ServiceTaskRegistryImpl;
 
 public class DefaultEngine extends AbstractEngine implements Engine {
     
-    private final ElementHandler elementHandler = new DelegateElementHandler(this);
+    private final ElementHandler elementHandler = new DelegatingElementHandler(this);
     private final PersistenceManager persistenceManager = new DummyPersistenceManager();
     private final LockManager lockManager = new NoopLockManager();
     private final IdGenerator idGenerator = new UuidGenerator();

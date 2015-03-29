@@ -6,17 +6,13 @@ import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.api.ExecutionContext;
 
-/**
- * Команда выполнения процесса. Реализации обычно предназначены для изменения
- * состояния процесса (стека, переменных и т.д.).
- */
 public interface ExecutionCommand extends Serializable {
 
     /**
-     * Выполняет команду, применяя её к указанному состоянию процесса.
+     * Executes command with specified process state.
      * @param engine
      * @param execution
-     * @return измененное или новое состояние процесса.
+     * @return modified or new process state.
      * @throws ExecutionException
      */
     DefaultExecution exec(AbstractEngine engine, DefaultExecution execution) throws ExecutionException;

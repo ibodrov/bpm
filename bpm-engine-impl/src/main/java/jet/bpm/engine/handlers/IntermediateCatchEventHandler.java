@@ -14,10 +14,8 @@ import jet.bpm.engine.model.IntermediateCatchEvent;
 import jet.bpm.engine.model.ProcessDefinition;
 
 /**
- * Обработчик элемента 'intermediate catch event' - события процесса. При
- * обработке выполняется создание дочернего процесса, его приостановка и
- * привязка к событию. Созданный дочерний процесс может быть возобновлен с
- * помощью {@link Engine#resume(java.lang.String, java.lang.String, java.util.Map)}.
+ * Itermediate event handler. Its job is to create child execution, suspend
+ * it and link it with the event.
  */
 public class IntermediateCatchEventHandler extends AbstractElementHandler {
 
@@ -31,20 +29,20 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         
         IdGenerator idg = getEngine().getIdGenerator();
 
-        // создаем дочерний процесс, который начнет свое выполнение сразу с
-        // первого элемента после обрабатываемого события
-        DefaultExecution child = new DefaultExecution(idg.create(), s.getId(), s.getProcessBusinessKey());
+        // create child execution, which will start right from the first element
+        // after current
+        DefaultExecution child = new DefaultExecution(idg.create(), s.getId(), s.getBusinessKey());
         FlowUtils.followFlows(getEngine(), child, c, c.getElementId(), false);
 
-        // приостановим и сохраним дочерный процесс. Он будет вызван кем-то
-        // извне по факту наступления события
+        // suspend and save child execution. Its will be resumed by someone
+        // outside of current process
         child.setSuspended(true);
         getEngine().getPersistenceManager().save(child);
         
         ProcessDefinition pd = getProcessDefinition(c);
         IntermediateCatchEvent ice = (IntermediateCatchEvent)pd.getChild(c.getElementId());
 
-        // сохраним привязку процесса к событию
+        // link execution with the event
         String evId = getEventId(ice);
         
         ExpressionManager em = getEngine().getExpressionManager();
@@ -53,13 +51,12 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         String timeDuration = eval(ice.getTimeDuration(), ctx, em);
         
         Event e = new Event(evId, child.getId(), c.getGroupId(), c.isExclusive(), timeDate, timeDuration);
-        getEngine().getEventManager().register(child.getProcessBusinessKey(), e);
+        getEngine().getEventManager().register(child.getBusinessKey(), e);
     }
 
     /**
-     * Возвращает ключ события. Если в событии указан тип BPMN message, то он
-     * используется в качестве ключа. В противном случае, используется ID
-     * элемента события.
+     * Return the event ID. If the specifed event has message reference, it will
+     * be used as an event ID. Otherwise, element ID will be used.
      */
     private String getEventId(IntermediateCatchEvent ev) {
         return ev.getMessageRef() != null ? ev.getMessageRef() : ev.getId();

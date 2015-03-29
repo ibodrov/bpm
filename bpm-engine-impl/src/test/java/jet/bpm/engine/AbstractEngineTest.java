@@ -59,7 +59,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
 
     @Override
     public void onActivation(Execution e, String processDefinitionId, String elementId) {
-        String k = e.getProcessBusinessKey() + "/" + processDefinitionId;
+        String k = e.getBusinessKey() + "/" + processDefinitionId;
         List<String> l = activations.get(k);
         if (l == null) {
             l = new ArrayList<>();

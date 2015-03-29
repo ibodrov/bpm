@@ -13,9 +13,6 @@ import jet.bpm.engine.model.InclusiveGateway;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 
-/**
- * Обработчик элемента 'inclusive gateway'.
- */
 public class InclusiveGatewayHandler extends AbstractElementHandler {
 
     public InclusiveGatewayHandler(AbstractEngine engine) {
@@ -29,19 +26,16 @@ public class InclusiveGatewayHandler extends AbstractElementHandler {
         ProcessDefinition pd = getProcessDefinition(c);
         InclusiveGateway g = (InclusiveGateway) ProcessDefinitionUtils.findElement(pd, c.getElementId());
 
-        // если данный 'inclusive gateway' является открывающим, то после
-        // прохода по всем ветвям, нужно приостановить выполнение
+        // add execution suspension after all flows are done
         if (g.getExit() != null) {
             s.push(new SuspendExecutionCommand(c.getContext()));
         }
 
-        // продолжаем выполнение, при одном из двух условий:
-        //
-        // - если данный 'inclusive gateway' является открывающим и нам нужно
-        //   просто обработать все его исходящие ветви;
-        // - если данный 'incluse gateway' является завершающим и все его
-        //   входящие ветви пройдены
-        //
+        // will continue execution on one of two conditions:
+        // - if current element is opening gateway and we just need to execute
+        //   all of its outgoing flows;
+        // - if current element is closing gateway and all of its flows are
+        //   complete.
         if (g.getExit() != null || isActivationCompleted(pd, c)) {
             FlowUtils.followFlows(getEngine(), s, c);
         }

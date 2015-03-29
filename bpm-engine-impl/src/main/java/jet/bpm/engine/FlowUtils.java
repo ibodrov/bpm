@@ -30,9 +30,8 @@ public final class FlowUtils {
         ProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
         ProcessDefinition pd = provider.getById(processDefinitionId);
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, elementId);
-
-        // переворачиваем коллецию т.к. нам нужно заполнить стек элементами в
-        // порядке объявления
+        
+        // reverse the collection, to fill up the stack in correct order
         Collections.reverse(flows);
         for (SequenceFlow next : flows) {
             log.debug("followFlows ['{}'] -> continuing from '{}', '{}' to {}", execution.getId(), processDefinitionId, elementId, next.getId());

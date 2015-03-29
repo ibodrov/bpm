@@ -33,7 +33,7 @@ public class SequenceFlowTest extends AbstractEngineTest {
         // ---
 
         String key = UUID.randomUUID().toString();
-        getEngine().run(key, processId, null);
+        getEngine().start(key, processId, null);
 
         // ---
 
@@ -66,7 +66,7 @@ public class SequenceFlowTest extends AbstractEngineTest {
         // ---
 
         String key = UUID.randomUUID().toString();
-        getEngine().run(key, processId, null);
+        getEngine().start(key, processId, null);
 
         // ---
 

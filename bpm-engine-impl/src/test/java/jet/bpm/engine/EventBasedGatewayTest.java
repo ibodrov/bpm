@@ -33,7 +33,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         // ---
 
         String key = UUID.randomUUID().toString();
-        getEngine().run(key, processId, null);
+        getEngine().start(key, processId, null);
 
         // ---
 
@@ -82,7 +82,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         // ---
 
         String key = UUID.randomUUID().toString();
-        getEngine().run(key, processId, null);
+        getEngine().start(key, processId, null);
 
         // ---
 
@@ -148,7 +148,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         // ---
 
         String key = UUID.randomUUID().toString();
-        getEngine().run(key, processId, null);
+        getEngine().start(key, processId, null);
 
         // ---
 

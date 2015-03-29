@@ -12,10 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Команда объединения контекстов корневого и дочернего процессов. Предназначена
- * для выполнения после завершения дочернего процесса. При выполнении данной
- * команды, out-переменные дочернего процесса станут переменными корневого
- * (вызвавшего дочерний) процесса.
+ * Command to merge contexts of parent and child processes. Designed to run
+ * after child process ends. On its execution, the out variables of the child process
+ * will become variables in parent process.
  */
 public class MergeExecutionContextCommand implements ExecutionCommand {
 
@@ -34,18 +33,16 @@ public class MergeExecutionContextCommand implements ExecutionCommand {
     @Override
     public DefaultExecution exec(AbstractEngine engine, DefaultExecution execution) throws ExecutionException {
         execution.pop();
-
-        // TODO: возможно стоит отрефакторить в виде некоторой "условной"
-        // команды
+        
+        // TODO: refactor as conditional command?
         String errorRef = BpmnErrorHelper.getRaisedError(child);
         if (errorRef != null) {
-            // передаем возникшую ошибку от подпроцесса к процессу-родителю
+            // perform error raise
             BpmnErrorHelper.raiseError(context, errorRef);
             log.debug("raising error '{}'", errorRef);
             return execution;
         }
-
-        // OUT-параметры
+        
         ExecutionContextHelper.copyVariables(engine.getExpressionManager(), child, context, outVariables);
 
         return execution;

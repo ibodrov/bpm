@@ -44,7 +44,7 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
 
         String errorRef = BpmnErrorHelper.getRaisedError(context);
         if (errorRef == null) {
-            // ошибки не случилось, продолжаем как ни в чем не бывало
+            // no errors was raised, will continue execution
             FlowUtils.followFlows(engine, execution, context, processDefinitionId, elementId, groupId, exclusive);
             return execution;
         }
@@ -54,14 +54,14 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
 
         BoundaryEvent ev = ProcessDefinitionUtils.findBoundaryEvent(pd, elementId, errorRef);
         if (ev == null) {
-            // попробуем найти boundary event без указания типа ошибки
+            // try to find boundary event without specified error reference
             ev = ProcessDefinitionUtils.findBoundaryEvent(pd, elementId, null);
         }
         
         if (ev != null) {
-            log.debug("apply ['{}', '{}'] -> handle boundary error '{}'", execution.getProcessBusinessKey(), elementId, errorRef);
+            log.debug("apply ['{}', '{}'] -> handle boundary error '{}'", execution.getBusinessKey(), elementId, errorRef);
             
-            // считаем ошибку обработанной
+            // error is handled
             BpmnErrorHelper.clear(context);
             
             followFlows(execution, pd, ev.getId(), context);

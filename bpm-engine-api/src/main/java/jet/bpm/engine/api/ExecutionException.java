@@ -1,5 +1,8 @@
 package jet.bpm.engine.api;
 
+/**
+ * Generic execution exception.
+ */
 public class ExecutionException extends Exception {
 
     public ExecutionException(String message) {

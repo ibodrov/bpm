@@ -13,11 +13,11 @@ import jet.bpm.engine.model.SubProcess;
 public final class ProcessDefinitionUtils {
 
     /**
-     * Находит описание процесс по его идентификатору.
+     * Finds process definition by its ID.
      * @param provider
      * @param id
      * @return
-     * @throws ExecutionException если искомое описание процесса не найдено.
+     * @throws ExecutionException if the process definition is not found.
      */
     public static ProcessDefinition findProcess(ProcessDefinitionProvider provider, String id) throws ExecutionException {
         ProcessDefinition pd = provider.getById(id);
@@ -28,14 +28,12 @@ public final class ProcessDefinitionUtils {
     }
 
     /**
-     * Находит описание (под)процесса по идентификатору элемента процесса.
-     * @param pd описание (корневого) процесса.
-     * @param id идентификатор элемент искомого процесса.
-     * @return если искомый элемент был найден в корневом процессе, то будет
-     * возвращено описание корневого процесса. Если искомый элемент был найден
-     * в подпроцессе, то будет возвращено описание подпроцесса.
-     * @throws ExecutionException если искомый элемент не найден ни в
-     * корневом процессе, ни одном из подпроцессов.
+     * Finds (sub)process definition by its element ID.
+     * @param pd parent process definition.
+     * @param id the (sub)process element ID.
+     * @return process definition, which contains element with specified ID.
+     * @throws ExecutionException if the element is not found in parent or any
+     * subprocesses.
      */
     public static ProcessDefinition findElementProcess(ProcessDefinition pd, String id) throws ExecutionException {
         ProcessDefinition sub = findElementProcess0(pd, id);
@@ -63,11 +61,10 @@ public final class ProcessDefinitionUtils {
     }
 
     /**
-     * Находит элемент (под)процесса по его идентификатору.
+     * Finds element of (sub)process by ID;
      * @param pd
      * @param id
-     * @return элемент процесса.
-     * @throws ExecutionException если искомый элемент не найден.
+     * @throws ExecutionException if the element is not found.
      */
     public static AbstractElement findElement(ProcessDefinition pd, String id) throws ExecutionException {
         ProcessDefinition sub = findElementProcess(pd, id);
@@ -75,12 +72,10 @@ public final class ProcessDefinitionUtils {
     }
 
     /**
-     * Находит подпроцесс по его идентификатору.
+     * Finds subprocess by ID.
      * @param pd
      * @param id
-     * @return найденный элемент подпроцесса.
-     * @throws ExecutionException если искомый подпроцесс не найден или
-     * найденный элемент не является подпроцессом.
+     * @throws ExecutionException if the subprocesss is not found.
      */
     public static SubProcess findSubProces(ProcessDefinition pd, String id) throws ExecutionException {
         AbstractElement e = findElement(pd, id);
@@ -92,12 +87,10 @@ public final class ProcessDefinitionUtils {
     }
 
     /**
-     * Для указанного элемента находит все исходящие sequence flow.
+     * Finds all outgoind flows for the specified element.
      * @param pd
      * @param from
-     * @return набор найденных flow.
-     * @throws ExecutionException если в процессе не задано ни одного flow
-     * исходящего из указанного элемента.
+     * @throws ExecutionException if the element has no outgoing flows..
      */
     public static List<SequenceFlow> findOutgoingFlows(ProcessDefinition pd, String from) throws ExecutionException {
         List<SequenceFlow> result = new ArrayList<>();
@@ -120,12 +113,10 @@ public final class ProcessDefinitionUtils {
     }
 
     /**
-     * Для указанного элемента находит все входящие sequence flow.
+     * Finds all incoming flows for the specified element.
      * @param pd
      * @param to
-     * @return набор найденных flow.
-     * @throws ExecutionException если в процессе не задано ни одного flow
-     * входящие в указанный элемент.
+     * @throws ExecutionException if the element has no incoming flows..
      */
     public static List<SequenceFlow> findIncomingFlows(ProcessDefinition pd, String to) throws ExecutionException {
         List<SequenceFlow> result = new ArrayList<>();
@@ -148,12 +139,9 @@ public final class ProcessDefinitionUtils {
     }
 
     /**
-     * Находит начальное событие в описании процесса. Поиск в подпроцессах не
-     * осуществляется.
+     * Finds (first) start event of the process.
      * @param pd
-     * @return начальное событие
-     * @throws ExecutionException если в процессе не определено ни одного
-     * начального события.
+     * @throws ExecutionException if process has no start events.
      */
     public static StartEvent findStartEvent(ProcessDefinition pd) throws ExecutionException {
         for (AbstractElement e : pd.getChildren()) {

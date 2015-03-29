@@ -15,9 +15,6 @@ import jet.bpm.engine.model.SequenceFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Обработчик элемента 'exclusive gateway'.
- */
 public class ExclusiveGatewayHandler extends AbstractElementHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ExclusiveGatewayHandler.class);
@@ -34,16 +31,14 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
 
         ProcessDefinition pd = getProcessDefinition(c);
 
-        // найдем все исходящие flow. Если на них были какие-то EL-выражения,
-        // то вычислим их
+        // find all outgoing flows and eval their expressions
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, c.getElementId());
         for (Iterator<SequenceFlow> i = flows.iterator(); i.hasNext();) {
-            // вычислим значение
             SequenceFlow f = i.next();
             if (f.getExpression() != null) {
                 i.remove();
                 if (eval(c.getContext(), f)) {
-                    // нашелся flow с выражением, которое вычислилось в true
+                    // we found flow, which evaluated into 'true'
                     nextId = f.getId();
                     break;
                 }
@@ -53,10 +48,10 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
         ExclusiveGateway element = (ExclusiveGateway) pd.getChild(c.getElementId());
 
         if (nextId == null && !flows.isEmpty()) {
-            // остались только те flow, на которых не было EL-выражений
+            // only flows left without EL expressions
             String defaultFlow = element.getDefaultFlow();
             if (defaultFlow != null) {
-                // задан flow по умолчанию, попробуем его
+                // we have default flow, lets try him
                 for (SequenceFlow f : flows) {
                     if (f.getId().equals(defaultFlow)) {
                         nextId = f.getId();
@@ -64,14 +59,13 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
                     }
                 }
             } else {
-                // default flow не задан, возьмем первый из оставшихся
+                // default flow is not specified, will take first one
                 nextId = flows.iterator().next().getId();
             }
         }
 
         if (nextId == null) {
-            // ничего не найдено или ни один flow с EL-выражением не был
-            // вычислен в true
+            // no valid flows are found
             throw new ExecutionException("No valid outgoing flows for '%s' and no default flow", c.getElementId());
         }
 

@@ -9,9 +9,6 @@ import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.model.EndEvent;
 import jet.bpm.engine.model.ProcessDefinition;
 
-/**
- * Обработчик элемента 'end event'.
- */
 public class EndEventHandler extends AbstractElementHandler {
 
     public EndEventHandler(AbstractEngine engine) {
@@ -26,8 +23,8 @@ public class EndEventHandler extends AbstractElementHandler {
         EndEvent e = (EndEvent) ProcessDefinitionUtils.findElement(pd, c.getElementId());
 
         if (e.getErrorRef() != null) {
-            // на элементе задан error ref - нужно выбросить ошибку в
-            // процесс-родитель
+            // the element has an error ref - must raise error to the parent
+            // process.
             BpmnErrorHelper.raiseError(c.getContext(), e.getErrorRef());
         }
     }

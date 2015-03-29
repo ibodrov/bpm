@@ -7,9 +7,6 @@ import jet.bpm.engine.FlowUtils;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.commands.SuspendExecutionCommand;
 
-/**
- * Обработчик элемента 'event-based gateway'.
- */
 public class EventBasedGatewayHandler extends AbstractElementHandler {
 
     public EventBasedGatewayHandler(AbstractEngine engine) {
@@ -20,14 +17,14 @@ public class EventBasedGatewayHandler extends AbstractElementHandler {
     public void handle(DefaultExecution s, ProcessElementCommand c) throws ExecutionException {
         s.pop();
 
-        // помещаем на стек команду приостановки процесса. Ожидается, что она
-        // будет вызвана, когда завершится обработка всех 'sequence flow'
-        // исходящих из данного 'gateway'
+        // add to the stack process suspension command. It is expected that it
+        // will be called when all outgoind sequence flows of this gateway
+        // is done.
         s.push(new SuspendExecutionCommand(c.getContext()));
 
-        // помещаем на стек все элементы исходящих 'flow'. Т.е. exclusive
-        // gateway подразумевает, что только одна из ветвей будет выполнена,
-        // то передадим признак эклюзивности
+        // add to the stack all the element of outgoing flows of this gateway
+        // and mark them with 'exclusiveness' flag (because in the event gateway
+        // only one flow can complete)
         FlowUtils.followFlows(getEngine(), s, c, c.getElementId(), true);
     }
 }

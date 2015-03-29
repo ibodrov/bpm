@@ -56,7 +56,7 @@ public abstract class AbstractEngine implements Engine {
     }
 
     @Override
-    public void run(String processBusinessKey, String processDefinitionId, Map<String, Object> variables) throws ExecutionException {
+    public void start(String processBusinessKey, String processDefinitionId, Map<String, Object> variables) throws ExecutionException {
         ProcessDefinitionProvider pdp = getProcessDefinitionProvider();
 
         ProcessDefinition pd = pdp.getById(processDefinitionId);
@@ -91,9 +91,8 @@ public abstract class AbstractEngine implements Engine {
             }
             
             if (e.isExclusive()) {
-                // эксклюзивное событие означает, что может возникнуть только
-                // одно событие из группы. А значит все остальные события надо
-                // удалить
+                // exclusive event means that only one event from the group of
+                // events can happen. Rest of events must be removed.
                 em.clearGroup(processBusinessKey, e.getGroupId());
             }
             
@@ -140,11 +139,9 @@ public abstract class AbstractEngine implements Engine {
                     log.debug("run ['{}'] -> switching to {}", s.getId(), pid);
                     DefaultExecution parent = pm.remove(pid);
                     if (parent == null) {
-                        // это типичная в случае использования inclusive gateway
-                        // ситуация: родитель завершает свое выполнение после
-                        // того, как отработает последний побочный процесс.
-                        // Фактически, последний побочный процесс и становится
-                        // продолжением родительского.
+                        // this is typical for the scenarios where the parent
+                        // process ends before its children (e.g. "Inclusive
+                        // Gateway").
                         log.debug("run ['{}'] -> parent execution not found", pid);
                         break;
                     } else {

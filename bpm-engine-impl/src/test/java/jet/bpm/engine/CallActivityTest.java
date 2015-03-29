@@ -41,7 +41,7 @@ public class CallActivityTest extends AbstractEngineTest {
         // ---
 
         String key = UUID.randomUUID().toString();
-        getEngine().run(key, aId, null);
+        getEngine().start(key, aId, null);
 
         // ---
 
@@ -101,7 +101,7 @@ public class CallActivityTest extends AbstractEngineTest {
         // ---
 
         String key = UUID.randomUUID().toString();
-        getEngine().run(key, aId, null);
+        getEngine().start(key, aId, null);
 
         assertActivations(key, aId,
                 "start",

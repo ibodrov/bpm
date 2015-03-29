@@ -81,7 +81,7 @@ public class EngineRule implements TestRule {
     }
     
     public void startProcessInstanceByKey(String txId, String key, Map<String, Object> input) throws ExecutionException {
-        engine.run(txId, key, input);
+        engine.start(txId, key, input);
     }
     
     public void wakeUp(String key, String eventId) throws ExecutionException {

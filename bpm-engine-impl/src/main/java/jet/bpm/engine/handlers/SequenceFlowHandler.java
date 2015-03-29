@@ -14,9 +14,6 @@ import jet.bpm.engine.model.SequenceFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Обработчик элемента 'sequence flow'.
- */
 public class SequenceFlowHandler extends AbstractElementHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SequenceFlowHandler.class);
@@ -34,17 +31,16 @@ public class SequenceFlowHandler extends AbstractElementHandler {
         SequenceFlow flow = (SequenceFlow) ProcessDefinitionUtils.findElement(pd, c.getElementId());
         processListeners(c.getContext(), flow);
 
-        // помещаем на стек команду обработки элемента, на который показал flow.
-        // cохраняем ID и признак экслюзивности группы
+        // add to the stack the element processing command. Preserve group ID
+        // and exclusiveness flag
         s.push(new ProcessElementCommand(c.getProcessDefinitionId(), flow.getTo(), c.getGroupId(), c.isExclusive(), c.getContext()));
     }
 
     /**
-     * Обработка слушателей события перехода по flow. Осложняется тем, что
-     * в некоторых случаях слушатель получается путем вычисления некоторого
-     * EL-выражения.
-     * @param ctx контекст текущего процесса
-     * @param f обрабатываемый flow
+     * Handle process flow listeners. Listener reference can be specified with
+     * EL expression.
+     * @param ctx current execution context.
+     * @param f processing flow.
      * @throws ExecutionException
      */
     private void processListeners(ExecutionContext ctx, SequenceFlow f) throws ExecutionException {

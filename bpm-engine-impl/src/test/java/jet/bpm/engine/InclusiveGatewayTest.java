@@ -34,7 +34,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
         // ---
 
         String key = UUID.randomUUID().toString();
-        getEngine().run(key, processId, null);
+        getEngine().start(key, processId, null);
 
         // ---
 
@@ -84,7 +84,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
         // ---
 
         String key = UUID.randomUUID().toString();
-        getEngine().run(key, processId, null);
+        getEngine().start(key, processId, null);
 
         // ---
 

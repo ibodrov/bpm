@@ -24,17 +24,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Делегирующий обработчик элементов процесса. Распознает тип элемента и
- * передает выполнение в обработчик конкретного типа элемента.
+ * Detected element type and delegates its handling to the specific processor.
  */
-public class DelegateElementHandler implements ElementHandler {
+public class DelegatingElementHandler implements ElementHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(DelegateElementHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(DelegatingElementHandler.class);
 
     private final AbstractEngine engine;
     private final Map<String, ElementHandler> delegates = new HashMap<>();
 
-    public DelegateElementHandler(AbstractEngine engine) {
+    public DelegatingElementHandler(AbstractEngine engine) {
         this.engine = engine;
 
         register(CallActivity.class, new CallActivityElementHandler(engine));

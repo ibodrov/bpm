@@ -36,7 +36,7 @@ public class DefaultExecution implements Execution, Serializable {
     }
 
     @Override
-    public String getProcessBusinessKey() {
+    public String getBusinessKey() {
         return processBusinessKey;
     }
 

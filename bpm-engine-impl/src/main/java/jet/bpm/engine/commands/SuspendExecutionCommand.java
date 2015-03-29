@@ -1,15 +1,13 @@
 package jet.bpm.engine.commands;
 
 import jet.bpm.engine.AbstractEngine;
-import jet.bpm.engine.api.Engine;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.api.ExecutionContext;
 
 /**
- * Команда приостановки процесса. Вызывает сохранение текущего состояния
- * процесса и его завершение. После приостановки процесс может быть возобновлен
- * с помощью {@link Engine#resume(java.lang.String, java.lang.String)}.
+ * Process suspension command. Invokes saving of process state and interrupts
+ * its execution.
  */
 public class SuspendExecutionCommand implements ExecutionCommand {
 

@@ -33,17 +33,13 @@ public class ProcessElementCommand implements ExecutionCommand {
         return elementId;
     }
 
-    /**
-     * @return идентификатор ветви исполнения. Обычно задается по идентификатору
-     * события, породившего ветвь.
-     */
     public String getGroupId() {
         return groupId;
     }
 
     /**
-     * @return признак "эклюзивности" выполнения. Используется для определения
-     * необходимости выполнения параллельных ветвей процесса.
+     * Indicates exclusiveness of this flow. Used to mark exclusive branches of
+     * parallel flows.
      */
     public boolean isExclusive() {
         return exclusive;
@@ -56,10 +52,9 @@ public class ProcessElementCommand implements ExecutionCommand {
 
     @Override
     public DefaultExecution exec(AbstractEngine engine, DefaultExecution execution) throws ExecutionException {
-        // обрабатываем элемент
         engine.getElementHandler().handle(execution, this);
 
-        // нотифицируем о произошедщей активации элемента
+        // perform notification of element activation
         context.onActivation(execution, processDefinitionId, elementId);
         engine.fireOnElementActivation(execution, processDefinitionId, elementId);
 

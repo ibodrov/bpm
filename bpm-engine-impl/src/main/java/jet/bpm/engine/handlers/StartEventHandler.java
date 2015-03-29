@@ -6,10 +6,6 @@ import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.FlowUtils;
 import jet.bpm.engine.commands.ProcessElementCommand;
 
-/**
- * Обработчик элемента 'start event'. Просто осуществляет переход к
- * следующему элементу.
- */
 public class StartEventHandler extends AbstractElementHandler {
 
     public StartEventHandler(AbstractEngine engine) {

@@ -20,9 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Обработчик элемента 'service task'. Поддерживает вызов задач с помощью т.н.
- * delegate expression - EL-выражения, вычисляемого в тот или иной экземпляр
- * {@link JavaDelegate}.
+ * Service task handling. Supports task calling by delegate expression - EL
+ * expression which evals into {@link JavaDelegate} instance.
  *
  * @see ServiceTaskRegistry
  */
@@ -51,13 +50,13 @@ public class ServiceTaskHandler extends AbstractElementHandler {
             try {
                 switch (type) {
                     case SIMPLE: {
-                        // простой случай: выполнение task - это вычисление EL
+                        // simple case: task execution its just an eval
                         em.eval(ctx, expr, Object.class);
                         break;
                     }
                     case DELEGATE: {
-                        // чуть более сложный случай: выполнение task - это
-                        // вызов JavaDelegate полученного при вычислении EL
+                        // delegation: task execution its execution of delegate
+                        // reference
                         JavaDelegate d = em.eval(ctx, expr, JavaDelegate.class);
                         d.execute(ctx);
                         break;
@@ -79,24 +78,23 @@ public class ServiceTaskHandler extends AbstractElementHandler {
                 throw new ExecutionException("Unhandled execution exception: " + expr, e);
             }
         } else {
-            log.debug("handle ['{}', '{}', '{}'] -> empty expression, noop", s.getProcessBusinessKey(), c.getElementId(), expr);
+            log.debug("handle ['{}', '{}', '{}'] -> empty expression, noop", s.getBusinessKey(), c.getElementId(), expr);
             FlowUtils.followFlows(getEngine(), s, c);
         }
     }
 
     /**
-     * Обработка ошибок BPMN. В отличии от обычных исключений, передается
-     * идентификатор ошибки. В случае, если на task был привязан "boundary error
-     * event", то необходимо его учесть в обработке.
-     * @param s текущий процесс.
-     * @param pd описание текущего процесса.
-     * @param c обрабатываемый элемент (task).
-     * @param e обрабатываемая ошибка.
+     * BPMN error handling. Unlike common exceptions, error references is used.
+     * Handles error boundary events.
+     * @param s currenct execution.
+     * @param pd current process definition.
+     * @param c current process command.
+     * @param e handled error.
      * @throws ExecutionException
      */
     private void handleBpmError(DefaultExecution s, ProcessDefinition pd, ProcessElementCommand c, BpmnError e) throws ExecutionException {
         String errorRef = e.getErrorRef();
-        String bk = s.getProcessBusinessKey();
+        String bk = s.getBusinessKey();
         String eid = c.getElementId();
 
         BoundaryEvent ev = ProcessDefinitionUtils.findBoundaryEvent(pd, eid, errorRef);
@@ -105,14 +103,13 @@ public class ServiceTaskHandler extends AbstractElementHandler {
         }
 
         if (ev != null) {
-            // на task висел "boundary error event" - обработка дальше пойдет по
-            // его ветви
+            // task element had boundary error event - the execution will use
+            // its flow
             log.debug("handleBpmError ['{}', '{}'] -> handle boundary error '{}'", bk, eid, errorRef);
             FlowUtils.followFlows(getEngine(), s, c, ev.getId());
         } else {
-            // на task не было подходящего "boundary error event" - выполнение
-            // текущего (под)процесса прекращается, ошибка передается
-            // процессу-родителю
+            // no boundary error events was found - error will be raised to the
+            // parent execution
             log.debug("handleBpmError ['{}', '{}'] -> no boundary error", bk, eid, errorRef);
             BpmnErrorHelper.raiseError(c.getContext(), errorRef);
         }

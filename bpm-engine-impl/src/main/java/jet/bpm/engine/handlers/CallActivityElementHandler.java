@@ -8,9 +8,6 @@ import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.model.CallActivity;
 import jet.bpm.engine.model.ProcessDefinition;
 
-/**
- * Обработчик элемента 'call activity' - вызов подпроцесса BPM.
- */
 public class CallActivityElementHandler extends AbstractCallHandler {
 
     public CallActivityElementHandler(AbstractEngine engine) {

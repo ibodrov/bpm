@@ -8,22 +8,21 @@ import jet.bpm.engine.model.VariableMapping;
 public final class ExecutionContextHelper {
 
     /**
-     * Копирует переменные одного контекста в другой с помощью указанного набора
-     * mappings. Если исходная переменная есть в mapping, но нет в исходном
-     * контексте, то в целевом контексте переменная будет равна
-     * <code>null</code>.
-     * @param em ссылка на {@link ExpressionManager} для вычисления исходных
-     * переменных
-     * @param src исходный контекст
-     * @param dst целевойй контекст
-     * @param mappings правила копирования
+     * Copy variables from one context to another. If the source variable is
+     * present in mapping, but not in source context, then target variable will
+     * be <code>null</code>.
+     * @param em reference to the {@link ExpressionManager}. Used to compute
+     * variable values.
+     * @param src source context.
+     * @param dst target context.
+     * @param mapping variables mapping.
      */
-    public static void copyVariables(ExpressionManager em, ExecutionContext src, ExecutionContext dst, Set<VariableMapping> mappings) {
-        if (mappings == null) {
+    public static void copyVariables(ExpressionManager em, ExecutionContext src, ExecutionContext dst, Set<VariableMapping> mapping) {
+        if (mapping == null) {
             return;
         }
         
-        for (VariableMapping m : mappings) {
+        for (VariableMapping m : mapping) {
             String source = m.getSource();
             String sourceExpression = m.getSourceExpression();
             

@@ -10,10 +10,19 @@ public final class BpmnErrorHelper {
         return (String)ctx.getVariable(KEY);
     }
     
+    /**
+     * Raise the error to parent execution.
+     * @param ctx the current execution context.
+     * @param errorRef error reference.
+     */
     public static void raiseError(ExecutionContext ctx, String errorRef) {
         ctx.setVariable(KEY, errorRef);
     }
     
+    /**
+     * Clears raised error in the given context.
+     * @param ctx the execution context.
+     */
     public static void clear(ExecutionContext ctx) {
         ctx.removeVariable(KEY);
     }
