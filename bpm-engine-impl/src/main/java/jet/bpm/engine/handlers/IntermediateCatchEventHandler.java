@@ -7,6 +7,7 @@ import jet.bpm.engine.IdGenerator;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.FlowUtils;
+import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.el.ExpressionManager;
 import jet.bpm.engine.event.Event;
@@ -40,7 +41,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         getEngine().getPersistenceManager().save(child);
         
         ProcessDefinition pd = getProcessDefinition(c);
-        IntermediateCatchEvent ice = (IntermediateCatchEvent)pd.getChild(c.getElementId());
+        IntermediateCatchEvent ice = (IntermediateCatchEvent) ProcessDefinitionUtils.findElement(pd, c.getElementId());
 
         // link execution with the event
         String evId = getEventId(ice);
