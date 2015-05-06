@@ -45,7 +45,7 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
             }
         }
 
-        ExclusiveGateway element = (ExclusiveGateway) pd.getChild(c.getElementId());
+        ExclusiveGateway element = (ExclusiveGateway) ProcessDefinitionUtils.findElement(pd, c.getElementId());
 
         if (nextId == null && !flows.isEmpty()) {
             // only flows left without EL expressions
