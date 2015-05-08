@@ -22,12 +22,21 @@ public class MergeExecutionContextCommand implements ExecutionCommand {
 
     private final ExecutionContext context;
     private final ExecutionContext child;
+    private final boolean copyAllVariables;
     private final Set<VariableMapping> outVariables;
 
     public MergeExecutionContextCommand(ExecutionContext context, ExecutionContext child, Set<VariableMapping> outVariables) {
         this.context = context;
         this.child = child;
         this.outVariables = outVariables;
+        this.copyAllVariables = false;
+    }
+    
+    public MergeExecutionContextCommand(ExecutionContext context, ExecutionContext child) {
+        this.context = context;
+        this.child = child;
+        this.outVariables = null;
+        this.copyAllVariables = true;
     }
 
     @Override
@@ -43,7 +52,11 @@ public class MergeExecutionContextCommand implements ExecutionCommand {
             return execution;
         }
         
-        ExecutionContextHelper.copyVariables(engine.getExpressionManager(), child, context, outVariables);
+        if (copyAllVariables) {
+            ExecutionContextHelper.copyVariables(child, context);
+        } else {
+            ExecutionContextHelper.copyVariables(engine.getExpressionManager(), child, context, outVariables);
+        }
 
         return execution;
     }

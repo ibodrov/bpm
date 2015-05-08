@@ -4,6 +4,8 @@ import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.BpmnError;
 import jet.bpm.engine.api.JavaDelegate;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.model.AbstractElement;
@@ -15,6 +17,7 @@ import jet.bpm.engine.model.ServiceTask;
 import jet.bpm.engine.model.ExpressionType;
 import jet.bpm.engine.model.StartEvent;
 import jet.bpm.engine.model.SubProcess;
+import org.junit.Assert;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
 
@@ -197,5 +200,67 @@ public class SubProcessTest extends AbstractEngineTest {
                 "f4",
                 "end");
         assertNoMoreActivations();
+    }
+    
+    /**
+     * start --> sub                            t2 --> end
+     *              \                          /
+     *               substart --> t1 --> subend
+     */
+    @Test
+    public void testVariablePassing() throws Exception {
+        final String k = "k" + System.currentTimeMillis();
+        final String v = "v" + System.currentTimeMillis();
+        final String shadowV = "s" + System.currentTimeMillis();
+        
+        JavaDelegate t1 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                ctx.setVariable(k, v);
+            }
+        });
+        getEngine().getServiceTaskRegistry().register("t1", t1);
+
+        JavaDelegate t2 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                Object v2 = ctx.getVariable(k);
+                Assert.assertEquals(v, v2);
+            }
+        });
+        getEngine().getServiceTaskRegistry().register("t2", t2);
+
+        // --
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "sub"),
+                new SubProcess("sub", Arrays.<AbstractElement>asList(
+                        new StartEvent("substart"),
+                        new SequenceFlow("f2", "substart", "t1"),
+                        new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                        new SequenceFlow("f3", "t1", "subend"),
+                        new EndEvent("subend")
+                )),
+                new SequenceFlow("f4", "sub", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f5", "t2", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        Map<String, Object> m = new HashMap<>();
+        m.put(k, shadowV);
+        getEngine().start(key, processId, m);
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
+        verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
 }

@@ -36,6 +36,14 @@ public final class ExecutionContextHelper {
             dst.setVariable(m.getTarget(), v);
         }
     }
+    
+    public static void copyVariables(ExecutionContext src, ExecutionContext dst) {
+        Set<String> keys = src.getVariableNames();
+        for (String k : keys) {
+            Object v = src.getVariable(k);
+            dst.setVariable(k, v);
+        }
+    }
 
     private ExecutionContextHelper() {
     }

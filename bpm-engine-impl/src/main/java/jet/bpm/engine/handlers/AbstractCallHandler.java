@@ -55,7 +55,7 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
 
         // add context merging command to the current stack. It will perform
         // OUT-parametes handling
-        s.push(new MergeExecutionContextCommand(parent, child, outVariables));
+        s.push(makeMergeCommand(parent, child, outVariables));
 
         // get the ID of the called process. Depends on call type ('sub-process'
         // or 'call activity') it can be:
@@ -67,6 +67,8 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
         AbstractElement start = ProcessDefinitionUtils.findStartEvent(sub);
         s.push(new ProcessElementCommand(id, start.getId(), child));
     }
+    
+    protected abstract MergeExecutionContextCommand makeMergeCommand(ExecutionContext parent, ExecutionContext child, Set<VariableMapping> outVariables);
 
     protected abstract ProcessDefinition findCalledProcess(ProcessElementCommand c) throws ExecutionException;
 
