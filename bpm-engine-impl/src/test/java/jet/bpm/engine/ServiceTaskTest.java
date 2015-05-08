@@ -16,6 +16,7 @@ import jet.bpm.engine.model.SequenceFlow;
 import jet.bpm.engine.model.ServiceTask;
 import jet.bpm.engine.model.ExpressionType;
 import jet.bpm.engine.model.StartEvent;
+import org.junit.Assert;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
 
@@ -117,6 +118,60 @@ public class ServiceTaskTest extends AbstractEngineTest {
         // ---
 
         verify(t1, times(1)).execute(any(ExecutionContext.class));
+    }
+    
+    /**
+     * start --> t1 --------- t2 --> end
+     *             \        /
+     *              error --
+     */
+    @Test
+    public void testErrorCodeStoring() throws Exception {
+        final String errorRef = "test#" + System.currentTimeMillis();
+
+        JavaDelegate t1 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws ExecutionException {
+                throw new BpmnError(errorRef);
+            }
+        });
+        getEngine().getServiceTaskRegistry().register("t1", t1);
+        
+        JavaDelegate t2 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws ExecutionException {
+                Object v = ctx.getVariable(ExecutionContext.ERROR_CODE_KEY);
+                Assert.assertEquals(errorRef, v);
+            }
+        });
+        getEngine().getServiceTaskRegistry().register("t2", t2);
+
+        // ---
+
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f2", "t1", "end"),
+                new BoundaryEvent("be1", "t1", errorRef),
+                new SequenceFlow("f3", "be1", "t2"),
+                new ServiceTask("t2", ExpressionType.DELEGATE, "${t2}"),
+                new SequenceFlow("f4", "t2", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        verify(t1, times(1)).execute(any(ExecutionContext.class));
+        verify(t2, times(1)).execute(any(ExecutionContext.class));
     }
     
     /**

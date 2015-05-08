@@ -104,7 +104,14 @@ public class SubProcessTest extends AbstractEngineTest {
         JavaDelegate t2 = mock(JavaDelegate.class);
         getEngine().getServiceTaskRegistry().register("t2", t2);
 
-        JavaDelegate t3 = mock(JavaDelegate.class);
+        JavaDelegate t3 = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws Exception {
+                Object v = ctx.getVariable(ExecutionContext.ERROR_CODE_KEY);
+                Assert.assertEquals(errorRef, v);
+            }
+        });
         getEngine().getServiceTaskRegistry().register("t3", t3);
 
         // ---

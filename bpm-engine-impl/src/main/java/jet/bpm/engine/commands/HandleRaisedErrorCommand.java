@@ -64,6 +64,9 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
             // error is handled
             BpmnErrorHelper.clear(context);
             
+            // save errorRef for later
+            context.setVariable(ExecutionContext.ERROR_CODE_KEY, errorRef);
+            
             followFlows(execution, pd, ev.getId(), context);
         }
 

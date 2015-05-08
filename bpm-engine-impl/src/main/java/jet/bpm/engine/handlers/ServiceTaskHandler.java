@@ -106,6 +106,8 @@ public class ServiceTaskHandler extends AbstractElementHandler {
             // task element had boundary error event - the execution will use
             // its flow
             log.debug("handleBpmError ['{}', '{}'] -> handle boundary error '{}'", bk, eid, errorRef);
+            // save errorRef for later
+            c.getContext().setVariable(ExecutionContext.ERROR_CODE_KEY, errorRef);
             FlowUtils.followFlows(getEngine(), s, c, ev.getId());
         } else {
             // no boundary error events was found - error will be raised to the

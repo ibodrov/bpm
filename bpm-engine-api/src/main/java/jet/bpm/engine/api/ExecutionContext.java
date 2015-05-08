@@ -8,6 +8,12 @@ import java.util.Set;
  * Execution context. Provides access to the process variables.
  */
 public interface ExecutionContext extends ActivationListener, Serializable {
+    
+    /**
+     * Key of latest handled error, contains "errorRef" of boundary error event.
+     * Can be accessed with {@link #getVariable(java.lang.String)}.
+     */
+    public static final String ERROR_CODE_KEY = "errorCode";
 
     Object getVariable(String key);
     
