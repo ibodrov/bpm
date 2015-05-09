@@ -25,7 +25,7 @@
                         <Import-Package>*</Import-Package>
                         <Export-Package>
                             jet.bpm.engine.api,
-                            jet.bpm.bpm.engine.model
+                            jet.bpm.engine.model
                         </Export-Package>
                     </instructions>
                 </configuration>
