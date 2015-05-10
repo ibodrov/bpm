@@ -85,7 +85,7 @@ public abstract class AbstractEngine implements Engine {
         lm.lock(processBusinessKey);
         try {
             EventManager em = getEventManager();
-            Event e = em.find(processBusinessKey, eventId);
+            Event e = em.remove(processBusinessKey, eventId);
             if (e == null) {
                 throw new ExecutionException("No event '%s' found for process '%s'", eventId, processBusinessKey);
             }

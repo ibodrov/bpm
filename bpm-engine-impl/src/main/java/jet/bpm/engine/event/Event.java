@@ -8,14 +8,16 @@ public final class Event implements Serializable {
     private final String id;
     private final String executionId;
     private final String groupId;
+    private final String processBusinessKey;
     private final boolean exclusive;
     private final String timeDate;
     private final String timeDuration;
 
-    public Event(String id, String executionId, String groupId, boolean exclusive, String timeDate, String timeDuration) {
+    public Event(String id, String executionId, String groupId, String processBusinessKey, boolean exclusive, String timeDate, String timeDuration) {
         this.id = id;
         this.executionId = executionId;
         this.groupId = groupId;
+        this.processBusinessKey = processBusinessKey;
         this.exclusive = exclusive;
         this.timeDate = timeDate;
         this.timeDuration = timeDuration;
@@ -45,12 +47,17 @@ public final class Event implements Serializable {
         return timeDuration;
     }
 
+    public String getProcessBusinessKey() {
+        return processBusinessKey;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
         hash = 71 * hash + Objects.hashCode(this.id);
         hash = 71 * hash + Objects.hashCode(this.executionId);
         hash = 71 * hash + Objects.hashCode(this.groupId);
+        hash = 71 * hash + Objects.hashCode(this.processBusinessKey);
         hash = 71 * hash + (this.exclusive ? 1 : 0);
         hash = 71 * hash + Objects.hashCode(this.timeDate);
         hash = 71 * hash + Objects.hashCode(this.timeDuration);
@@ -75,6 +82,9 @@ public final class Event implements Serializable {
         if (!Objects.equals(this.groupId, other.groupId)) {
             return false;
         }
+        if (!Objects.equals(this.processBusinessKey, other.processBusinessKey)) {
+            return false;
+        }
         if (this.exclusive != other.exclusive) {
             return false;
         }
@@ -89,6 +99,6 @@ public final class Event implements Serializable {
 
     @Override
     public String toString() {
-        return "Event{" + "id=" + id + ", executionId=" + executionId + ", groupId=" + groupId + ", exclusive=" + exclusive + ", timeDate=" + timeDate + ", timeDuration=" + timeDuration + '}';
+        return "Event{" + "id=" + id + ", executionId=" + executionId + ", groupId=" + groupId + ", processBusinessKey=" + processBusinessKey + ", exclusive=" + exclusive + ", timeDate=" + timeDate + ", timeDuration=" + timeDuration + '}';
     }
 }

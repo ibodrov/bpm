@@ -3,10 +3,13 @@ package jet.bpm.engine.event;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import jet.bpm.engine.api.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +19,25 @@ public class EventManagerImpl implements EventManager {
 
     private final Map<EventKey, Event> events = new HashMap<>();
 
+    private final List<Event> eventsToExecute = new ArrayList<>();
+
     @Override
     public Event find(String processBusinessKey, String eventId) {
         synchronized (events) {
             EventKey k = new EventKey(processBusinessKey, eventId);
             return events.get(k);
+        }
+    }
+
+    @Override
+    public Event remove(String processBusinessKey, String eventId) {
+        synchronized (events) {
+            EventKey k = new EventKey(processBusinessKey, eventId);
+            Event e = events.remove(k);
+
+            eventsToExecute.remove(e);
+
+            return e;
         }
     }
 
@@ -43,6 +60,11 @@ public class EventManagerImpl implements EventManager {
         synchronized (events) {
             EventKey k = new EventKey(processBusinessKey, event.getId());
             events.put(k, event);
+
+            if(event.getTimeDate() != null && event.getTimeDuration() != null) {
+                eventsToExecute.add(event);
+            }
+
             log.debug("register ['{}', '{}'] -> done", processBusinessKey, event);
         }
     }
@@ -59,10 +81,34 @@ public class EventManagerImpl implements EventManager {
                     i.remove();
 
                     String id = entry.getValue().getExecutionId();
+                    eventsToExecute.remove(entry.getValue());
                     log.debug("clearGroup ['{}', '{}'] -> execution {} was removed (current size: {})", processBusinessKey, groupId, id, events.size());
                 }
             }
         }
+    }
+
+    @Override
+    public List<Event> findNextEventsToExecute(int maxEvents) throws ExecutionException {
+        List<Event> result = new ArrayList<>(maxEvents);
+        synchronized (events) {
+            Date now = new Date();
+            for (Iterator<Event> it = eventsToExecute.iterator(); it.hasNext();) {
+                Event e = it.next();
+
+                String dueDate = e.getTimeDate() != null ? e.getTimeDate() : e.getTimeDuration();
+                Date expiredAt = EventUtils.resolveTimeDate(dueDate);
+
+                if(now.after(expiredAt) || now.equals(expiredAt)) {
+                    result.add(e);
+                    it.remove();
+                }
+                if(result.size() >= maxEvents) {
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     private static final class EventKey implements Serializable {
