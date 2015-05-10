@@ -1,13 +1,12 @@
 package jet.bpm.engine.handlers;
 
-import jet.bpm.engine.api.Engine;
-import jet.bpm.engine.api.ExecutionException;
-import jet.bpm.engine.api.ExecutionContext;
-import jet.bpm.engine.IdGenerator;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.FlowUtils;
+import jet.bpm.engine.IdGenerator;
 import jet.bpm.engine.ProcessDefinitionUtils;
+import jet.bpm.engine.api.ExecutionContext;
+import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.el.ExpressionManager;
 import jet.bpm.engine.event.Event;
@@ -27,7 +26,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
     @Override
     public void handle(DefaultExecution s, ProcessElementCommand c) throws ExecutionException {
         s.pop();
-        
+
         IdGenerator idg = getEngine().getIdGenerator();
 
         // create child execution, which will start right from the first element
@@ -39,19 +38,19 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         // outside of current process
         child.setSuspended(true);
         getEngine().getPersistenceManager().save(child);
-        
+
         ProcessDefinition pd = getProcessDefinition(c);
         IntermediateCatchEvent ice = (IntermediateCatchEvent) ProcessDefinitionUtils.findElement(pd, c.getElementId());
 
         // link execution with the event
         String evId = getEventId(ice);
-        
+
         ExpressionManager em = getEngine().getExpressionManager();
         ExecutionContext ctx = c.getContext();
         String timeDate = eval(ice.getTimeDate(), ctx, em);
         String timeDuration = eval(ice.getTimeDuration(), ctx, em);
-        
-        Event e = new Event(evId, child.getId(), c.getGroupId(), c.isExclusive(), timeDate, timeDuration);
+
+        Event e = new Event(evId, child.getId(), c.getGroupId(), s.getBusinessKey(), c.isExclusive(), timeDate, timeDuration);
         getEngine().getEventManager().register(child.getBusinessKey(), e);
     }
 
@@ -62,7 +61,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
     private String getEventId(IntermediateCatchEvent ev) {
         return ev.getMessageRef() != null ? ev.getMessageRef() : ev.getId();
     }
-    
+
     private String eval(String expr, ExecutionContext ctx, ExpressionManager em) {
         if (expr == null || expr.trim().isEmpty()) {
             return null;
