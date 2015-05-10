@@ -96,8 +96,7 @@ public class EventManagerImpl implements EventManager {
             for (Iterator<Event> it = eventsToExecute.iterator(); it.hasNext();) {
                 Event e = it.next();
 
-                String dueDate = e.getTimeDate() != null ? e.getTimeDate() : e.getTimeDuration();
-                Date expiredAt = EventUtils.resolveTimeDate(dueDate);
+                Date expiredAt = e.getTimeDate() != null ? e.getTimeDate() : EventUtils.resolveTimeDate(e.getTimeDuration());
 
                 if(now.after(expiredAt) || now.equals(expiredAt)) {
                     result.add(e);

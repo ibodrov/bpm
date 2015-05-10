@@ -1,5 +1,7 @@
 package jet.bpm.engine.handlers;
 
+import java.util.Date;
+import javax.xml.bind.DatatypeConverter;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.FlowUtils;
@@ -18,6 +20,10 @@ import jet.bpm.engine.model.ProcessDefinition;
  * it and link it with the event.
  */
 public class IntermediateCatchEventHandler extends AbstractElementHandler {
+    
+    public static Date parseIso8601(String s) {
+        return DatatypeConverter.parseDate(s).getTime();
+    }
 
     public IntermediateCatchEventHandler(AbstractEngine engine) {
         super(engine);
@@ -47,11 +53,28 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
 
         ExpressionManager em = getEngine().getExpressionManager();
         ExecutionContext ctx = c.getContext();
-        String timeDate = eval(ice.getTimeDate(), ctx, em);
-        String timeDuration = eval(ice.getTimeDuration(), ctx, em);
-
+        Date timeDate = parseTimeDate(ice.getTimeDate(), ctx, em);
+        String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
+        
         Event e = new Event(evId, child.getId(), c.getGroupId(), s.getBusinessKey(), c.isExclusive(), timeDate, timeDuration);
+
         getEngine().getEventManager().register(child.getBusinessKey(), e);
+    }
+    
+    private Date parseTimeDate(String s, ExecutionContext ctx, ExpressionManager em) throws ExecutionException {
+        if(s == null) {
+            return null;
+        }
+        
+        Object v = eval(s, ctx, em, Object.class);
+        if (v instanceof String) {
+            return parseIso8601(s);
+        } else if (v instanceof Date) {
+            return (Date) v;
+        } else {
+            throw new ExecutionException("Invalid timeDate format: '%s'", s);
+        }
+        
     }
 
     /**
@@ -61,11 +84,11 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
     private String getEventId(IntermediateCatchEvent ev) {
         return ev.getMessageRef() != null ? ev.getMessageRef() : ev.getId();
     }
-
-    private String eval(String expr, ExecutionContext ctx, ExpressionManager em) {
+    
+    private <T> T eval(String expr, ExecutionContext ctx, ExpressionManager em, Class<T> type) {
         if (expr == null || expr.trim().isEmpty()) {
             return null;
         }
-        return em.eval(ctx, expr, String.class);
+        return em.eval(ctx, expr, type);
     }
 }
