@@ -62,6 +62,10 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
     
     private Date parseTimeDate(String s, ExecutionContext ctx, ExpressionManager em) throws ExecutionException {
         Object v = eval(s, ctx, em, Object.class);
+        if (v == null) {
+            return null;
+        }
+        
         if (v instanceof String) {
             return parseIso8601(s);
         } else if (v instanceof Date) {
