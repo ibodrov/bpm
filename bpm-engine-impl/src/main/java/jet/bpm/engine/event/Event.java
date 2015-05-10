@@ -1,6 +1,7 @@
 package jet.bpm.engine.event;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Objects;
 
 public final class Event implements Serializable {
@@ -9,10 +10,10 @@ public final class Event implements Serializable {
     private final String executionId;
     private final String groupId;
     private final boolean exclusive;
-    private final String timeDate;
+    private final Date timeDate;
     private final String timeDuration;
 
-    public Event(String id, String executionId, String groupId, boolean exclusive, String timeDate, String timeDuration) {
+    public Event(String id, String executionId, String groupId, boolean exclusive, Date timeDate, String timeDuration) {
         this.id = id;
         this.executionId = executionId;
         this.groupId = groupId;
@@ -37,7 +38,7 @@ public final class Event implements Serializable {
         return exclusive;
     }
 
-    public String getTimeDate() {
+    public Date getTimeDate() {
         return timeDate;
     }
 

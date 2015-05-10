@@ -1,7 +1,11 @@
 package jet.bpm.engine;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import jet.bpm.engine.event.Event;
 import jet.bpm.engine.model.AbstractElement;
 import jet.bpm.engine.model.EndEvent;
 import jet.bpm.engine.model.EventBasedGateway;
@@ -9,7 +13,9 @@ import jet.bpm.engine.model.IntermediateCatchEvent;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import jet.bpm.engine.model.StartEvent;
+import static org.junit.Assert.*;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.*;
 
 public class EventBasedGatewayTest extends AbstractEngineTest {
@@ -174,5 +180,40 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
                 "f9",
                 "end3");
         assertNoMoreActivations();
+    }
+    
+    /**
+     * start --> gw --> ev --> end
+     */
+    @Test
+    public void testTimerEvent() throws Exception {
+        String k = "timeVal";
+        Object v = new Date();
+        
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw"),
+                new EventBasedGateway("gw"),
+                    new SequenceFlow("f2", "gw", "ev"),
+                    new IntermediateCatchEvent("ev", null, "${" + k + "}", null),
+                    new SequenceFlow("f3", "ev", "end"),
+                    new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        Map<String, Object> m = new HashMap<>();
+        m.put(k, v);
+        getEngine().start(key, processId, m);
+
+        // ---
+
+        ArgumentCaptor<Event> arg = ArgumentCaptor.forClass(Event.class);
+        verify(eventManager, times(1)).register(eq(key), arg.capture());
+        Event ev = arg.getValue();
+        assertNotNull(ev);
+        assertEquals(v, ev.getTimeDate());
     }
 }

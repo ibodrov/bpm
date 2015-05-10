@@ -1,6 +1,6 @@
 package jet.bpm.engine.handlers;
 
-import jet.bpm.engine.api.Engine;
+import java.util.Date;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.IdGenerator;
@@ -48,8 +48,8 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         
         ExpressionManager em = getEngine().getExpressionManager();
         ExecutionContext ctx = c.getContext();
-        String timeDate = eval(ice.getTimeDate(), ctx, em);
-        String timeDuration = eval(ice.getTimeDuration(), ctx, em);
+        Date timeDate = eval(ice.getTimeDate(), ctx, em, Date.class);
+        String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
         
         Event e = new Event(evId, child.getId(), c.getGroupId(), c.isExclusive(), timeDate, timeDuration);
         getEngine().getEventManager().register(child.getBusinessKey(), e);
@@ -63,10 +63,10 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         return ev.getMessageRef() != null ? ev.getMessageRef() : ev.getId();
     }
     
-    private String eval(String expr, ExecutionContext ctx, ExpressionManager em) {
+    private <T> T eval(String expr, ExecutionContext ctx, ExpressionManager em, Class<T> type) {
         if (expr == null || expr.trim().isEmpty()) {
             return null;
         }
-        return em.eval(ctx, expr, String.class);
+        return em.eval(ctx, expr, type);
     }
 }
