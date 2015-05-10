@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import jet.bpm.engine.event.Event;
+import jet.bpm.engine.handlers.IntermediateCatchEventHandler;
 import jet.bpm.engine.model.AbstractElement;
 import jet.bpm.engine.model.EndEvent;
 import jet.bpm.engine.model.EventBasedGateway;
@@ -183,21 +184,24 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
     }
     
     /**
-     * start --> gw --> ev --> end
+     * start --> gw --> ev1 --> ev1 --> end
      */
     @Test
     public void testTimerEvent() throws Exception {
-        String k = "timeVal";
-        Object v = new Date();
+        String k1 = "timeVal";
+        Object v1 = new Date();
+        String dt = "2011-03-11T12:13:14";
         
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
-                    new SequenceFlow("f2", "gw", "ev"),
-                    new IntermediateCatchEvent("ev", null, "${" + k + "}", null),
-                    new SequenceFlow("f3", "ev", "end"),
+                    new SequenceFlow("f2", "gw", "ev1"),
+                    new IntermediateCatchEvent("ev1", null, "${" + k1 + "}", null),
+                    new SequenceFlow("f3", "ev1", "ev2"),
+                    new IntermediateCatchEvent("ev2", null, dt, null),
+                    new SequenceFlow("f4", "ev2", "end"),
                     new EndEvent("end")
         )));
 
@@ -205,7 +209,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
 
         String key = UUID.randomUUID().toString();
         Map<String, Object> m = new HashMap<>();
-        m.put(k, v);
+        m.put(k1, v1);
         getEngine().start(key, processId, m);
 
         // ---
@@ -214,6 +218,20 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         verify(eventManager, times(1)).register(eq(key), arg.capture());
         Event ev = arg.getValue();
         assertNotNull(ev);
-        assertEquals(v, ev.getTimeDate());
+        assertEquals(v1, ev.getTimeDate());
+        reset(eventManager);
+        
+        // ---
+        
+        getEngine().resume(key, "ev1", null);
+        
+        // ---
+        
+        arg = ArgumentCaptor.forClass(Event.class);
+        verify(eventManager, times(1)).register(eq(key), arg.capture());
+        ev = arg.getValue();
+        assertNotNull(ev);
+        Date actualDt = IntermediateCatchEventHandler.parseIso8601(dt);
+        assertEquals(actualDt, ev.getTimeDate());
     }
 }

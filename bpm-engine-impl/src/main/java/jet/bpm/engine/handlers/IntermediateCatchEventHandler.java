@@ -1,6 +1,7 @@
 package jet.bpm.engine.handlers;
 
 import java.util.Date;
+import javax.xml.bind.DatatypeConverter;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.IdGenerator;
@@ -19,6 +20,10 @@ import jet.bpm.engine.model.ProcessDefinition;
  * it and link it with the event.
  */
 public class IntermediateCatchEventHandler extends AbstractElementHandler {
+    
+    public static Date parseIso8601(String s) {
+        return DatatypeConverter.parseDate(s).getTime();
+    }
 
     public IntermediateCatchEventHandler(AbstractEngine engine) {
         super(engine);
@@ -48,11 +53,23 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         
         ExpressionManager em = getEngine().getExpressionManager();
         ExecutionContext ctx = c.getContext();
-        Date timeDate = eval(ice.getTimeDate(), ctx, em, Date.class);
+        Date timeDate = parseTimeDate(ice.getTimeDate(), ctx, em);
         String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
         
         Event e = new Event(evId, child.getId(), c.getGroupId(), c.isExclusive(), timeDate, timeDuration);
         getEngine().getEventManager().register(child.getBusinessKey(), e);
+    }
+    
+    private Date parseTimeDate(String s, ExecutionContext ctx, ExpressionManager em) throws ExecutionException {
+        Object v = eval(s, ctx, em, Object.class);
+        if (v instanceof String) {
+            return parseIso8601(s);
+        } else if (v instanceof Date) {
+            return (Date) v;
+        } else {
+            throw new ExecutionException("Invalid timeDate format: '%s'", s);
+        }
+        
     }
 
     /**
