@@ -15,6 +15,7 @@ import jet.bpm.engine.model.EventBasedGateway;
 import jet.bpm.engine.model.ExclusiveGateway;
 import jet.bpm.engine.model.InclusiveGateway;
 import jet.bpm.engine.model.IntermediateCatchEvent;
+import jet.bpm.engine.model.ParallelGateway;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import jet.bpm.engine.model.ServiceTask;
@@ -41,6 +42,7 @@ public class DelegatingElementHandler implements ElementHandler {
         register(EventBasedGateway.class, new EventBasedGatewayHandler(engine));
         register(InclusiveGateway.class, new InclusiveGatewayHandler(engine));
         register(ExclusiveGateway.class, new ExclusiveGatewayHandler(engine));
+        register(ParallelGateway.class, new ParallelGatewayHandler(engine));
         register(IntermediateCatchEvent.class, new IntermediateCatchEventHandler(engine));
         register(SequenceFlow.class, new SequenceFlowHandler(engine));
         register(ServiceTask.class, new ServiceTaskHandler(engine));
