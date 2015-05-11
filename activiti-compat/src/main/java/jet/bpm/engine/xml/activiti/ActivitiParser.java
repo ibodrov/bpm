@@ -20,7 +20,9 @@ import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import jet.bpm.engine.model.ServiceTask;
 import jet.bpm.engine.model.ExpressionType;
+import jet.bpm.engine.model.InclusiveGateway;
 import jet.bpm.engine.model.IntermediateCatchEvent;
+import jet.bpm.engine.model.ParallelGateway;
 import jet.bpm.engine.model.SequenceFlow.ExecutionListener;
 import jet.bpm.engine.model.StartEvent;
 import jet.bpm.engine.model.SubProcess;
@@ -143,6 +145,18 @@ public class ActivitiParser implements Parser {
                     id = attributes.getValue("id");
                     ExclusiveGateway eg = new ExclusiveGateway(id, attributes.getValue("default"));
                     children.add(eg);
+                    break;
+                    
+                case "parallelGateway":
+                    id = attributes.getValue("id");
+                    ParallelGateway pg = new ParallelGateway(id);
+                    children.add(pg);
+                    break;
+                    
+                case "inclusiveGateway":
+                    id = attributes.getValue("id");
+                    InclusiveGateway ig = new InclusiveGateway(id);
+                    children.add(ig);
                     break;
 
                 case "serviceTask":

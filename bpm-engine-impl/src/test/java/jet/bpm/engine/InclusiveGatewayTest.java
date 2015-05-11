@@ -22,7 +22,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
         deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
-                new InclusiveGateway("gw1", "gw2"),
+                new InclusiveGateway("gw1"),
                     new SequenceFlow("f2", "gw1", "ev"),
                     new IntermediateCatchEvent("ev"),
                     new SequenceFlow("f3", "ev", "gw2"),
@@ -66,7 +66,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
         deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
                 new StartEvent("start"),
                 new SequenceFlow("f1", "start", "gw1"),
-                new InclusiveGateway("gw1", "gw2"),
+                new InclusiveGateway("gw1"),
 
                     new SequenceFlow("f2", "gw1", "ev1"),
                     new IntermediateCatchEvent("ev1"),

@@ -5,8 +5,4 @@ public class InclusiveGateway extends ParallelGateway {
     public InclusiveGateway(String id) {
         super(id);
     }
-
-    public InclusiveGateway(String id, String exit) {
-        super(id, exit);
-    }
 }

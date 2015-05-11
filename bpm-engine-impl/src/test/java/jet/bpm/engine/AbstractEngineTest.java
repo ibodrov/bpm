@@ -86,6 +86,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
     }
 
     protected void assertNoMoreActivations() {
+        StringBuilder b = new StringBuilder();
         int s = 0;
         for (List<String> l : activations.values()) {
             s += l.size();

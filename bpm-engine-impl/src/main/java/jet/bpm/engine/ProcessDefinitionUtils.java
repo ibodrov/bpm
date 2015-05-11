@@ -1,6 +1,7 @@
 package jet.bpm.engine;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.model.AbstractElement;

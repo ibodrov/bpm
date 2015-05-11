@@ -6,6 +6,7 @@ import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.AbstractEngine;
+import jet.bpm.engine.GatewayHelper;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.el.ExpressionManager;
@@ -70,6 +71,11 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
         }
 
         log.debug("'{}' was selected", nextId);
+        
+        // store forks count...
+        GatewayHelper.inc(c.getContext(), 1);
+        
+        // ...and proceed
         s.push(new ProcessElementCommand(pd.getId(), nextId, c.getContext()));
     }
 
