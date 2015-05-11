@@ -41,6 +41,7 @@ public class LevelDbPersistenceManager implements PersistenceManager {
     public void save(DefaultExecution execution) {
         byte[] key = marshallKey(execution.getId());
         db.put(key, marshallValue(execution));
+        log.debug("save ['{}'] -> done", execution.getId());
     }
 
     @Override

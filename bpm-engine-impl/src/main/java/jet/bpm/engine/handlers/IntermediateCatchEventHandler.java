@@ -9,10 +9,12 @@ import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.commands.ProcessElementCommand;
+import jet.bpm.engine.commands.SuspendExecutionCommand;
 import jet.bpm.engine.el.ExpressionManager;
 import jet.bpm.engine.event.Event;
 import jet.bpm.engine.model.IntermediateCatchEvent;
 import jet.bpm.engine.model.ProcessDefinition;
+import jet.bpm.engine.persistence.PersistenceManager;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
@@ -44,7 +46,8 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         // suspend and save child execution. Its will be resumed by someone
         // outside of current process
         child.setSuspended(true);
-        getEngine().getPersistenceManager().save(child);
+        PersistenceManager pm = getEngine().getPersistenceManager();
+        pm.save(child);
 
         ProcessDefinition pd = getProcessDefinition(c);
         IntermediateCatchEvent ice = (IntermediateCatchEvent) ProcessDefinitionUtils.findElement(pd, c.getElementId());

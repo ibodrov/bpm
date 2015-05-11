@@ -97,7 +97,7 @@ public abstract class AbstractEngine implements Engine {
             }
 
             String eid = e.getExecutionId();
-            log.debug("resume ['{}', '{}'] -> got execution id {}", processBusinessKey, eventName, eid);
+            log.debug("resume ['{}', '{}'] -> got '{}'", processBusinessKey, eventName, eid);
 
             PersistenceManager pm = getPersistenceManager();
             DefaultExecution s = pm.remove(eid);
@@ -136,7 +136,7 @@ public abstract class AbstractEngine implements Engine {
                     log.debug("run ['{}'] -> no parent execution, breaking", s.getId());
                     break;
                 } else {
-                    log.debug("run ['{}'] -> switching to {}", s.getId(), pid);
+                    log.debug("run ['{}'] -> switching to '{}'", s.getId(), pid);
                     DefaultExecution parent = pm.remove(pid);
                     if (parent == null) {
                         // this is typical for the scenarios where the parent
