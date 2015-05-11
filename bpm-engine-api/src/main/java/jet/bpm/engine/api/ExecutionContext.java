@@ -33,4 +33,6 @@ public interface ExecutionContext extends ActivationListener, Serializable {
      * @param elementId the ID of the activated element.
      */
     boolean isActivated(String processDefinitionId, String elementId);
+    
+    int getActivationCount(String processDefinitionId, String elementId);
 }

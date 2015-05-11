@@ -11,6 +11,7 @@ import jet.bpm.engine.model.ParallelGateway;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import jet.bpm.engine.model.StartEvent;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ParallelGatewayTest extends AbstractEngineTest {
@@ -101,6 +102,7 @@ public class ParallelGatewayTest extends AbstractEngineTest {
      *               --
      */
     @Test
+    @Ignore
     public void testPartialInJoin() throws Exception {
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
