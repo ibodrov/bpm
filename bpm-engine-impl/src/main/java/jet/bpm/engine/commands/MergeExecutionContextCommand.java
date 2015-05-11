@@ -20,18 +20,18 @@ public class MergeExecutionContextCommand implements ExecutionCommand {
 
     private static final Logger log = LoggerFactory.getLogger(MergeExecutionContextCommand.class);
 
-    private final ExecutionContext target;
+    private final ExecutionContext source;
     private final boolean copyAllVariables;
     private final Set<VariableMapping> outVariables;
 
-    public MergeExecutionContextCommand(ExecutionContext target, Set<VariableMapping> outVariables) {
-        this.target = target;
+    public MergeExecutionContextCommand(ExecutionContext source, Set<VariableMapping> outVariables) {
+        this.source = source;
         this.outVariables = outVariables;
         this.copyAllVariables = false;
     }
     
-    public MergeExecutionContextCommand(ExecutionContext target, ExecutionContext child) {
-        this.target = target;
+    public MergeExecutionContextCommand(ExecutionContext source) {
+        this.source = source;
         this.outVariables = null;
         this.copyAllVariables = true;
     }
@@ -40,13 +40,13 @@ public class MergeExecutionContextCommand implements ExecutionCommand {
     public DefaultExecution exec(AbstractEngine engine, DefaultExecution execution) throws ExecutionException {
         execution.pop();
         
-        ExecutionContext source = execution.getContext();
+        ExecutionContext target = execution.getContext();
         
         // TODO: refactor as conditional command?
         String errorRef = BpmnErrorHelper.getRaisedError(source);
         if (errorRef != null) {
             // perform error raise
-            BpmnErrorHelper.raiseError(target, errorRef);
+            BpmnErrorHelper.raiseError(source, errorRef);
             log.debug("raising error '{}'", errorRef);
             return execution;
         }
