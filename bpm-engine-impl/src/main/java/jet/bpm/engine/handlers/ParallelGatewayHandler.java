@@ -33,7 +33,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
         ProcessDefinition pd = getProcessDefinition(defId);
         List<SequenceFlow> in = ProcessDefinitionUtils.findIncomingFlows(pd, eId);
         
-        ExecutionContext ctx = c.getContext();
+        ExecutionContext ctx = s.getContext();
         int activated = ctx.getActivationCount(defId, eId) + 1; // add current activation
         int total = in.size();
         
@@ -49,7 +49,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
             inactive.removeAll(filtered);
             processInactive(s, c, inactive);
             
-            FlowUtils.followFlows(s, ctx, c, filtered);
+            FlowUtils.followFlows(s, c, filtered);
         } else {
             log.debug("handle ['{}', '{}'] -> keep joining on '{}' (activated: {}, total: {})", s.getId(), c.getProcessDefinitionId(), eId, activated, total);
         }

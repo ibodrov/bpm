@@ -11,18 +11,16 @@ public class ProcessElementCommand implements ExecutionCommand {
     private final String elementId;
     private final String groupId;
     private final boolean exclusive;
-    private final ExecutionContext context;
 
-    public ProcessElementCommand(String processDefinitionId, String elementId, ExecutionContext context) {
-        this(processDefinitionId, elementId, null, false, context);
+    public ProcessElementCommand(String processDefinitionId, String elementId) {
+        this(processDefinitionId, elementId, null, false);
     }
 
-    public ProcessElementCommand(String processDefinitionId, String elementId, String groupId, boolean exclusive, ExecutionContext context) {
+    public ProcessElementCommand(String processDefinitionId, String elementId, String groupId, boolean exclusive) {
         this.processDefinitionId = processDefinitionId;
         this.elementId = elementId;
         this.groupId = groupId;
         this.exclusive = exclusive;
-        this.context = context;
     }
 
     public String getProcessDefinitionId() {
@@ -44,18 +42,14 @@ public class ProcessElementCommand implements ExecutionCommand {
     public boolean isExclusive() {
         return exclusive;
     }
-
-    @Override
-    public ExecutionContext getContext() {
-        return context;
-    }
-
+    
     @Override
     public DefaultExecution exec(AbstractEngine engine, DefaultExecution execution) throws ExecutionException {
         engine.getElementHandler().handle(execution, this);
 
         // perform notification of element activation
-        context.onActivation(execution, processDefinitionId, elementId);
+        ExecutionContext ctx = execution.getContext();
+        ctx.onActivation(execution, processDefinitionId, elementId);
         engine.fireOnElementActivation(execution, processDefinitionId, elementId);
 
         return execution;

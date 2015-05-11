@@ -37,7 +37,7 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
             SequenceFlow f = i.next();
             if (f.getExpression() != null) {
                 i.remove();
-                if (eval(c.getContext(), f)) {
+                if (eval(s.getContext(), f)) {
                     // we found flow, which evaluated into 'true'
                     nextId = f.getId();
                     break;
@@ -70,7 +70,7 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
         }
 
         log.debug("'{}' was selected", nextId);
-        s.push(new ProcessElementCommand(pd.getId(), nextId, c.getContext()));
+        s.push(new ProcessElementCommand(pd.getId(), nextId));
     }
 
     private boolean eval(ExecutionContext ctx, SequenceFlow f) {

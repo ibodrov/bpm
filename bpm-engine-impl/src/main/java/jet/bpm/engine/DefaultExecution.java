@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import jet.bpm.engine.api.Execution;
+import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.commands.ExecutionCommand;
 
 public class DefaultExecution implements Execution, Serializable {
@@ -12,17 +13,15 @@ public class DefaultExecution implements Execution, Serializable {
     private final String parentId;
     private final String processBusinessKey;
     private final Deque<ExecutionCommand> commands = new ArrayDeque<>();
-
+    private final ExecutionContext context;
+    
     private boolean suspended = false;
 
-    public DefaultExecution(String id, String processBusinessKey) {
-        this(id, null, processBusinessKey);
-    }
-
-    public DefaultExecution(String id, String parentId, String processBusinessKey) {
+    public DefaultExecution(String id, String parentId, String processBusinessKey, ExecutionContext context) {
         this.id = id;
         this.parentId = parentId;
         this.processBusinessKey = processBusinessKey;
+        this.context = context;
     }
 
     @Override
@@ -40,6 +39,10 @@ public class DefaultExecution implements Execution, Serializable {
         return processBusinessKey;
     }
 
+    public ExecutionContext getContext() {
+        return context;
+    }
+    
     @Override
     public boolean isDone() {
         return commands.isEmpty();

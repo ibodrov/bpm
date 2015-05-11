@@ -67,8 +67,8 @@ public abstract class AbstractEngine implements Engine {
 
         IdGenerator idg = getIdGenerator();
 
-        DefaultExecution s = new DefaultExecution(idg.create(), processBusinessKey);
-        s.push(new ProcessElementCommand(processDefinitionId, start.getId(), ctx));
+        DefaultExecution s = new DefaultExecution(idg.create(), null, processBusinessKey, ctx);
+        s.push(new ProcessElementCommand(processDefinitionId, start.getId()));
 
         LockManager lm = getLockManager();
         lm.lock(processBusinessKey);
@@ -108,7 +108,7 @@ public abstract class AbstractEngine implements Engine {
             s.setSuspended(false);
 
             ExecutionCommand c = s.peek();
-            applyVariables(c.getContext(), variables);
+            applyVariables(s.getContext(), variables);
 
             run(s);
         } finally {

@@ -29,11 +29,11 @@ public class SequenceFlowHandler extends AbstractElementHandler {
         ProcessDefinition pd = getProcessDefinition(c);
 
         SequenceFlow flow = (SequenceFlow) ProcessDefinitionUtils.findElement(pd, c.getElementId());
-        processListeners(c.getContext(), flow);
+        processListeners(s.getContext(), flow);
 
         // add to the stack the element processing command. Preserve group ID
         // and exclusiveness flag
-        s.push(new ProcessElementCommand(c.getProcessDefinitionId(), flow.getTo(), c.getGroupId(), c.isExclusive(), c.getContext()));
+        s.push(new ProcessElementCommand(c.getProcessDefinitionId(), flow.getTo(), c.getGroupId(), c.isExclusive()));
     }
 
     /**

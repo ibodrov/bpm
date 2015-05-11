@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import jet.bpm.engine.commands.ProcessElementCommand;
-import jet.bpm.engine.event.Event;
 import jet.bpm.engine.leveldb.KryoSerializer;
 import jet.bpm.engine.leveldb.index.ExpiredEventIndex;
 import jet.bpm.engine.leveldb.index.ExpiredEventIndex.IndexValue;
@@ -45,14 +44,14 @@ public class KryoSerializerTest {
     @Test
     public void defaultExecutionSerialize() throws Exception {
         KryoSerializer s = new KryoSerializer();
-
-        DefaultExecution e = new DefaultExecution("id", "parentId", "bus-key");
-
+        
         ExecutionContextImpl c = new ExecutionContextImpl();
         c.setVariable("v1", "v2");
         c.setVariable("v2", new Service("sid"));
 
-        ProcessElementCommand cmd1 = new ProcessElementCommand("pid", "eid", c);
+        DefaultExecution e = new DefaultExecution("id", "parentId", "bus-key", c);
+
+        ProcessElementCommand cmd1 = new ProcessElementCommand("pid", "eid");
 
         e.push(cmd1);
 

@@ -4,7 +4,6 @@ import java.io.Serializable;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
-import jet.bpm.engine.api.ExecutionContext;
 
 public interface ExecutionCommand extends Serializable {
 
@@ -16,6 +15,4 @@ public interface ExecutionCommand extends Serializable {
      * @throws ExecutionException
      */
     DefaultExecution exec(AbstractEngine engine, DefaultExecution execution) throws ExecutionException;
-
-    ExecutionContext getContext();
 }

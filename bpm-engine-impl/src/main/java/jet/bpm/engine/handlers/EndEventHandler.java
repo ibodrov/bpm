@@ -25,7 +25,7 @@ public class EndEventHandler extends AbstractElementHandler {
         if (e.getErrorRef() != null) {
             // the element has an error ref - must raise error to the parent
             // process.
-            BpmnErrorHelper.raiseError(c.getContext(), e.getErrorRef());
+            BpmnErrorHelper.raiseError(s.getContext(), e.getErrorRef());
         }
     }
 }

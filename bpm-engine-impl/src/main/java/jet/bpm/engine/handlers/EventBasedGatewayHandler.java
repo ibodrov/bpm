@@ -20,7 +20,7 @@ public class EventBasedGatewayHandler extends AbstractElementHandler {
         // add to the stack process suspension command. It is expected that it
         // will be called when all outgoind sequence flows of this gateway
         // is done.
-        s.push(new SuspendExecutionCommand(c.getContext()));
+        s.push(new SuspendExecutionCommand());
 
         // add to the stack all the element of outgoing flows of this gateway
         // and mark them with 'exclusiveness' flag (because in the event gateway

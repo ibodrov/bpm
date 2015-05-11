@@ -20,21 +20,18 @@ public class MergeExecutionContextCommand implements ExecutionCommand {
 
     private static final Logger log = LoggerFactory.getLogger(MergeExecutionContextCommand.class);
 
-    private final ExecutionContext context;
-    private final ExecutionContext child;
+    private final ExecutionContext target;
     private final boolean copyAllVariables;
     private final Set<VariableMapping> outVariables;
 
-    public MergeExecutionContextCommand(ExecutionContext context, ExecutionContext child, Set<VariableMapping> outVariables) {
-        this.context = context;
-        this.child = child;
+    public MergeExecutionContextCommand(ExecutionContext target, Set<VariableMapping> outVariables) {
+        this.target = target;
         this.outVariables = outVariables;
         this.copyAllVariables = false;
     }
     
-    public MergeExecutionContextCommand(ExecutionContext context, ExecutionContext child) {
-        this.context = context;
-        this.child = child;
+    public MergeExecutionContextCommand(ExecutionContext target, ExecutionContext child) {
+        this.target = target;
         this.outVariables = null;
         this.copyAllVariables = true;
     }
@@ -43,26 +40,23 @@ public class MergeExecutionContextCommand implements ExecutionCommand {
     public DefaultExecution exec(AbstractEngine engine, DefaultExecution execution) throws ExecutionException {
         execution.pop();
         
+        ExecutionContext source = execution.getContext();
+        
         // TODO: refactor as conditional command?
-        String errorRef = BpmnErrorHelper.getRaisedError(child);
+        String errorRef = BpmnErrorHelper.getRaisedError(source);
         if (errorRef != null) {
             // perform error raise
-            BpmnErrorHelper.raiseError(context, errorRef);
+            BpmnErrorHelper.raiseError(target, errorRef);
             log.debug("raising error '{}'", errorRef);
             return execution;
         }
         
         if (copyAllVariables) {
-            ExecutionContextHelper.copyVariables(child, context);
+            ExecutionContextHelper.copyVariables(source, target);
         } else {
-            ExecutionContextHelper.copyVariables(engine.getExpressionManager(), child, context, outVariables);
+            ExecutionContextHelper.copyVariables(engine.getExpressionManager(), source, target, outVariables);
         }
 
         return execution;
-    }
-
-    @Override
-    public ExecutionContext getContext() {
-        return context;
     }
 }

@@ -4,7 +4,6 @@ import java.util.Set;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
-import jet.bpm.engine.ExecutionContextHelper;
 import jet.bpm.engine.ExecutionContextImpl;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionContext;
@@ -12,7 +11,6 @@ import jet.bpm.engine.commands.HandleRaisedErrorCommand;
 import jet.bpm.engine.commands.MergeExecutionContextCommand;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.model.AbstractElement;
-import jet.bpm.engine.model.CallActivity;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.VariableMapping;
 
@@ -31,9 +29,6 @@ public class SubProcessElementHandler extends AbstractCallHandler {
         // add error handling command to stack
         s.push(new HandleRaisedErrorCommand(c));
 
-        // create new child context (variables of the called process)
-        ExecutionContext parent = c.getContext();
-
         // get the ID of the called process. Depends on call type ('sub-process'
         // or 'call activity') it can be:
         // - ID of process, which contains the element of calling process;
@@ -42,7 +37,7 @@ public class SubProcessElementHandler extends AbstractCallHandler {
 
         // first command is put to the called process' stack
         AbstractElement start = ProcessDefinitionUtils.findStartEvent(sub);
-        s.push(new ProcessElementCommand(id, start.getId(), parent));
+        s.push(new ProcessElementCommand(id, start.getId()));
     }
 
     @Override

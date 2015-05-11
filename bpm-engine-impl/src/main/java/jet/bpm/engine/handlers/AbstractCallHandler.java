@@ -1,13 +1,11 @@
 package jet.bpm.engine.handlers;
 
-import java.util.Map;
 import java.util.Set;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.ExecutionContextHelper;
-import jet.bpm.engine.ExecutionContextImpl;
 import jet.bpm.engine.commands.HandleRaisedErrorCommand;
 import jet.bpm.engine.commands.MergeExecutionContextCommand;
 import jet.bpm.engine.ProcessDefinitionUtils;
@@ -47,7 +45,7 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
         }
 
         // create new child context (variables of the called process)
-        ExecutionContext parent = c.getContext();
+        ExecutionContext parent = s.getContext();
         ExecutionContext child = createNewContext(parent);
 
         // IN-parameters of the called process
@@ -65,7 +63,7 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
 
         // first command is put to the called process' stack
         AbstractElement start = ProcessDefinitionUtils.findStartEvent(sub);
-        s.push(new ProcessElementCommand(id, start.getId(), child));
+        s.push(new ProcessElementCommand(id, start.getId()));
     }
     
     protected abstract MergeExecutionContextCommand makeMergeCommand(ExecutionContext parent, ExecutionContext child, Set<VariableMapping> outVariables);

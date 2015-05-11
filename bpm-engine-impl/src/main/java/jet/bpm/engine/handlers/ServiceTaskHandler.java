@@ -45,7 +45,7 @@ public class ServiceTaskHandler extends AbstractElementHandler {
 
         if (expr != null) {
             ExpressionManager em = getEngine().getExpressionManager();
-            ExecutionContext ctx = c.getContext();
+            ExecutionContext ctx = s.getContext();
 
             try {
                 switch (type) {
@@ -107,13 +107,13 @@ public class ServiceTaskHandler extends AbstractElementHandler {
             // its flow
             log.debug("handleBpmError ['{}', '{}'] -> handle boundary error '{}'", bk, eid, errorRef);
             // save errorRef for later
-            c.getContext().setVariable(ExecutionContext.ERROR_CODE_KEY, errorRef);
+            s.getContext().setVariable(ExecutionContext.ERROR_CODE_KEY, errorRef);
             FlowUtils.followFlows(getEngine(), s, c, ev.getId());
         } else {
             // no boundary error events was found - error will be raised to the
             // parent execution
             log.debug("handleBpmError ['{}', '{}'] -> no boundary error", bk, eid, errorRef);
-            BpmnErrorHelper.raiseError(c.getContext(), errorRef);
+            BpmnErrorHelper.raiseError(s.getContext(), errorRef);
         }
     }
 }

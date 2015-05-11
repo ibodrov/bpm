@@ -3,13 +3,13 @@ package jet.bpm.engine.handlers;
 import java.util.Date;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
+import jet.bpm.engine.ExecutionContextImpl;
 import jet.bpm.engine.FlowUtils;
 import jet.bpm.engine.IdGenerator;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.commands.ProcessElementCommand;
-import jet.bpm.engine.commands.SuspendExecutionCommand;
 import jet.bpm.engine.el.ExpressionManager;
 import jet.bpm.engine.event.Event;
 import jet.bpm.engine.model.IntermediateCatchEvent;
@@ -40,7 +40,8 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
 
         // create child execution, which will start right from the first element
         // after current
-        DefaultExecution child = new DefaultExecution(idg.create(), s.getId(), s.getBusinessKey());
+        ExecutionContext childContext = new ExecutionContextImpl(s.getContext());
+        DefaultExecution child = new DefaultExecution(idg.create(), s.getId(), s.getBusinessKey(), childContext);
         FlowUtils.followFlows(getEngine(), child, c, c.getElementId(), false);
 
         // suspend and save child execution. Its will be resumed by someone
@@ -56,7 +57,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         String evId = getEventId(ice);
 
         ExpressionManager em = getEngine().getExpressionManager();
-        ExecutionContext ctx = c.getContext();
+        ExecutionContext ctx = s.getContext();
         Date timeDate = parseTimeDate(ice.getTimeDate(), c, ctx, em);
         String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
 
