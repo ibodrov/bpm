@@ -6,6 +6,7 @@ import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.ExecutionContextHelper;
+import jet.bpm.engine.ExecutionContextImpl;
 import jet.bpm.engine.commands.HandleRaisedErrorCommand;
 import jet.bpm.engine.commands.MergeExecutionContextCommand;
 import jet.bpm.engine.ProcessDefinitionUtils;
@@ -46,10 +47,14 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
 
         // create new child context (variables of the called process)
         ExecutionContext parent = s.getContext();
-        ExecutionContext child = createNewContext(parent);
+        ExecutionContext child = new ExecutionContextImpl();
 
         // IN-parameters of the called process
         ExecutionContextHelper.copyVariables(getEngine().getExpressionManager(), parent, child, inVariables);
+        
+        // make child context our current, it will be reverted in merge command
+        // below
+        s.setContext(child);
 
         // add context merging command to the current stack. It will perform
         // OUT-parametes handling
@@ -71,6 +76,4 @@ public abstract class AbstractCallHandler extends AbstractElementHandler {
     protected abstract ProcessDefinition findCalledProcess(ProcessElementCommand c) throws ExecutionException;
 
     protected abstract String getCalledProcessId(ProcessElementCommand c, ProcessDefinition sub) throws ExecutionException;
-    
-    protected abstract ExecutionContext createNewContext(ExecutionContext parent);
 }

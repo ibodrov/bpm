@@ -52,12 +52,7 @@ public class SubProcessElementHandler extends AbstractCallHandler {
     }
 
     @Override
-    protected ExecutionContext createNewContext(ExecutionContext parent) {
-        return new ExecutionContextImpl(parent);
-    }
-
-    @Override
     protected MergeExecutionContextCommand makeMergeCommand(ExecutionContext parent, ExecutionContext child, Set<VariableMapping> outVariables) {
-        return new MergeExecutionContextCommand(child);
+        return new MergeExecutionContextCommand(parent);
     }
 }

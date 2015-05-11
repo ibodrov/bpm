@@ -16,10 +16,10 @@ public class DefaultExecution implements Execution, Serializable {
     private final String parentId;
     private final String processBusinessKey;
     private final Deque<ExecutionCommand> commands = new ArrayDeque<>();
-    private final ExecutionContext context;
     private final Map<ActivationKey, Integer> activations = new HashMap<>();
     
     private boolean suspended = false;
+    private ExecutionContext context;
 
     public DefaultExecution(String id, String parentId, String processBusinessKey, ExecutionContext context) {
         this.id = id;
@@ -45,6 +45,10 @@ public class DefaultExecution implements Execution, Serializable {
 
     public ExecutionContext getContext() {
         return context;
+    }
+    
+    public void setContext(ExecutionContext ctx) {
+        this.context = ctx;
     }
     
     @Override
