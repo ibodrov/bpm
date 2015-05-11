@@ -48,8 +48,7 @@ public class ProcessElementCommand implements ExecutionCommand {
         engine.getElementHandler().handle(execution, this);
 
         // perform notification of element activation
-        ExecutionContext ctx = execution.getContext();
-        ctx.onActivation(execution, processDefinitionId, elementId);
+        execution.onActivation(execution, processDefinitionId, elementId);
         engine.fireOnElementActivation(execution, processDefinitionId, elementId);
 
         return execution;

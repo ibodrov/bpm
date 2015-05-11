@@ -20,6 +20,11 @@ public class MapPersistenceManager implements PersistenceManager {
         delegate.put(s.getId(), s);
         log.info("save ['{}'] -> done", s.getId());
     }
+
+    @Override
+    public DefaultExecution get(String id) {
+        return delegate.get(id);
+    }
     
     @Override
     public DefaultExecution remove(String id) {

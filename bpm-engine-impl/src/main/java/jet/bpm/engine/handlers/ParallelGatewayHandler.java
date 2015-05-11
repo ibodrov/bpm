@@ -6,7 +6,6 @@ import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.FlowUtils;
 import jet.bpm.engine.ProcessDefinitionUtils;
-import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.model.ProcessDefinition;
@@ -33,8 +32,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
         ProcessDefinition pd = getProcessDefinition(defId);
         List<SequenceFlow> in = ProcessDefinitionUtils.findIncomingFlows(pd, eId);
         
-        ExecutionContext ctx = s.getContext();
-        int activated = ctx.getActivationCount(defId, eId) + 1; // add current activation
+        int activated = s.getActivationCount(defId, eId) + 1; // add current activation
         int total = in.size();
         
         if (activated > total) {
@@ -49,7 +47,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
             inactive.removeAll(filtered);
             processInactive(s, c, inactive);
             
-            FlowUtils.followFlows(s, c, filtered);
+            FlowUtils.followFlows(s, c.getProcessDefinitionId(), c.getElementId(), c.getElementId(), false, filtered);
         } else {
             log.debug("handle ['{}', '{}'] -> keep joining on '{}' (activated: {}, total: {})", s.getId(), c.getProcessDefinitionId(), eId, activated, total);
         }

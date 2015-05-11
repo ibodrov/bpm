@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * Execution context. Provides access to the process variables.
  */
-public interface ExecutionContext extends ActivationListener, Serializable {
+public interface ExecutionContext extends Serializable {
     
     /**
      * Key of latest handled error, contains "errorRef" of boundary error event.
@@ -26,13 +26,4 @@ public interface ExecutionContext extends ActivationListener, Serializable {
     void removeVariable(String key);
 
     Set<String> getVariableNames();
-
-    /**
-     * Indicates when specified element is activated (completed is execution).
-     * @param processDefinitionId the ID of the process definition.
-     * @param elementId the ID of the activated element.
-     */
-    boolean isActivated(String processDefinitionId, String elementId);
-    
-    int getActivationCount(String processDefinitionId, String elementId);
 }

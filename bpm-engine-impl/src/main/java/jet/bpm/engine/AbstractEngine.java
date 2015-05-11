@@ -106,8 +106,7 @@ public abstract class AbstractEngine implements Engine {
             }
 
             s.setSuspended(false);
-
-            ExecutionCommand c = s.peek();
+            
             applyVariables(s.getContext(), variables);
 
             run(s);
@@ -140,8 +139,7 @@ public abstract class AbstractEngine implements Engine {
                     DefaultExecution parent = pm.remove(pid);
                     if (parent == null) {
                         // this is typical for the scenarios where the parent
-                        // process ends before its children (e.g. "Inclusive
-                        // Gateway").
+                        // process ends before its children
                         log.debug("run ['{}'] -> parent execution not found", pid);
                         break;
                     } else {
