@@ -50,8 +50,8 @@ public abstract class AbstractEngineTest implements ActivationListener {
         levelDbPersistenceManager = new LevelDbPersistenceManager(cfg, f, new KryoSerializer());
         levelDbPersistenceManager.init();
 
-//        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager, levelDbPersistenceManager, new StripedLockManagerImpl(1));
-        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager);
+        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager, levelDbPersistenceManager, new StripedLockManagerImpl(1));
+//        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager);
 
         activations = new HashMap<>();
         engine.addListener(this);
@@ -103,6 +103,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
     }
 
     protected void assertNoMoreActivations() {
+        StringBuilder b = new StringBuilder();
         int s = 0;
         for (List<String> l : activations.values()) {
             s += l.size();

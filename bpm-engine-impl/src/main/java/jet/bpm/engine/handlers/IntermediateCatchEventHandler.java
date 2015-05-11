@@ -54,7 +54,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
 
         ExpressionManager em = getEngine().getExpressionManager();
         ExecutionContext ctx = c.getContext();
-        Date timeDate = parseTimeDate(ice.getTimeDate(), ctx, em);
+        Date timeDate = parseTimeDate(ice.getTimeDate(), c, ctx, em);
         String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
 
         Date expiredAt = timeDate != null ? timeDate : parseDuration(timeDuration);
@@ -63,21 +63,20 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
 
         getEngine().getEventManager().register(child.getBusinessKey(), e);
     }
-
-    private Date parseTimeDate(String s, ExecutionContext ctx, ExpressionManager em) throws ExecutionException {
-        if (s == null) {
+    
+    private Date parseTimeDate(String s, ProcessElementCommand c, ExecutionContext ctx, ExpressionManager em) throws ExecutionException {
+        Object v = eval(s, ctx, em, Object.class);
+        if (v == null) {
             return null;
         }
-
-        Object v = eval(s, ctx, em, Object.class);
+        
         if (v instanceof String) {
             return parseIso8601(s);
         } else if (v instanceof Date) {
             return (Date) v;
         } else {
-            throw new ExecutionException("Invalid timeDate format: '%s'", s);
+            throw new ExecutionException("Invalid timeDate format in process '%s' in element '%s': '%s'", c.getProcessDefinitionId(), c.getElementId(), s);
         }
-
     }
 
     public static Date parseDuration(String s) throws ExecutionException {

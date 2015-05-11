@@ -4,7 +4,6 @@ import jet.bpm.engine.api.ExecutionContext;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -17,7 +16,7 @@ public class ExecutionContextImpl implements ExecutionContext {
     private static transient final Logger log = LoggerFactory.getLogger(ExecutionContext.class);
 
     private final ExecutionContext parent;
-    private final Set<ActivationKey> activations = new HashSet<>();
+    private final Map<ActivationKey, Integer> activations = new HashMap<>();
     private final Map<String, Object> variables = new HashMap<>();
 
     public ExecutionContextImpl() {
@@ -80,20 +79,42 @@ public class ExecutionContextImpl implements ExecutionContext {
 
     @Override
     public void onActivation(Execution e, String processDefinitionId, String elementId) {
-        activations.add(new ActivationKey(processDefinitionId, elementId));
-        log.debug("onActivation ['{}', '{}'] -> done (current size: {})", processDefinitionId, elementId, activations.size());
+        ActivationKey k = new ActivationKey(processDefinitionId, elementId);
+        Integer i = activations.get(k);
+        if (i == null) {
+            i = 0;
+        }
+        i = i + 1;
+        activations.put(k, i);
+        
+        log.debug("onActivation ['{}', '{}'] -> done (count: {}, current size: {})", processDefinitionId, elementId, i, activations.size());
     }
 
     @Override
     public boolean isActivated(String processDefinitionId, String elementId) {
         ActivationKey k = new ActivationKey(processDefinitionId, elementId);
-        if (activations.contains(k)) {
+        if (activations.containsKey(k)) {
             return true;
         } else if (parent != null) {
             return parent.isActivated(processDefinitionId, elementId);
         } else {
             return false;
         }
+    }
+
+    @Override
+    public int getActivationCount(String processDefinitionId, String elementId) {
+        ActivationKey k = new ActivationKey(processDefinitionId, elementId);
+        Integer i = activations.get(k);
+        if (i != null) {
+            return i;
+        }
+
+        if (parent != null) {
+            return parent.getActivationCount(processDefinitionId, elementId);
+        }
+
+        return 0;
     }
 
     private static final class ActivationKey implements Serializable {

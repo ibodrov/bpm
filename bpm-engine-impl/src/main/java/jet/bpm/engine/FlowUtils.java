@@ -31,6 +31,14 @@ public final class FlowUtils {
         ProcessDefinition pd = provider.getById(processDefinitionId);
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, elementId);
         
+        followFlows(execution, context, processDefinitionId, elementId, groupId, exclusive, flows);
+    }
+    
+    public static void followFlows(DefaultExecution execution, ExecutionContext context, ProcessElementCommand c, List<SequenceFlow> flows) {
+        followFlows(execution, context, c.getProcessDefinitionId(), c.getElementId(), c.getGroupId(), c.isExclusive(), flows);
+    }
+
+    public static void followFlows(DefaultExecution execution, ExecutionContext context, String processDefinitionId, String elementId, String groupId, boolean exclusive, List<SequenceFlow> flows) {
         // reverse the collection, to fill up the stack in correct order
         Collections.reverse(flows);
         for (SequenceFlow next : flows) {
