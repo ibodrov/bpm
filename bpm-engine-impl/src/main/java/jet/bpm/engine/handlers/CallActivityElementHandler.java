@@ -4,6 +4,8 @@ import java.util.Set;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.ProcessDefinitionProvider;
 import jet.bpm.engine.AbstractEngine;
+import jet.bpm.engine.DefaultExecution;
+import jet.bpm.engine.ExecutionContextImpl;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.commands.MergeExecutionContextCommand;
@@ -34,6 +36,11 @@ public class CallActivityElementHandler extends AbstractCallHandler {
 
     @Override
     protected MergeExecutionContextCommand makeMergeCommand(ExecutionContext parent, ExecutionContext child, Set<VariableMapping> outVariables) {
-        return new MergeExecutionContextCommand(parent, outVariables);
+        return new MergeExecutionContextCommand(child, outVariables);
+    }
+
+    @Override
+    protected ExecutionContext makeChildContext(DefaultExecution s) {
+        return new ExecutionContextImpl();
     }
 }

@@ -68,7 +68,7 @@ public class SequenceFlowHandler extends AbstractElementHandler {
                 }
             } catch (Exception e) {
                 log.error("processListeners ['{}'] -> error", f.getId(), e);
-                throw new ExecutionException("Unhandled listener exception", e);
+                throw new ExecutionException("Unhandled listener exception: " + e.getMessage(), e);
             }
         }
     }
