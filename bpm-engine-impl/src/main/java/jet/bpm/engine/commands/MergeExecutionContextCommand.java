@@ -43,7 +43,7 @@ public class MergeExecutionContextCommand implements ExecutionCommand {
         ExecutionContext source = execution.getContext();
         
         // TODO: refactor as conditional command?
-        String errorRef = BpmnErrorHelper.getRaisedError(target);
+        String errorRef = BpmnErrorHelper.getRaisedError(source);
         if (errorRef != null) {
             // perform error raise
             BpmnErrorHelper.raiseError(target, errorRef);

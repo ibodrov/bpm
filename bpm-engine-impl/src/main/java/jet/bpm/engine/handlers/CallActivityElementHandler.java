@@ -4,7 +4,6 @@ import java.util.Set;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.ProcessDefinitionProvider;
 import jet.bpm.engine.AbstractEngine;
-import jet.bpm.engine.ExecutionContextImpl;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.commands.MergeExecutionContextCommand;
