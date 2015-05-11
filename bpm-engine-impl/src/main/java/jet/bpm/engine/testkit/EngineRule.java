@@ -8,8 +8,9 @@ import jet.bpm.engine.ProcessDefinitionProviderImpl;
 import jet.bpm.engine.api.Engine;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.DefaultEngine;
-import jet.bpm.engine.event.EventManager;
-import jet.bpm.engine.event.EventManagerImpl;
+import jet.bpm.engine.event.EventPersistenceManager;
+import jet.bpm.engine.event.EventPersistenceManagerImpl;
+import jet.bpm.engine.event.InMemEventStorage;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.xml.Parser;
 import org.junit.rules.TestRule;
@@ -19,19 +20,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EngineRule implements TestRule {
-    
+
     private static final Logger log = LoggerFactory.getLogger(EngineRule.class);
-    
+
     private final Parser parser;
-    
+
     private ProcessDefinitionProviderImpl processDefinitionProvider;
-    private EventManager eventManager;
+    private EventPersistenceManager eventManager;
     private Engine engine;
 
     public EngineRule(Parser parser) {
         this.parser = parser;
     }
-    
+
     @Override
     public Statement apply(final Statement base, final Description description) {
         return new Statement() {
@@ -50,10 +51,10 @@ public class EngineRule implements TestRule {
     protected void before(Description description) throws Exception {
         if (engine == null) {
             processDefinitionProvider = new ProcessDefinitionProviderImpl();
-            eventManager = new EventManagerImpl();
+            eventManager = new EventPersistenceManagerImpl(new InMemEventStorage());
             engine = new DefaultEngine(processDefinitionProvider, new Mocks.Registry(), eventManager);
         }
-        
+
         Class<?> k = description.getTestClass();
         String n = description.getMethodName();
         for (Method m : k.getDeclaredMethods()) {
@@ -73,26 +74,26 @@ public class EngineRule implements TestRule {
     protected void after(Description description) {
         engine = null;
     }
-    
+
     public String startProcessInstanceByKey(String key, Map<String, Object> input) throws ExecutionException {
         String id = UUID.randomUUID().toString();
         startProcessInstanceByKey(id, key, input);
         return id;
     }
-    
+
     public void startProcessInstanceByKey(String txId, String key, Map<String, Object> input) throws ExecutionException {
         engine.start(txId, key, input);
     }
-    
+
     public void wakeUp(String key, String eventId) throws ExecutionException {
         wakeUp(key, eventId, null);
     }
-    
+
     public void wakeUp(String key, String eventId, Map<String, Object> variables) throws ExecutionException {
         engine.resume(key, eventId, variables);
     }
 
-    public EventManager getEventManager() {
+    public EventPersistenceManager getEventManager() {
         return eventManager;
     }
 }

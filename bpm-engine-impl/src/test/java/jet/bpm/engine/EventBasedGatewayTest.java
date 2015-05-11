@@ -182,7 +182,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
                 "end3");
         assertNoMoreActivations();
     }
-    
+
     /**
      * start --> gw --> ev1 --> ev1 --> end
      */
@@ -191,7 +191,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         String k1 = "timeVal";
         Object v1 = new Date();
         String dt = "2011-03-11T12:13:14";
-        
+
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
                 new StartEvent("start"),
@@ -218,20 +218,20 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         verify(eventManager, times(1)).register(eq(key), arg.capture());
         Event ev = arg.getValue();
         assertNotNull(ev);
-        assertEquals(v1, ev.getTimeDate());
+        assertEquals(v1, ev.getExpiredAt());
         reset(eventManager);
-        
+
         // ---
-        
+
         getEngine().resume(key, "ev1", null);
-        
+
         // ---
-        
+
         arg = ArgumentCaptor.forClass(Event.class);
         verify(eventManager, times(1)).register(eq(key), arg.capture());
         ev = arg.getValue();
         assertNotNull(ev);
         Date actualDt = IntermediateCatchEventHandler.parseIso8601(dt);
-        assertEquals(actualDt, ev.getTimeDate());
+        assertEquals(actualDt, ev.getExpiredAt());
     }
 }

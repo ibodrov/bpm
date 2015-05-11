@@ -1,7 +1,6 @@
 package jet.bpm.engine.handlers;
 
 import java.util.Date;
-import javax.xml.bind.DatatypeConverter;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.FlowUtils;
@@ -14,15 +13,17 @@ import jet.bpm.engine.el.ExpressionManager;
 import jet.bpm.engine.event.Event;
 import jet.bpm.engine.model.IntermediateCatchEvent;
 import jet.bpm.engine.model.ProcessDefinition;
+import org.joda.time.DateTime;
+import org.joda.time.Period;
 
 /**
- * Itermediate event handler. Its job is to create child execution, suspend
- * it and link it with the event.
+ * Itermediate event handler. Its job is to create child execution, suspend it
+ * and link it with the event.
  */
 public class IntermediateCatchEventHandler extends AbstractElementHandler {
-    
+
     public static Date parseIso8601(String s) {
-        return DatatypeConverter.parseDate(s).getTime();
+        return DateTime.parse(s).toDate();
     }
 
     public IntermediateCatchEventHandler(AbstractEngine engine) {
@@ -55,17 +56,19 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         ExecutionContext ctx = c.getContext();
         Date timeDate = parseTimeDate(ice.getTimeDate(), ctx, em);
         String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
-        
-        Event e = new Event(evId, child.getId(), c.getGroupId(), s.getBusinessKey(), c.isExclusive(), timeDate, timeDuration);
+
+        Date expiredAt = timeDate != null ? timeDate : parseDuration(timeDuration);
+
+        Event e = new Event(evId, child.getId(), c.getGroupId(), s.getBusinessKey(), c.isExclusive(), expiredAt);
 
         getEngine().getEventManager().register(child.getBusinessKey(), e);
     }
-    
+
     private Date parseTimeDate(String s, ExecutionContext ctx, ExpressionManager em) throws ExecutionException {
-        if(s == null) {
+        if (s == null) {
             return null;
         }
-        
+
         Object v = eval(s, ctx, em, Object.class);
         if (v instanceof String) {
             return parseIso8601(s);
@@ -74,7 +77,23 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         } else {
             throw new ExecutionException("Invalid timeDate format: '%s'", s);
         }
-        
+
+    }
+
+    public static Date parseDuration(String s) throws ExecutionException {
+        if(s == null) {
+            return null;
+        }
+
+        if (isDuration(s)) {
+            return DateTime.now().plus(Period.parse(s)).toDate();
+        } else {
+            throw new ExecutionException("Invalid duration format: '%s'", s);
+        }
+    }
+
+    private static boolean isDuration(String time) {
+        return time.startsWith("P");
     }
 
     /**
@@ -84,7 +103,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
     private String getEventId(IntermediateCatchEvent ev) {
         return ev.getMessageRef() != null ? ev.getMessageRef() : ev.getId();
     }
-    
+
     private <T> T eval(String expr, ExecutionContext ctx, ExpressionManager em, Class<T> type) {
         if (expr == null || expr.trim().isEmpty()) {
             return null;

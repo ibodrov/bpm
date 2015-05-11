@@ -1,9 +1,5 @@
 package jet.bpm.engine;
 
-import jet.bpm.engine.DefaultEngine;
-import jet.bpm.engine.ProcessDefinitionProvider;
-import jet.bpm.engine.AbstractEngine;
-import jet.bpm.engine.ProcessDefinitionProviderImpl;
 import jet.bpm.engine.api.ActivationListener;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,9 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import jet.bpm.engine.api.Execution;
-import jet.bpm.engine.event.EventManager;
-import jet.bpm.engine.event.EventManagerImpl;
+import jet.bpm.engine.event.EventPersistenceManager;
+import jet.bpm.engine.event.EventPersistenceManagerImpl;
 import jet.bpm.engine.api.JavaDelegate;
+import jet.bpm.engine.event.InMemEventStorage;
 import jet.bpm.engine.task.ServiceTaskRegistry;
 import jet.bpm.engine.task.ServiceTaskRegistryImpl;
 import jet.bpm.engine.model.ProcessDefinition;
@@ -29,7 +26,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
 
     private ProcessDefinitionProvider processDefinitionProvider;
     private ServiceTaskRegistry serviceTaskRegistry;
-    protected EventManager eventManager;
+    protected EventPersistenceManager eventManager;
     private AbstractEngine engine;
     private Map<String, List<String>> activations;
 
@@ -37,7 +34,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
     public void init() {
         processDefinitionProvider = new ProcessDefinitionProviderImpl();
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
-        eventManager = spy(new EventManagerImpl());
+        eventManager = spy(new EventPersistenceManagerImpl(new InMemEventStorage()));
 
         engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager);
 

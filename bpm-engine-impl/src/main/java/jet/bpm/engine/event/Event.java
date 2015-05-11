@@ -6,26 +6,20 @@ import java.util.Objects;
 
 public final class Event implements Serializable {
 
-    private final String id;
+    private final String name;
     private final String executionId;
     private final String groupId;
     private final String processBusinessKey;
     private final boolean exclusive;
-    private final Date timeDate;
-    private final String timeDuration;
+    private final Date expiredAt;
 
-    public Event(String id, String executionId, String groupId, String processBusinessKey, boolean exclusive, Date timeDate, String timeDuration) {
-        this.id = id;
+    public Event(String name, String executionId, String groupId, String processBusinessKey, boolean exclusive, Date expiredAt) {
+        this.name = name;
         this.executionId = executionId;
         this.groupId = groupId;
         this.processBusinessKey = processBusinessKey;
         this.exclusive = exclusive;
-        this.timeDate = timeDate;
-        this.timeDuration = timeDuration;
-    }
-
-    public String getId() {
-        return id;
+        this.expiredAt = expiredAt;
     }
 
     public String getExecutionId() {
@@ -40,28 +34,27 @@ public final class Event implements Serializable {
         return exclusive;
     }
 
-    public Date getTimeDate() {
-        return timeDate;
-    }
-
-    public String getTimeDuration() {
-        return timeDuration;
+    public Date getExpiredAt() {
+        return expiredAt;
     }
 
     public String getProcessBusinessKey() {
         return processBusinessKey;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 71 * hash + Objects.hashCode(this.id);
+        hash = 71 * hash + Objects.hashCode(this.name);
         hash = 71 * hash + Objects.hashCode(this.executionId);
         hash = 71 * hash + Objects.hashCode(this.groupId);
         hash = 71 * hash + Objects.hashCode(this.processBusinessKey);
         hash = 71 * hash + (this.exclusive ? 1 : 0);
-        hash = 71 * hash + Objects.hashCode(this.timeDate);
-        hash = 71 * hash + Objects.hashCode(this.timeDuration);
+        hash = 71 * hash + Objects.hashCode(this.expiredAt);
         return hash;
     }
 
@@ -74,7 +67,7 @@ public final class Event implements Serializable {
             return false;
         }
         final Event other = (Event) obj;
-        if (!Objects.equals(this.id, other.id)) {
+        if (!Objects.equals(this.name, other.name)) {
             return false;
         }
         if (!Objects.equals(this.executionId, other.executionId)) {
@@ -89,10 +82,7 @@ public final class Event implements Serializable {
         if (this.exclusive != other.exclusive) {
             return false;
         }
-        if (!Objects.equals(this.timeDate, other.timeDate)) {
-            return false;
-        }
-        if (!Objects.equals(this.timeDuration, other.timeDuration)) {
+        if (!Objects.equals(this.expiredAt, other.expiredAt)) {
             return false;
         }
         return true;
@@ -100,6 +90,6 @@ public final class Event implements Serializable {
 
     @Override
     public String toString() {
-        return "Event{" + "id=" + id + ", executionId=" + executionId + ", groupId=" + groupId + ", processBusinessKey=" + processBusinessKey + ", exclusive=" + exclusive + ", timeDate=" + timeDate + ", timeDuration=" + timeDuration + '}';
+        return "Event{" + "name=" + name + ", executionId=" + executionId + ", groupId=" + groupId + ", processBusinessKey=" + processBusinessKey + ", exclusive=" + exclusive + ", expiredAt=" + expiredAt + '}';
     }
 }

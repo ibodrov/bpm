@@ -6,8 +6,9 @@ import jet.bpm.engine.api.Engine;
 import jet.bpm.engine.lock.LockManager;
 import jet.bpm.engine.el.DefaultExpressionManager;
 import jet.bpm.engine.el.ExpressionManager;
-import jet.bpm.engine.event.EventManager;
-import jet.bpm.engine.event.EventManagerImpl;
+import jet.bpm.engine.event.EventPersistenceManager;
+import jet.bpm.engine.event.EventPersistenceManagerImpl;
+import jet.bpm.engine.event.EventStorage;
 import jet.bpm.engine.handlers.DelegatingElementHandler;
 import jet.bpm.engine.handlers.ElementHandler;
 import jet.bpm.engine.lock.NoopLockManager;
@@ -15,26 +16,44 @@ import jet.bpm.engine.task.ServiceTaskRegistry;
 import jet.bpm.engine.task.ServiceTaskRegistryImpl;
 
 public class DefaultEngine extends AbstractEngine implements Engine {
-    
+
     private final ElementHandler elementHandler = new DelegatingElementHandler(this);
-    private final PersistenceManager persistenceManager = new DummyPersistenceManager();
-    private final LockManager lockManager = new NoopLockManager();
+    private final PersistenceManager persistenceManager;
+    private final LockManager lockManager;
     private final IdGenerator idGenerator = new UuidGenerator();
-    
+
     private final ProcessDefinitionProvider processDefinitionProvider;
     private final ServiceTaskRegistry serviceTaskRegistry;
     private final ExpressionManager expressionManager;
-    private final EventManager eventManager;
+    private final EventPersistenceManager eventManager;
 
-    public DefaultEngine() {
-        this(new ProcessDefinitionProviderImpl(), new ServiceTaskRegistryImpl(), new EventManagerImpl());
+    public DefaultEngine(EventStorage eventStorage) {
+        this(new ProcessDefinitionProviderImpl(), new ServiceTaskRegistryImpl(), new EventPersistenceManagerImpl(eventStorage));
     }
-    
-    public DefaultEngine(ProcessDefinitionProvider processDefinitionProvider, ServiceTaskRegistry serviceTaskRegistry, EventManager eventManager) {
+
+    public DefaultEngine(ProcessDefinitionProvider processDefinitionProvider, ServiceTaskRegistry serviceTaskRegistry, EventStorage eventStorage) {
+        this(processDefinitionProvider, serviceTaskRegistry, new EventPersistenceManagerImpl(eventStorage));
+    }
+
+    public DefaultEngine(
+            ProcessDefinitionProvider processDefinitionProvider,
+            ServiceTaskRegistry serviceTaskRegistry,
+            EventPersistenceManager eventPersistenceManager) {
+        this(processDefinitionProvider, serviceTaskRegistry, eventPersistenceManager, new DummyPersistenceManager(), new NoopLockManager());
+    }
+
+    public DefaultEngine(
+            ProcessDefinitionProvider processDefinitionProvider,
+            ServiceTaskRegistry serviceTaskRegistry,
+            EventPersistenceManager eventPersistenceManager,
+            PersistenceManager persistenceManager,
+            LockManager lockManager) {
         this.processDefinitionProvider = processDefinitionProvider;
         this.serviceTaskRegistry = serviceTaskRegistry;
-        this.eventManager = eventManager;
+        this.eventManager = eventPersistenceManager;
         this.expressionManager = new DefaultExpressionManager(serviceTaskRegistry);
+        this.persistenceManager = persistenceManager;
+        this.lockManager = lockManager;
     }
 
     @Override
@@ -48,7 +67,7 @@ public class DefaultEngine extends AbstractEngine implements Engine {
     }
 
     @Override
-    public EventManager getEventManager() {
+    public EventPersistenceManager getEventManager() {
         return eventManager;
     }
 

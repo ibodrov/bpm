@@ -40,6 +40,21 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>15.0</version>
+        </dependency>
+            
+        <dependency>
+            <groupId>org.iq80.leveldb</groupId>
+            <artifactId>leveldb</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
@@ -67,10 +82,6 @@
                             javax.el;version="[2.2,3.0)",
                             *
                         </Import-Package>
-                        <Export-Package>
-                            jet.bpm.engine,
-                            jet.bpm.engine.*
-                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

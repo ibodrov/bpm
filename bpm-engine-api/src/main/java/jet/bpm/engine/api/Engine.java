@@ -11,17 +11,17 @@ public interface Engine {
      * @param processBusinessKey external process instance ID, must be unique.
      * @param processDefinitionId the id of the process definition, cannot be null.
      * @param variables variables to be passed, can be null.
-     * @throws ExecutionException 
+     * @throws ExecutionException
      */
     void start(String processBusinessKey, String processDefinitionId, Map<String, Object> variables) throws ExecutionException;
 
     /**
      * Resumes a process instance, waiting for specific event.
      * @param processBusinessKey external process instance ID.
-     * @param eventId the ID of the event, cannot be null.
+     * @param eventName the name of the event, cannot be null.
      * @param variables variables to be passed, can be null. Values with the same
      * name will be replaced.
-     * @throws ExecutionException 
+     * @throws ExecutionException
      */
-    void resume(String processBusinessKey, String eventId, Map<String, Object> variables) throws ExecutionException;
+    void resume(String processBusinessKey, String eventName, Map<String, Object> variables) throws ExecutionException;
 }

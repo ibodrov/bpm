@@ -4,7 +4,7 @@ import jet.bpm.engine.DefaultExecution;
 
 public interface PersistenceManager {
 
-    void save(DefaultExecution s);
-    
+    void save(DefaultExecution execution);
+
     DefaultExecution remove(String id);
 }

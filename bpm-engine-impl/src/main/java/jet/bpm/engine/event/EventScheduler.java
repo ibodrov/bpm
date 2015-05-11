@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import jet.bpm.engine.api.Engine;
+import jet.bpm.engine.DefaultEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,11 +13,11 @@ public class EventScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(EventScheduler.class);
 
-    private final EventManager eventManager;
+    private final EventPersistenceManager eventManager;
 
-    private final Engine engine;
+    private final DefaultEngine engine;
 
-    private final BlockingQueue<Event> acquiredEventQueue;
+    private final BlockingQueue<ExpiredEvent> acquiredEventQueue;
 
     private Thread eventAcquisitionThread;
 
@@ -32,10 +32,10 @@ public class EventScheduler {
     private long acquisitionErrorDelay = SECONDS.toMillis(5);
     private long executionErrorDelay = SECONDS.toMillis(5);
 
-    public EventScheduler(Engine engine, EventManager eventManager, int maxAcquiredEventQueueSize) {
+    public EventScheduler(DefaultEngine engine, int maxAcquiredEventQueueSize) {
         this.engine = engine;
-        this.eventManager = eventManager;
-        this.acquiredEventQueue = new LinkedBlockingQueue(maxAcquiredEventQueueSize);
+        this.eventManager = engine.getEventManager();
+        this.acquiredEventQueue = new LinkedBlockingQueue<>(maxAcquiredEventQueueSize);
     }
 
     public void setEventExecutorsCount(int eventExecutorsCount) {
@@ -108,14 +108,15 @@ public class EventScheduler {
     private void eventAcquisitionLoop() {
         while (!Thread.currentThread().isInterrupted() && !stopped) {
             try {
-                List<Event> acquiredEvents = eventManager.findNextEventsToExecute(maxEventsPerAcquisition);
-                if (acquiredEvents.isEmpty()) {
-                    sleep(acquisitionDelay);
-                    continue;
+                List<ExpiredEvent> acquiredEvents = eventManager.findNextExpiredEvent(maxEventsPerAcquisition);
+                if (!acquiredEvents.isEmpty()) {
+                    for (ExpiredEvent e : acquiredEvents) {
+                        acquiredEventQueue.put(e);
+                    }
                 }
-
-                for (Event e : acquiredEvents) {
-                    acquiredEventQueue.put(e);
+                
+                if(acquiredEvents.size() < maxEventsPerAcquisition) {
+                    sleep(acquisitionDelay);
                 }
             } catch (InterruptedException e) {
                 log.info("eventAcquisitionLoop -> interrupted");
@@ -132,11 +133,11 @@ public class EventScheduler {
     private void eventExecutionLoop() {
         while (!Thread.currentThread().isInterrupted() && !stopped) {
             try {
-                Event event = acquiredEventQueue.take();
+                ExpiredEvent event = acquiredEventQueue.take();
                 String processBusinessKey = event.getProcessBusinessKey();
-                String eventId = event.getId();
+                String eventName = event.getEventName();
 
-                engine.resume(processBusinessKey, eventId, null);
+                engine.resume(processBusinessKey, eventName, null);
             } catch (InterruptedException e) {
                 log.info("eventExecutionLoop -> interrupted");
                 Thread.currentThread().interrupt();
