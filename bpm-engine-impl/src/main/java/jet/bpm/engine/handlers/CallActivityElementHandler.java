@@ -36,7 +36,7 @@ public class CallActivityElementHandler extends AbstractCallHandler {
 
     @Override
     protected MergeExecutionContextCommand makeMergeCommand(ExecutionContext parent, ExecutionContext child, Set<VariableMapping> outVariables) {
-        return new MergeExecutionContextCommand(child, outVariables);
+        return new MergeExecutionContextCommand(parent, outVariables);
     }
 
     @Override

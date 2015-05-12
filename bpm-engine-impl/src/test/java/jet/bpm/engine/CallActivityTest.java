@@ -9,6 +9,7 @@ import java.util.UUID;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.JavaDelegate;
 import jet.bpm.engine.model.AbstractElement;
+import jet.bpm.engine.model.BoundaryEvent;
 import jet.bpm.engine.model.CallActivity;
 import jet.bpm.engine.model.EndEvent;
 import jet.bpm.engine.model.EventBasedGateway;
@@ -220,5 +221,56 @@ public class CallActivityTest extends AbstractEngineTest {
         // ---
         
         verify(t1Task, times(1)).execute(any(ExecutionContext.class));
+    }
+    
+    /**
+     * start --> call               end
+     *               \             /
+     *                start --> end
+     */
+    @Test
+    public void testError() throws Exception {
+        String aId = "testA";
+        String bId = "testB";
+        String errorRef = "e" + System.currentTimeMillis();
+
+        deploy(new ProcessDefinition(aId, Arrays.<AbstractElement>asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "call"),
+                new CallActivity("call", bId),
+                new BoundaryEvent("be", "call", errorRef),
+                new SequenceFlow("f2", "call", "end"),
+                new SequenceFlow("f3", "be", "end"),
+                new EndEvent("end")
+        )));
+
+        deploy(new ProcessDefinition(bId, Arrays.<AbstractElement>asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "end"),
+                new EndEvent("end", errorRef)
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, aId, null);
+
+        // ---
+
+        assertActivations(key, aId,
+                "start",
+                "f1",
+                "call");
+
+        assertActivations(key, bId,
+                "start",
+                "f1",
+                "end");
+
+        assertActivations(key, aId,
+                "f3",
+                "end");
+
+        assertNoMoreActivations();
     }
 }

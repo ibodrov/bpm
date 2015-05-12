@@ -53,7 +53,7 @@ public class SubProcessElementHandler extends AbstractCallHandler {
 
     @Override
     protected MergeExecutionContextCommand makeMergeCommand(ExecutionContext parent, ExecutionContext child, Set<VariableMapping> outVariables) {
-        return new MergeExecutionContextCommand(child);
+        return new MergeExecutionContextCommand(parent);
     }
 
     @Override
