@@ -13,6 +13,7 @@ public class EventMapHelper {
 
     private static final String EVENT_MAP_KEY = "__bpmn_event_map";
 
+    @SuppressWarnings("unchecked")
     public static void put(DefaultExecution e, String eventName, ExecutionCommand... commands) throws ExecutionException {
         ExecutionContext ctx = e.getContext();
         Map<String, List<ExecutionCommand>> m = (Map<String, List<ExecutionCommand>>) ctx.getVariable(EVENT_MAP_KEY);
@@ -37,6 +38,7 @@ public class EventMapHelper {
         return m == null || m.isEmpty();
     }
     
+    @SuppressWarnings("unchecked")
     public static void pushCommands(DefaultExecution e, String eventName) {
         ExecutionContext ctx = e.getContext();
         Map<String, List<ExecutionCommand>> m = (Map<String, List<ExecutionCommand>>) ctx.getVariable(EVENT_MAP_KEY);

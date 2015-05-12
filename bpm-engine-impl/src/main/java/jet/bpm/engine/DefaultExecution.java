@@ -82,16 +82,16 @@ public class DefaultExecution implements Execution, Serializable {
     }
     
     public void onActivation(Execution e, String processDefinitionId, String elementId) {
-        inc(processDefinitionId, elementId);
+        inc(processDefinitionId, elementId, 1);
     }
     
-    private Integer inc(String processDefinitionId, String elementId) {
+    public Integer inc(String processDefinitionId, String elementId, int count) {
         ActivationKey k = new ActivationKey(processDefinitionId, elementId);
         Integer i = activations.get(k);
         if (i == null) {
             i = 0;
         }
-        i = i + 1;
+        i = i + count;
         activations.put(k, i);
         return i;
     }
@@ -109,7 +109,7 @@ public class DefaultExecution implements Execution, Serializable {
 
     public void addActivations(DefaultExecution source) {
         for (ActivationKey k : source.activations.keySet()) {
-            inc(k.processDefinitionId, k.elementId);
+            inc(k.processDefinitionId, k.elementId, 1);
         }
     }
     

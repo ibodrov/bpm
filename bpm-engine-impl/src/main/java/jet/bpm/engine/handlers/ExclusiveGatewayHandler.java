@@ -1,11 +1,13 @@
 package jet.bpm.engine.handlers;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.AbstractEngine;
+import jet.bpm.engine.FlowUtils;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.el.ExpressionManager;
@@ -33,6 +35,8 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
 
         // find all outgoing flows and eval their expressions
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, c.getElementId());
+        List<SequenceFlow> originalFlows = new ArrayList<>(flows);
+        
         for (Iterator<SequenceFlow> i = flows.iterator(); i.hasNext();) {
             SequenceFlow f = i.next();
             if (f.getExpression() != null) {
@@ -71,6 +75,9 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
 
         log.debug("'{}' was selected", nextId);
         s.push(new ProcessElementCommand(pd.getId(), nextId));
+        
+        // process inactive flows
+        FlowUtils.activateFilteredFlows(s, pd, c.getElementId(), nextId);
     }
 
     private boolean eval(ExecutionContext ctx, SequenceFlow f) {

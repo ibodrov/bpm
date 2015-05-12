@@ -1,10 +1,17 @@
 package jet.bpm.engine;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.model.AbstractElement;
 import jet.bpm.engine.model.BoundaryEvent;
+import jet.bpm.engine.model.EndEvent;
+import jet.bpm.engine.model.EventBasedGateway;
+import jet.bpm.engine.model.ExclusiveGateway;
+import jet.bpm.engine.model.InclusiveGateway;
+import jet.bpm.engine.model.ParallelGateway;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import jet.bpm.engine.model.StartEvent;
@@ -160,26 +167,76 @@ public final class ProcessDefinitionUtils {
 
         throw new ExecutionException("Invalid process definition '%s': no start event defined", pd.getId());
     }
-
-    public static BoundaryEvent findBoundaryEvent(ProcessDefinition pd, String attachedToRef, String errorRef) throws ExecutionException {
+    
+    public static List<BoundaryEvent> findBoundaryEvents(ProcessDefinition pd, String attachedToRef) throws ExecutionException {
+        List<BoundaryEvent> l = new ArrayList<>();
+        
         ProcessDefinition sub = findElementProcess(pd, attachedToRef);
-
         for (AbstractElement e : sub.getChildren()) {
             if (e instanceof BoundaryEvent) {
                 BoundaryEvent ev = (BoundaryEvent) e;
                 if (attachedToRef.equals(ev.getAttachedToRef())) {
-                    if(errorRef != null) {
-                        if (errorRef.equals(ev.getErrorRef())) {
-                            return ev;
-                        }
-                    } else if (ev.getErrorRef() == null) {
+                    l.add(ev);
+                }
+            }
+        }
+        
+        return l;
+    }
+
+    public static BoundaryEvent findBoundaryEvent(ProcessDefinition pd, String attachedToRef, String errorRef) throws ExecutionException {
+        List<BoundaryEvent> l = findBoundaryEvents(pd, attachedToRef);
+        for (BoundaryEvent ev : l) {
+            if (attachedToRef.equals(ev.getAttachedToRef())) {
+                if (errorRef != null) {
+                    if (errorRef.equals(ev.getErrorRef())) {
                         return ev;
+                    }
+                } else if (ev.getErrorRef() == null) {
+                    return ev;
+                }
+            }
+        }
+        return null;
+    }
+    
+    public static Collection<SequenceFlow> filterOutgoingFlows(ProcessDefinition pd, String from, String ... filtered) throws ExecutionException {
+        List<SequenceFlow> l = findOutgoingFlows(pd, from);
+        
+        if (filtered != null && filtered.length > 0) {
+            for (Iterator<SequenceFlow> i = l.iterator(); i.hasNext();) {
+                SequenceFlow f = i.next();
+                for (String id : filtered) {
+                    if (id.equals(f.getId())) {
+                        i.remove();
                     }
                 }
             }
         }
-
-        return null;
+        
+        return l;
+    }
+    
+    public static String findNextGatewayId(ProcessDefinition pd, String from) throws ExecutionException {
+        AbstractElement e = findElement(pd, from);
+        if (!(e instanceof SequenceFlow)) {
+            e = findOutgoingFlow(pd, from);
+        }
+        
+        while (e != null) {
+            if (e instanceof SequenceFlow) {
+                SequenceFlow f = (SequenceFlow) e;
+                e = findElement(pd, f.getTo());
+            } else if (e instanceof ParallelGateway || e instanceof EventBasedGateway || e instanceof InclusiveGateway || e instanceof ExclusiveGateway) {
+                return e.getId();
+            } else if (e instanceof EndEvent) {
+                return null;
+            } else {
+                e = findOutgoingFlow(pd, e.getId());
+            }
+        }
+        
+        throw new ExecutionException("Invalid process definition '%s': can't find next parallel gateway after '%s'", pd.getId(), from);
     }
 
     private ProcessDefinitionUtils() {

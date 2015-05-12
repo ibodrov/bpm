@@ -1,10 +1,11 @@
 package jet.bpm.engine;
 
-import jet.bpm.engine.api.ExecutionContext;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.commands.ProcessElementCommand;
+import jet.bpm.engine.model.AbstractElement;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import org.slf4j.Logger;
@@ -44,6 +45,23 @@ public final class FlowUtils {
         for (SequenceFlow next : flows) {
             log.debug("followFlows ['{}'] -> continuing from '{}', '{}' to {}", execution.getId(), processDefinitionId, elementId, next.getId());
             execution.push(new ProcessElementCommand(processDefinitionId, next.getId(), groupId, exclusive));
+        }
+    }
+    
+    public static void activateFilteredFlows(DefaultExecution s, ProcessDefinition pd, String from, String ... filtered) throws ExecutionException {
+        Collection<SequenceFlow> flows = ProcessDefinitionUtils.filterOutgoingFlows(pd, from, filtered);
+        activateFlows(s, pd, flows);
+    }
+    
+    public static void activateFlows(DefaultExecution s, ProcessDefinition pd, Collection<? extends AbstractElement> elements) throws ExecutionException {
+        for (AbstractElement f : elements) {
+            String gwId = ProcessDefinitionUtils.findNextGatewayId(pd, f.getId());
+            if (gwId == null) {
+                return;
+            }
+            
+            log.debug("activateFlows ['{}', '{}'] -> activating '{}' via '{}'", s.getId(), pd.getId(), gwId, f.getId());
+            s.inc(pd.getId(), gwId, 1);
         }
     }
 

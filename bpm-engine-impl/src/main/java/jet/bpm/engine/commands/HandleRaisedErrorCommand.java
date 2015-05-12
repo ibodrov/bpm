@@ -1,6 +1,7 @@
 package jet.bpm.engine.commands;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.AbstractEngine;
@@ -68,6 +69,18 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
             ctx.setVariable(ExecutionContext.ERROR_CODE_KEY, errorRef);
             
             followFlows(execution, pd, ev.getId(), ctx);
+            
+            // process inactive
+            List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, elementId);
+            FlowUtils.activateFlows(execution, pd, flows);
+            List<BoundaryEvent> evs = ProcessDefinitionUtils.findBoundaryEvents(pd, elementId);
+            for (Iterator<BoundaryEvent> i = evs.iterator(); i.hasNext();) {
+                BoundaryEvent e = i.next();
+                if (e.getId().equals(ev.getId())) {
+                    i.remove();
+                }
+            }
+            FlowUtils.activateFlows(execution, pd, evs);
         }
 
         return execution;

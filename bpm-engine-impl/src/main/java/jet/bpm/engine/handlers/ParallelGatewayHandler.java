@@ -59,7 +59,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
         return flows;
     }
     
-    protected void processInactive(DefaultExecution s, ProcessElementCommand c, List<SequenceFlow> inactive) {
+    protected void processInactive(DefaultExecution s, ProcessElementCommand c, List<SequenceFlow> inactive) throws ExecutionException {
         // nothing to do
     }
 }
