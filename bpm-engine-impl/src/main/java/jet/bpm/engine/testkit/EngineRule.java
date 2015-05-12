@@ -11,8 +11,14 @@ import jet.bpm.engine.DefaultEngine;
 import jet.bpm.engine.event.EventPersistenceManager;
 import jet.bpm.engine.event.EventPersistenceManagerImpl;
 import jet.bpm.engine.event.InMemEventStorage;
+import jet.bpm.engine.leveldb.Configuration;
+import jet.bpm.engine.leveldb.KryoSerializer;
+import jet.bpm.engine.leveldb.LevelDbPersistenceManager;
+import jet.bpm.engine.lock.StripedLockManagerImpl;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.xml.Parser;
+import org.iq80.leveldb.DBFactory;
+import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -52,7 +58,13 @@ public class EngineRule implements TestRule {
         if (engine == null) {
             processDefinitionProvider = new ProcessDefinitionProviderImpl();
             eventManager = new EventPersistenceManagerImpl(new InMemEventStorage());
-            engine = new DefaultEngine(processDefinitionProvider, new Mocks.Registry(), eventManager);
+            Configuration cfg = new Configuration();
+            cfg.setExecutionPath("/tmp/bpm/" + System.currentTimeMillis());
+            DBFactory f = new Iq80DBFactory();
+            LevelDbPersistenceManager levelDbPersistenceManager = new LevelDbPersistenceManager(cfg, f, new KryoSerializer());
+            levelDbPersistenceManager.init();
+
+            engine = new DefaultEngine(processDefinitionProvider, new Mocks.Registry(), eventManager, levelDbPersistenceManager, new StripedLockManagerImpl(1));
         }
 
         Class<?> k = description.getTestClass();

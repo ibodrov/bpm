@@ -1,7 +1,6 @@
 package jet.bpm.engine;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.model.AbstractElement;
@@ -111,6 +110,14 @@ public final class ProcessDefinitionUtils {
         }
 
         return result;
+    }
+    
+    public static SequenceFlow findOutgoingFlow(ProcessDefinition pd, String from) throws ExecutionException {
+        List<SequenceFlow> l = findOutgoingFlows(pd, from);
+        if (l.size() != 1) {
+            throw new ExecutionException("Invalid process definition '%s': expected single flow from '%s'", pd.getId(), from);
+        }
+        return l.get(0);
     }
 
     /**

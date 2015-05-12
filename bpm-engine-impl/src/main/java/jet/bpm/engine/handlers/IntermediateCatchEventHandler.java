@@ -3,21 +3,18 @@ package jet.bpm.engine.handlers;
 import java.util.Date;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
-import jet.bpm.engine.ExecutionContextImpl;
-import jet.bpm.engine.FlowUtils;
-import jet.bpm.engine.IdGenerator;
+import jet.bpm.engine.EventMapHelper;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.ExecutionException;
-import jet.bpm.engine.commands.A;
-import jet.bpm.engine.commands.MergeActivationsCommand;
+import jet.bpm.engine.commands.PersistExecutionCommand;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.commands.SuspendExecutionCommand;
 import jet.bpm.engine.el.ExpressionManager;
 import jet.bpm.engine.event.Event;
 import jet.bpm.engine.model.IntermediateCatchEvent;
 import jet.bpm.engine.model.ProcessDefinition;
-import jet.bpm.engine.persistence.PersistenceManager;
+import jet.bpm.engine.model.SequenceFlow;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
@@ -26,7 +23,7 @@ import org.joda.time.Period;
  * and link it with the event.
  */
 public class IntermediateCatchEventHandler extends AbstractElementHandler {
-
+    
     public static Date parseIso8601(String s) {
         return DateTime.parse(s).toDate();
     }
@@ -38,45 +35,42 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
     @Override
     public void handle(DefaultExecution s, ProcessElementCommand c) throws ExecutionException {
         s.pop();
-
-        IdGenerator idg = getEngine().getIdGenerator();
-
-        // create child execution, which will start right from the first element
-        // after current
-        ExecutionContext childContext = new ExecutionContextImpl(s.getContext());
-        DefaultExecution child = new DefaultExecution(idg.create(), s.getId(), s.getBusinessKey(), childContext);
-        child.setSuspended(true);
         
-        String groupId = c.getGroupId();
-        child.push(new A(s.getId()));
-        child.push(new MergeActivationsCommand(groupId));
-        FlowUtils.followFlows(getEngine(), child, c, groupId, false);
+        Event e = makeEvent(c, s);
         
-        if (groupId == null) {
+        ProcessDefinition pd = getProcessDefinition(c);
+
+        if (c.getGroupId() != null) {
+            // grouped event
+            SequenceFlow next = ProcessDefinitionUtils.findOutgoingFlow(pd, c.getElementId());
+            
+            EventMapHelper.put(s, e.getName(),
+                    new PersistExecutionCommand(),
+                    new ProcessElementCommand(pd.getId(), next.getId(), c.getGroupId(), c.isExclusive()));
+        } else {
+            // standalone event
             s.push(new SuspendExecutionCommand());
+            
+            SequenceFlow next = ProcessDefinitionUtils.findOutgoingFlow(pd, c.getElementId());
+            s.push(new ProcessElementCommand(pd.getId(), next.getId(), c.getGroupId(), c.isExclusive()));
         }
+        
+        getEngine().getEventManager().register(s.getBusinessKey(), e);
+    }
 
-        // suspend and save child execution. Its will be resumed by someone
-        // outside of current process
-        PersistenceManager pm = getEngine().getPersistenceManager();
-        pm.save(child);
-
+    private Event makeEvent(ProcessElementCommand c, DefaultExecution s) throws ExecutionException {
         ProcessDefinition pd = getProcessDefinition(c);
         IntermediateCatchEvent ice = (IntermediateCatchEvent) ProcessDefinitionUtils.findElement(pd, c.getElementId());
-
+        
         // link execution with the event
         String evId = getEventId(ice);
-
         ExpressionManager em = getEngine().getExpressionManager();
         ExecutionContext ctx = s.getContext();
         Date timeDate = parseTimeDate(ice.getTimeDate(), c, ctx, em);
         String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
-
         Date expiredAt = timeDate != null ? timeDate : parseDuration(timeDuration);
-
-        Event e = new Event(evId, child.getId(), c.getGroupId(), s.getBusinessKey(), c.isExclusive(), expiredAt);
-
-        getEngine().getEventManager().register(child.getBusinessKey(), e);
+        Event e = new Event(evId, s.getId(), c.getGroupId(), s.getBusinessKey(), c.isExclusive(), expiredAt);
+        return e;
     }
     
     private Date parseTimeDate(String s, ProcessElementCommand c, ExecutionContext ctx, ExpressionManager em) throws ExecutionException {

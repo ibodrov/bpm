@@ -101,6 +101,7 @@ public abstract class AbstractEngine implements Engine {
 
             PersistenceManager pm = getPersistenceManager();
             DefaultExecution s = pm.remove(eid);
+            // TODO do not remove?
             if (s == null) {
                 throw new ExecutionException("No execution '%s' found for process '%s'", eid, processBusinessKey);
             }
@@ -108,6 +109,12 @@ public abstract class AbstractEngine implements Engine {
             s.setSuspended(false);
             
             applyVariables(s.getContext(), variables);
+            
+            if (!EventMapHelper.isEmpty(s)) {
+                EventMapHelper.pushCommands(s, eventName);
+            } else if (s.isDone()) {
+                throw new ExecutionException("No event mapping found in process '%s' or no commands in execution", eid);
+            }
 
             run(s);
         } finally {

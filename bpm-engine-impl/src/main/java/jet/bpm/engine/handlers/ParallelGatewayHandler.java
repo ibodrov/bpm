@@ -8,6 +8,7 @@ import jet.bpm.engine.FlowUtils;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.commands.ProcessElementCommand;
+import jet.bpm.engine.commands.ProcessEventMappingCommand;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import org.slf4j.Logger;
@@ -47,6 +48,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
             inactive.removeAll(filtered);
             processInactive(s, c, inactive);
             
+            s.push(new ProcessEventMappingCommand());
             FlowUtils.followFlows(s, c.getProcessDefinitionId(), c.getElementId(), c.getElementId(), false, filtered);
         } else {
             log.debug("handle ['{}', '{}'] -> keep joining on '{}' (activated: {}, total: {})", s.getId(), c.getProcessDefinitionId(), eId, activated, total);

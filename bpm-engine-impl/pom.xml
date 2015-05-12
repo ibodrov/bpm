@@ -49,7 +49,6 @@
         <dependency>
             <groupId>org.iq80.leveldb</groupId>
             <artifactId>leveldb</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.esotericsoftware</groupId>

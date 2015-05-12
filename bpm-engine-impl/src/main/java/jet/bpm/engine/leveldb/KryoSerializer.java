@@ -9,11 +9,12 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.ExecutionContextImpl;
-import jet.bpm.engine.commands.A;
 import jet.bpm.engine.commands.ExecutionCommand;
 import jet.bpm.engine.commands.HandleRaisedErrorCommand;
 import jet.bpm.engine.commands.MergeExecutionContextCommand;
+import jet.bpm.engine.commands.PersistExecutionCommand;
 import jet.bpm.engine.commands.ProcessElementCommand;
+import jet.bpm.engine.commands.ProcessEventMappingCommand;
 import jet.bpm.engine.commands.SuspendExecutionCommand;
 import jet.bpm.engine.leveldb.index.ExpiredEventIndex.IndexValue;
 
@@ -39,7 +40,8 @@ public class KryoSerializer implements Serializer {
                 kryo.register(HandleRaisedErrorCommand.class);
                 kryo.register(MergeExecutionContextCommand.class);
                 kryo.register(SuspendExecutionCommand.class);
-                kryo.register(A.class);
+                kryo.register(ProcessEventMappingCommand.class);
+                kryo.register(PersistExecutionCommand.class);
 
                 kryo.setClassLoader(Thread.currentThread().getContextClassLoader());
 
