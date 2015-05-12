@@ -92,14 +92,8 @@ public final class ProcessDefinitionUtils {
             throw new ExecutionException("Invalid process definition '%s': element '%s' is not a subprocess element", pd.getId(), id);
         }
     }
-
-    /**
-     * Finds all outgoind flows for the specified element.
-     * @param pd
-     * @param from
-     * @throws ExecutionException if the element has no outgoing flows..
-     */
-    public static List<SequenceFlow> findOutgoingFlows(ProcessDefinition pd, String from) throws ExecutionException {
+    
+    public static List<SequenceFlow> findOptionalOutgoingFlows(ProcessDefinition pd, String from) throws ExecutionException {
         List<SequenceFlow> result = new ArrayList<>();
 
         ProcessDefinition sub = findElementProcess(pd, from);
@@ -111,6 +105,18 @@ public final class ProcessDefinitionUtils {
                 }
             }
         }
+        
+        return result;
+    }
+
+    /**
+     * Finds all outgoind flows for the specified element.
+     * @param pd
+     * @param from
+     * @throws ExecutionException if the element has no outgoing flows..
+     */
+    public static List<SequenceFlow> findOutgoingFlows(ProcessDefinition pd, String from) throws ExecutionException {
+        List<SequenceFlow> result = findOptionalOutgoingFlows(pd, from);
 
         if (result.isEmpty()) {
             throw new ExecutionException("Invalid process definition '%s': no flows from '%s'", pd.getId(), from);
@@ -168,7 +174,7 @@ public final class ProcessDefinitionUtils {
         throw new ExecutionException("Invalid process definition '%s': no start event defined", pd.getId());
     }
     
-    public static List<BoundaryEvent> findBoundaryEvents(ProcessDefinition pd, String attachedToRef) throws ExecutionException {
+    public static List<BoundaryEvent> findOptionalBoundaryEvents(ProcessDefinition pd, String attachedToRef) throws ExecutionException {
         List<BoundaryEvent> l = new ArrayList<>();
         
         ProcessDefinition sub = findElementProcess(pd, attachedToRef);
@@ -185,7 +191,7 @@ public final class ProcessDefinitionUtils {
     }
 
     public static BoundaryEvent findBoundaryEvent(ProcessDefinition pd, String attachedToRef, String errorRef) throws ExecutionException {
-        List<BoundaryEvent> l = findBoundaryEvents(pd, attachedToRef);
+        List<BoundaryEvent> l = findOptionalBoundaryEvents(pd, attachedToRef);
         for (BoundaryEvent ev : l) {
             if (attachedToRef.equals(ev.getAttachedToRef())) {
                 if (errorRef != null) {

@@ -71,9 +71,9 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
             followFlows(execution, pd, ev.getId(), ctx);
             
             // process inactive
-            List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, elementId);
+            List<SequenceFlow> flows = ProcessDefinitionUtils.findOptionalOutgoingFlows(pd, elementId);
             FlowUtils.activateFlows(execution, pd, flows);
-            List<BoundaryEvent> evs = ProcessDefinitionUtils.findBoundaryEvents(pd, elementId);
+            List<BoundaryEvent> evs = ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, elementId);
             for (Iterator<BoundaryEvent> i = evs.iterator(); i.hasNext();) {
                 BoundaryEvent e = i.next();
                 if (e.getId().equals(ev.getId())) {
