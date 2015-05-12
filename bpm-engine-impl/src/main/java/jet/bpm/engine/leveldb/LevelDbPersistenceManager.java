@@ -54,7 +54,11 @@ public class LevelDbPersistenceManager implements PersistenceManager {
     
     @Override
     public DefaultExecution remove(String id) {
-        return get(id);
+        byte[] key = marshallKey(id);
+        byte[] bytes = db.get(key);
+        DefaultExecution e = unmarshallValue(bytes);
+        db.delete(key);
+        return e;
     }
 
     private byte[] marshallKey(String id) {
