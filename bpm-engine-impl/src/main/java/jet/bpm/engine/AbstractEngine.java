@@ -62,7 +62,7 @@ public abstract class AbstractEngine implements Engine {
         ProcessDefinition pd = pdp.getById(processDefinitionId);
         StartEvent start = ProcessDefinitionUtils.findStartEvent(pd);
 
-        ExecutionContext ctx = new ExecutionContextImpl();
+        ExecutionContext ctx = new ExecutionContextImpl(null);
         applyVariables(ctx, variables);
 
         IdGenerator idg = getIdGenerator();

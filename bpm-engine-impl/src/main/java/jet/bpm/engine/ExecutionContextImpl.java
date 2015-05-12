@@ -11,10 +11,6 @@ public class ExecutionContextImpl implements ExecutionContext {
     private final ExecutionContext parent;
     private final Map<String, Object> variables = new HashMap<>();
 
-    public ExecutionContextImpl() {
-        this(null);
-    }
-
     public ExecutionContextImpl(ExecutionContext parent) {
         this.parent = parent;
     }

@@ -45,7 +45,7 @@ public class KryoSerializerTest {
     public void defaultExecutionSerialize() throws Exception {
         KryoSerializer s = new KryoSerializer();
         
-        ExecutionContextImpl c = new ExecutionContextImpl();
+        ExecutionContextImpl c = new ExecutionContextImpl(null);
         c.setVariable("v1", "v2");
         c.setVariable("v2", new Service("sid"));
 

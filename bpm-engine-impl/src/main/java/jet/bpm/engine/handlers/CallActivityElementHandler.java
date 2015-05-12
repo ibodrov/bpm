@@ -41,6 +41,6 @@ public class CallActivityElementHandler extends AbstractCallHandler {
 
     @Override
     protected ExecutionContext makeChildContext(DefaultExecution s) {
-        return new ExecutionContextImpl();
+        return new ExecutionContextImpl(null);
     }
 }

@@ -224,15 +224,16 @@ public class CallActivityTest extends AbstractEngineTest {
     }
     
     /**
-     * start --> call               end
-     *               \             /
-     *                start --> end
+     * start --> call                       end
+     *               \                     /
+     *                start --> ev1 --> end
      */
     @Test
     public void testError() throws Exception {
         String aId = "testA";
         String bId = "testB";
         String errorRef = "e" + System.currentTimeMillis();
+        String messageRef = "m" + System.currentTimeMillis();
 
         deploy(new ProcessDefinition(aId, Arrays.<AbstractElement>asList(
                 new StartEvent("start"),
@@ -245,9 +246,11 @@ public class CallActivityTest extends AbstractEngineTest {
         )));
 
         deploy(new ProcessDefinition(bId, Arrays.<AbstractElement>asList(
-                new StartEvent("start"),
-                new SequenceFlow("f1", "start", "end"),
-                new EndEvent("end", errorRef)
+                new StartEvent("bstart"),
+                new SequenceFlow("bf1", "bstart", "bev1"),
+                new IntermediateCatchEvent("bev1", messageRef),
+                new SequenceFlow("bf2", "bev1", "bend"),
+                new EndEvent("bend", errorRef)
         )));
 
         // ---
@@ -263,10 +266,16 @@ public class CallActivityTest extends AbstractEngineTest {
                 "call");
 
         assertActivations(key, bId,
-                "start",
-                "f1",
-                "end");
+                "bstart",
+                "bf1",
+                "bev1");
+        
+        getEngine().resume(key, messageRef, null);
 
+        assertActivations(key, bId,
+                "bf2",
+                "bend");
+        
         assertActivations(key, aId,
                 "f3",
                 "end");

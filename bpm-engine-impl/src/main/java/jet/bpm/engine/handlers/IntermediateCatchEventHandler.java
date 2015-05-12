@@ -9,8 +9,10 @@ import jet.bpm.engine.IdGenerator;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.ExecutionException;
+import jet.bpm.engine.commands.A;
 import jet.bpm.engine.commands.MergeActivationsCommand;
 import jet.bpm.engine.commands.ProcessElementCommand;
+import jet.bpm.engine.commands.SuspendExecutionCommand;
 import jet.bpm.engine.el.ExpressionManager;
 import jet.bpm.engine.event.Event;
 import jet.bpm.engine.model.IntermediateCatchEvent;
@@ -43,14 +45,19 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         // after current
         ExecutionContext childContext = new ExecutionContextImpl(s.getContext());
         DefaultExecution child = new DefaultExecution(idg.create(), s.getId(), s.getBusinessKey(), childContext);
+        child.setSuspended(true);
         
         String groupId = c.getGroupId();
+        child.push(new A(s.getId()));
         child.push(new MergeActivationsCommand(groupId));
         FlowUtils.followFlows(getEngine(), child, c, groupId, false);
+        
+        if (groupId == null) {
+            s.push(new SuspendExecutionCommand());
+        }
 
         // suspend and save child execution. Its will be resumed by someone
         // outside of current process
-        child.setSuspended(true);
         PersistenceManager pm = getEngine().getPersistenceManager();
         pm.save(child);
 
