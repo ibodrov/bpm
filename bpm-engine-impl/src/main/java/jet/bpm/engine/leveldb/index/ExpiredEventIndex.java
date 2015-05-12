@@ -142,16 +142,6 @@ public class ExpiredEventIndex {
         return (IndexValue) serializer.fromBytes(value);
     }
 
-    public void dump() throws Exception {
-        try (DBIterator it = levelDb.iterator();) {
-            for (it.seekToFirst(); it.hasNext();) {
-                Map.Entry<byte[], byte[]> entry = it.next();
-
-                log.info(">>>>: {} -> {}", unmarshallKey(entry.getKey()), unmarshallValue(entry.getValue()));
-            }
-        }
-    }
-
     private static final class IndexKey {
 
         private final UUID eventId;

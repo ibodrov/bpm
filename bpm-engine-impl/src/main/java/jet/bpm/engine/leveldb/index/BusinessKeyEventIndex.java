@@ -3,14 +3,10 @@ package jet.bpm.engine.leveldb.index;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import jet.bpm.engine.leveldb.LevelDb;
 import jet.bpm.engine.leveldb.PersistentEvent;
 import jet.bpm.engine.leveldb.Serializer;
-import org.iq80.leveldb.DBIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BusinessKeyEventIndex {
 
@@ -85,16 +81,5 @@ public class BusinessKeyEventIndex {
 
     private byte[] marshallValue(Set<String> value) {
         return serializer.toBytes(value);
-    }
-
-    private static final Logger log = LoggerFactory.getLogger(BusinessKeyEventIndex.class);
-    public void dump() throws Exception {
-        try (DBIterator it = levelDb.iterator();) {
-            for (it.seekToFirst(); it.hasNext();) {
-                Map.Entry<byte[], byte[]> entry = it.next();
-
-                log.info(">>>>: {} -> {}", entry.getKey(), unmarshallValue(entry.getValue()));
-            }
-        }
     }
 }

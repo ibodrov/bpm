@@ -2,10 +2,8 @@ package jet.bpm.engine.event;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.event.EventStorage.EventKey;
-import jet.bpm.engine.leveldb.LevelDbEventStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,15 +77,7 @@ public class EventPersistenceManagerImpl implements EventPersistenceManager {
     @Override
     public List<ExpiredEvent> findNextExpiredEvent(int maxEvents) throws ExecutionException {
         List<ExpiredEvent> result = eventStorage.findNextExpiredEvent(maxEvents);
-
         log.debug("findNextExpiredEvent [{}] -> done ({})", maxEvents, result.size());
-
-        try {
-            ((LevelDbEventStorage)eventStorage).dump();
-        } catch (Exception ex) {
-            java.util.logging.Logger.getLogger(EventPersistenceManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
         return result;
     }
 }

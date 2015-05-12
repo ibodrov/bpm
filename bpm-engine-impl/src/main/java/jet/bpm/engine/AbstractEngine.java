@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import jet.bpm.engine.api.Execution;
 import jet.bpm.engine.api.ExecutionException;
+import jet.bpm.engine.api.NoEventFoundException;
 import jet.bpm.engine.commands.ExecutionCommand;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.el.ExpressionManager;
@@ -87,7 +88,7 @@ public abstract class AbstractEngine implements Engine {
             EventPersistenceManager em = getEventManager();
             Event e = em.remove(processBusinessKey, eventName);
             if (e == null) {
-                throw new ExecutionException("No event '%s' found for process '%s'", eventName, processBusinessKey);
+                throw new NoEventFoundException("No event '%s' found for process '%s'", eventName, processBusinessKey);
             }
 
             if (e.isExclusive()) {

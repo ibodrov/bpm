@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import jet.bpm.engine.event.Event;
@@ -14,9 +13,6 @@ import jet.bpm.engine.event.ExpiredEvent;
 import jet.bpm.engine.leveldb.index.BusinessKeyEventIndex;
 import jet.bpm.engine.leveldb.index.ExpiredEventIndex;
 import org.iq80.leveldb.DBFactory;
-import org.iq80.leveldb.DBIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LevelDbEventStorage implements EventStorage {
 
@@ -125,20 +121,5 @@ public class LevelDbEventStorage implements EventStorage {
         }
 
         return (PersistentEvent) serializer.fromBytes(event);
-    }
-
-    private static final Logger log = LoggerFactory.getLogger(LevelDbEventStorage.class);
-
-    public void dump() throws Exception {
-        try (DBIterator it = eventDb.iterator();) {
-            for (it.seekToFirst(); it.hasNext();) {
-                Map.Entry<byte[], byte[]> entry = it.next();
-
-                log.info(">>>>: {} -> {}", entry.getKey(), unmarshallEvent(entry.getValue()));
-            }
-        }
-
-        businessKeyEventLevelDbIndex.dump();
-        expiredEventLevelDbIndex.dump();
     }
 }
