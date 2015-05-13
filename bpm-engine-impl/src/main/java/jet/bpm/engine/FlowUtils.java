@@ -3,6 +3,7 @@ package jet.bpm.engine;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.model.AbstractElement;
@@ -23,11 +24,11 @@ public final class FlowUtils {
         followFlows(engine, execution, c.getProcessDefinitionId(), elementId, c.getGroupId(), c.isExclusive());
     }
 
-    public static void followFlows(AbstractEngine engine, DefaultExecution execution, ProcessElementCommand c, String groupId, boolean exclusive) throws ExecutionException {
+    public static void followFlows(AbstractEngine engine, DefaultExecution execution, ProcessElementCommand c, UUID groupId, boolean exclusive) throws ExecutionException {
         followFlows(engine, execution, c.getProcessDefinitionId(), c.getElementId(), groupId, exclusive);
     }
 
-    public static void followFlows(AbstractEngine engine, DefaultExecution execution, String processDefinitionId, String elementId, String groupId, boolean exclusive) throws ExecutionException {
+    public static void followFlows(AbstractEngine engine, DefaultExecution execution, String processDefinitionId, String elementId, UUID groupId, boolean exclusive) throws ExecutionException {
         ProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
         ProcessDefinition pd = provider.getById(processDefinitionId);
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, elementId);
@@ -39,7 +40,7 @@ public final class FlowUtils {
         followFlows(execution, c.getProcessDefinitionId(), c.getElementId(), c.getGroupId(), c.isExclusive(), flows);
     }
 
-    public static void followFlows(DefaultExecution execution, String processDefinitionId, String elementId, String groupId, boolean exclusive, List<SequenceFlow> flows) {
+    public static void followFlows(DefaultExecution execution, String processDefinitionId, String elementId, UUID groupId, boolean exclusive, List<SequenceFlow> flows) {
         // reverse the collection, to fill up the stack in correct order
         Collections.reverse(flows);
         for (SequenceFlow next : flows) {

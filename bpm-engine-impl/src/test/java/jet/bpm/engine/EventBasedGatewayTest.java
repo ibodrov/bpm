@@ -32,7 +32,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
                     new SequenceFlow("f2", "gw", "ev"),
-                    new IntermediateCatchEvent("ev"),
+                    new IntermediateCatchEvent("ev", "ev"),
                     new SequenceFlow("f3", "ev", "end"),
                     new EndEvent("end")
         )));
@@ -74,13 +74,13 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", eventGroup),
                 new EventBasedGateway(eventGroup),
                     new SequenceFlow("f2", eventGroup, "ev1"),
-                    new IntermediateCatchEvent("ev1"),
+                    new IntermediateCatchEvent("ev1", "ev1"),
                     new SequenceFlow("f3", "ev1", "end1"),
 
                     new EndEvent("end1"),
 
                     new SequenceFlow("f4", eventGroup, "ev2"),
-                    new IntermediateCatchEvent("ev2"),
+                    new IntermediateCatchEvent("ev2", "ev2"),
                     new SequenceFlow("f5", "ev2", "end2"),
 
                     new EndEvent("end2")
@@ -111,7 +111,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
 
         // ---
 
-        verify(eventManager, times(1)).clearGroup(eq(key), anyString());
+        verify(eventManager, times(1)).clearGroup(eq(key), any(UUID.class));
     }
 
     /**
@@ -130,23 +130,23 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", "gw1"),
                 new EventBasedGateway("gw1"),
                     new SequenceFlow("f2", "gw1", "ev1"),
-                    new IntermediateCatchEvent("ev1"),
+                    new IntermediateCatchEvent("ev1", "ev1"),
                     new SequenceFlow("f3", "ev1", "end1"),
 
                     new EndEvent("end1"),
 
                     new SequenceFlow("f4", "gw1", "ev2"),
-                    new IntermediateCatchEvent("ev2"),
+                    new IntermediateCatchEvent("ev2", "ev2"),
                     new SequenceFlow("f5", "ev2", "gw2"),
                     new EventBasedGateway("gw2"),
                         new SequenceFlow("f6", "gw2", "ev3"),
-                        new IntermediateCatchEvent("ev3"),
+                        new IntermediateCatchEvent("ev3", "ev3"),
                         new SequenceFlow("f7", "ev3", "end2"),
 
                         new EndEvent("end2"),
 
                         new SequenceFlow("f8", "gw2", "ev4"),
-                        new IntermediateCatchEvent("ev4"),
+                        new IntermediateCatchEvent("ev4", "ev4"),
                         new SequenceFlow("f9", "ev4", "end3"),
 
                         new EndEvent("end3")
@@ -198,9 +198,9 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
                     new SequenceFlow("f2", "gw", "ev1"),
-                    new IntermediateCatchEvent("ev1", null, "${" + k1 + "}", null),
+                    new IntermediateCatchEvent("ev1", "ev1", "${" + k1 + "}", null),
                     new SequenceFlow("f3", "ev1", "ev2"),
-                    new IntermediateCatchEvent("ev2", null, dt, null),
+                    new IntermediateCatchEvent("ev2", "ev2", dt, null),
                     new SequenceFlow("f4", "ev2", "end"),
                     new EndEvent("end")
         )));
@@ -215,7 +215,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         // ---
 
         ArgumentCaptor<Event> arg = ArgumentCaptor.forClass(Event.class);
-        verify(eventManager, times(1)).register(eq(key), arg.capture());
+        verify(eventManager, times(1)).add(arg.capture());
         Event ev = arg.getValue();
         assertNotNull(ev);
         assertEquals(v1, ev.getExpiredAt());
@@ -228,7 +228,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         // ---
 
         arg = ArgumentCaptor.forClass(Event.class);
-        verify(eventManager, times(1)).register(eq(key), arg.capture());
+        verify(eventManager, times(1)).add(arg.capture());
         ev = arg.getValue();
         assertNotNull(ev);
         Date actualDt = IntermediateCatchEventHandler.parseIso8601(dt);

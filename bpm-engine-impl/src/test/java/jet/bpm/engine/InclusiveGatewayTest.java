@@ -24,7 +24,7 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", "gw1"),
                 new InclusiveGateway("gw1"),
                     new SequenceFlow("f2", "gw1", "ev"),
-                    new IntermediateCatchEvent("ev"),
+                    new IntermediateCatchEvent("ev", "ev"),
                     new SequenceFlow("f3", "ev", "gw2"),
                 new InclusiveGateway("gw2"),
                 new SequenceFlow("f4", "gw2", "end"),
@@ -69,11 +69,11 @@ public class InclusiveGatewayTest extends AbstractEngineTest {
                 new InclusiveGateway("gw1"),
 
                     new SequenceFlow("f2", "gw1", "ev1"),
-                    new IntermediateCatchEvent("ev1"),
+                    new IntermediateCatchEvent("ev1", "ev1"),
                     new SequenceFlow("f3", "ev1", "gw2"),
 
                     new SequenceFlow("f4", "gw1", "ev2"),
-                    new IntermediateCatchEvent("ev2"),
+                    new IntermediateCatchEvent("ev2", "ev2"),
                     new SequenceFlow("f5", "ev2", "gw2"),
 
                 new InclusiveGateway("gw2"),

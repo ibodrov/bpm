@@ -7,22 +7,22 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class InMemEventStorage implements EventStorage {
 
-    private final Map<EventKey, Event> events = new HashMap<>();
-
+    private final Map<UUID, Event> events = new HashMap<>();
     private final List<ExpiredEvent> eventsToExecute = new ArrayList<>();
 
     @Override
-    public Event get(EventKey k) {
+    public Event get(UUID k) {
         synchronized (events) {
             return events.get(k);
         }
     }
 
     @Override
-    public Event remove(EventKey k) {
+    public Event remove(UUID k) {
         synchronized (events) {
             Event e = events.remove(k);
 
@@ -30,15 +30,14 @@ public class InMemEventStorage implements EventStorage {
             return e;
         }
     }
-
+    
     @Override
-    public Collection<Event> find(String processBusinessKey) {
+    public Collection<Event> find(String processBusinessKey, String eventName) {
         synchronized (events) {
             Collection<Event> c = new ArrayList<>();
-            for (Map.Entry<EventKey, Event> e : events.entrySet()) {
-                EventKey k = e.getKey();
-                if (k.getProcessBusinessKey().equals(processBusinessKey)) {
-                    c.add(e.getValue());
+            for (Event e : events.values()) {
+                if (e.getProcessBusinessKey().equals(processBusinessKey) && e.getName().equals(eventName)) {
+                    c.add(e);
                 }
             }
             return c;
@@ -46,12 +45,25 @@ public class InMemEventStorage implements EventStorage {
     }
 
     @Override
-    public void add(EventKey k, Event event) {
+    public Collection<Event> find(String processBusinessKey) {
         synchronized (events) {
-            events.put(k, event);
+            Collection<Event> c = new ArrayList<>();
+            for (Event e : events.values()) {
+                if (e.getProcessBusinessKey().equals(processBusinessKey)) {
+                    c.add(e);
+                }
+            }
+            return c;
+        }
+    }
+
+    @Override
+    public void add(Event event) {
+        synchronized (events) {
+            events.put(event.getId(), event);
 
             if (event.getExpiredAt() != null) {
-                eventsToExecute.add(new ExpiredEvent(k.getProcessBusinessKey(), k.getEventName(), event.getExpiredAt()));
+                eventsToExecute.add(new ExpiredEvent(event.getId(), event.getExpiredAt()));
             }
         }
     }
@@ -80,12 +92,10 @@ public class InMemEventStorage implements EventStorage {
         if(e == null) {
             return;
         }
-
-        String processBusinessKey = e.getProcessBusinessKey();
-        String eventName = e.getName();
+        
         for (Iterator<ExpiredEvent> it = eventsToExecute.iterator(); it.hasNext();) {
             ExpiredEvent ee = it.next();
-            if (processBusinessKey.equals(ee.getProcessBusinessKey()) && eventName.equals(ee.getEventName())) {
+            if (ee.geId().equals(e.getId())) {
                 it.remove();
             }
         }

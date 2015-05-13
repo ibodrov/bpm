@@ -10,24 +10,18 @@ import jet.bpm.engine.api.NoEventFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EventScheduler {
+public final class EventScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(EventScheduler.class);
 
     private final EventPersistenceManager eventManager;
-
     private final DefaultEngine engine;
-
     private final BlockingQueue<ExpiredEvent> acquiredEventQueue;
-
-    private Thread eventAcquisitionThread;
-
     private final List<Thread> eventExecutorThreads = new ArrayList<>();
 
+    private Thread eventAcquisitionThread;
     private volatile boolean stopped = true;
-
     private int eventExecutorsCount = 10;
-
     private int maxEventsPerAcquisition = 10;
     private long acquisitionDelay = SECONDS.toMillis(5);
     private long acquisitionErrorDelay = SECONDS.toMillis(5);
@@ -134,11 +128,10 @@ public class EventScheduler {
     private void eventExecutionLoop() {
         while (!Thread.currentThread().isInterrupted() && !stopped) {
             try {
-                ExpiredEvent event = acquiredEventQueue.take();
-                String processBusinessKey = event.getProcessBusinessKey();
-                String eventName = event.getEventName();
+                ExpiredEvent x = acquiredEventQueue.take();
+                Event e = eventManager.get(x.geId());
 
-                engine.resume(processBusinessKey, eventName, null);
+                engine.resume(e, null);
             } catch (NoEventFoundException e) {
                 log.warn("eventExecutionLoop -> no event found: {}", e.getMessage());
             } catch (InterruptedException e) {

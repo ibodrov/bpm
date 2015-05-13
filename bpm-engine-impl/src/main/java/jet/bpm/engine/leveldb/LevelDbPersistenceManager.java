@@ -8,8 +8,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
-import java.nio.charset.Charset;
-import java.util.logging.Level;
+import java.nio.ByteBuffer;
+import java.util.UUID;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.persistence.PersistenceManager;
 import org.iq80.leveldb.DBFactory;
@@ -21,7 +21,6 @@ public class LevelDbPersistenceManager implements PersistenceManager {
     private static final Logger log = LoggerFactory.getLogger(LevelDbPersistenceManager.class);
 
     private final LevelDb db;
-
     private final Serializer serializer;
 
     public LevelDbPersistenceManager(Configuration cfg, DBFactory dbFactory, Serializer serializer) {
@@ -45,15 +44,15 @@ public class LevelDbPersistenceManager implements PersistenceManager {
     }
 
     @Override
-    public DefaultExecution get(String id) {
+    public DefaultExecution get(UUID id) {
         byte[] key = marshallKey(id);
         byte[] bytes = db.get(key);
 
         return unmarshallValue(bytes);
     }
-    
+
     @Override
-    public DefaultExecution remove(String id) {
+    public DefaultExecution remove(UUID id) {
         byte[] key = marshallKey(id);
         byte[] bytes = db.get(key);
         DefaultExecution e = unmarshallValue(bytes);
@@ -61,13 +60,16 @@ public class LevelDbPersistenceManager implements PersistenceManager {
         return e;
     }
 
-    private byte[] marshallKey(String id) {
-        return id.getBytes(Charset.forName("UTF-8"));
+    private static byte[] marshallKey(UUID id) {
+        long mostSigBits = id.getMostSignificantBits();
+        long leastSigBits = id.getLeastSignificantBits();
+        return ByteBuffer.allocate(8 + 8)
+                .putLong(mostSigBits)
+                .putLong(leastSigBits)
+                .array();
     }
 
     private byte[] marshallValue(DefaultExecution execution) {
-//        return serializer.toBytes(execution);
-
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ObjectOutput out = new ObjectOutputStream(bos)) {
             out.writeObject(execution);
@@ -83,12 +85,10 @@ public class LevelDbPersistenceManager implements PersistenceManager {
             return null;
         }
 
-//        return (DefaultExecution) serializer.fromBytes(bytes);
         try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
                 ObjectInput in = new ObjectInputStream(bis) {
 
                     @Override
-
                     protected Class<?> resolveClass(final ObjectStreamClass desc) throws IOException, ClassNotFoundException {
                         final String name = desc.getName();
                         try {

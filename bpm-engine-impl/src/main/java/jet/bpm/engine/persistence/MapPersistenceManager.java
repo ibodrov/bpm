@@ -1,6 +1,7 @@
 package jet.bpm.engine.persistence;
 
 import java.util.Map;
+import java.util.UUID;
 import jet.bpm.engine.DefaultExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,9 +10,9 @@ public class MapPersistenceManager implements PersistenceManager {
 
     private static final Logger log = LoggerFactory.getLogger(MapPersistenceManager.class);
     
-    private final Map<String, DefaultExecution> delegate;
+    private final Map<UUID, DefaultExecution> delegate;
 
-    public MapPersistenceManager(Map<String, DefaultExecution> delegate) {
+    public MapPersistenceManager(Map<UUID, DefaultExecution> delegate) {
         this.delegate = delegate;
     }
     
@@ -22,12 +23,12 @@ public class MapPersistenceManager implements PersistenceManager {
     }
 
     @Override
-    public DefaultExecution get(String id) {
+    public DefaultExecution get(UUID id) {
         return delegate.get(id);
     }
     
     @Override
-    public DefaultExecution remove(String id) {
+    public DefaultExecution remove(UUID id) {
         DefaultExecution e = delegate.remove(id);
         log.debug("remove ['{}'] -> done (found: {})", id, e != null);
         return e;

@@ -1,22 +1,22 @@
 package jet.bpm.engine.commands;
 
+import java.util.UUID;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
-import jet.bpm.engine.api.ExecutionContext;
 
 public class ProcessElementCommand implements ExecutionCommand {
 
     private final String processDefinitionId;
     private final String elementId;
-    private final String groupId;
+    private final UUID groupId;
     private final boolean exclusive;
 
     public ProcessElementCommand(String processDefinitionId, String elementId) {
         this(processDefinitionId, elementId, null, false);
     }
 
-    public ProcessElementCommand(String processDefinitionId, String elementId, String groupId, boolean exclusive) {
+    public ProcessElementCommand(String processDefinitionId, String elementId, UUID groupId, boolean exclusive) {
         this.processDefinitionId = processDefinitionId;
         this.elementId = elementId;
         this.groupId = groupId;
@@ -31,7 +31,7 @@ public class ProcessElementCommand implements ExecutionCommand {
         return elementId;
     }
 
-    public String getGroupId() {
+    public UUID getGroupId() {
         return groupId;
     }
 

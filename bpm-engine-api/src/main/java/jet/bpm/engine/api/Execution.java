@@ -1,6 +1,7 @@
 package jet.bpm.engine.api;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * Process execution instance.
@@ -10,12 +11,12 @@ public interface Execution extends Serializable {
     /**
      * The ID of process instance. 
      */
-    public String getId();
+    public UUID getId();
 
     /**
      * The ID of parent process instance.
      */
-    public String getParentId();
+    public UUID getParentId();
 
     /**
      * The business key of this process instance.

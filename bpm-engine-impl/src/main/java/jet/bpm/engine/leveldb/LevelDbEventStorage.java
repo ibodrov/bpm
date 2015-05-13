@@ -1,12 +1,15 @@
 package jet.bpm.engine.leveldb;
 
-import java.nio.charset.Charset;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import jet.bpm.engine.JugUuidGenerator;
+import jet.bpm.engine.UuidGenerator;
 import jet.bpm.engine.event.Event;
 import jet.bpm.engine.event.EventStorage;
 import jet.bpm.engine.event.ExpiredEvent;
@@ -17,12 +20,10 @@ import org.iq80.leveldb.DBFactory;
 public class LevelDbEventStorage implements EventStorage {
 
     private final ExpiredEventIndex expiredEventLevelDbIndex;
-
     private final BusinessKeyEventIndex businessKeyEventLevelDbIndex;
-
     private final LevelDb eventDb;
-
     private final Serializer serializer;
+    private final UuidGenerator uuidGenerator = new JugUuidGenerator();
 
     public LevelDbEventStorage(Configuration cfg, DBFactory dbFactory, Serializer serializer) {
         eventDb = new LevelDb(dbFactory, cfg.getEventPath(), cfg.isSyncWrite());
@@ -53,15 +54,14 @@ public class LevelDbEventStorage implements EventStorage {
     }
 
     @Override
-    public Event get(EventKey key) {
-        byte[] eventBytes = eventDb.get(marshallKey(key));
-        PersistentEvent persistentEvent = unmarshallEvent(eventBytes);
-        return persistentEvent.getEvent();
+    public Event get(UUID id) {
+        byte[] eventBytes = eventDb.get(marshallKey(id));
+        return unmarshallEvent(eventBytes);
     }
 
     @Override
-    public Event remove(EventKey key) {
-        byte[] keyBytes = marshallKey(key);
+    public Event remove(UUID id) {
+        byte[] keyBytes = marshallKey(id);
         byte[] eventBytes = eventDb.get(keyBytes);
         if (eventBytes == null) {
             return null;
@@ -69,22 +69,31 @@ public class LevelDbEventStorage implements EventStorage {
 
         eventDb.delete(keyBytes);
 
-        PersistentEvent persistentEvent = unmarshallEvent(eventBytes);
-
-        expiredEventLevelDbIndex.onRemove(persistentEvent);
-
-        businessKeyEventLevelDbIndex.onRemove(persistentEvent);
-
-        return persistentEvent.getEvent();
+        Event e = unmarshallEvent(eventBytes);
+        expiredEventLevelDbIndex.onRemove(e);
+        businessKeyEventLevelDbIndex.onRemove(e);
+        return e;
     }
 
+    @Override
+    public Collection<Event> find(String processBusinessKey, String eventName) {
+        Collection<Event> events = find(processBusinessKey);
+        for (Iterator<Event> i = events.iterator(); i.hasNext();) {
+            Event e = i.next();
+            if (!e.getName().equals(eventName)) {
+                i.remove();
+            }
+        }
+        return events;
+    }
+    
     @Override
     public Collection<Event> find(String processBusinessKey) {
         List<Event> result = new ArrayList<>();
 
-        Set<String> eventNames = businessKeyEventLevelDbIndex.list(processBusinessKey);
-        for (String eventName : eventNames) {
-            Event e = get(new EventKey(processBusinessKey, eventName));
+        Set<UUID> ids = businessKeyEventLevelDbIndex.list(processBusinessKey);
+        for (UUID id : ids) {
+            Event e = get(id);
             if (e != null) {
                 result.add(e);
             }
@@ -93,33 +102,35 @@ public class LevelDbEventStorage implements EventStorage {
     }
 
     @Override
-    public void add(EventKey key, Event event) {
-        PersistentEvent persistentEvent = new PersistentEvent(UUID.randomUUID(), event);
-
-        expiredEventLevelDbIndex.onAdd(persistentEvent);
-        businessKeyEventLevelDbIndex.onAdd(persistentEvent);
-        eventDb.put(marshallKey(key), marshalEvent(persistentEvent));
+    public void add(Event event) {
+        expiredEventLevelDbIndex.onAdd(event);
+        businessKeyEventLevelDbIndex.onAdd(event);
+        eventDb.put(marshallKey(event.getId()), marshalEvent(event));
     }
 
     @Override
     public List<ExpiredEvent> findNextExpiredEvent(int maxEvents) {
         return expiredEventLevelDbIndex.list(new Date(), maxEvents);
     }
-
-    private byte[] marshallKey(EventKey key) {
-        String s = key.getProcessBusinessKey() + ":" + key.getEventName();
-        return s.getBytes(Charset.forName("UTF-8"));
+    
+    private static byte[] marshallKey(UUID id) {
+        long mostSigBits = id.getMostSignificantBits();
+        long leastSigBits = id.getLeastSignificantBits();
+        return ByteBuffer.allocate(8 + 8)
+                .putLong(mostSigBits)
+                .putLong(leastSigBits)
+                .array();
     }
 
-    private byte[] marshalEvent(PersistentEvent event) {
+    private byte[] marshalEvent(Event event) {
         return serializer.toBytes(event);
     }
 
-    private PersistentEvent unmarshallEvent(byte[] event) {
+    private Event unmarshallEvent(byte[] event) {
         if (event == null) {
             return null;
         }
 
-        return (PersistentEvent) serializer.fromBytes(event);
+        return (Event) serializer.fromBytes(event);
     }
 }

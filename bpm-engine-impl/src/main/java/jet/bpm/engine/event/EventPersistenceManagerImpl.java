@@ -2,8 +2,8 @@ package jet.bpm.engine.event;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import jet.bpm.engine.api.ExecutionException;
-import jet.bpm.engine.event.EventStorage.EventKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,60 +18,55 @@ public class EventPersistenceManagerImpl implements EventPersistenceManager {
     }
 
     @Override
-    public Event get(String processBusinessKey, String eventId) {
-        EventKey k = new EventKey(processBusinessKey, eventId);
-
-        Event result = eventStorage.get(k);
-
-        log.debug("get ['{}', '{}'] -> done ({})", processBusinessKey, eventId, result != null);
-
+    public Event get(UUID id) {
+        Event result = eventStorage.get(id);
+        log.debug("get ['{}'] -> done ({})", id, result != null);
         return result;
     }
-
+    
     @Override
-    public Event remove(String processBusinessKey, String eventName) {
-        EventKey k = new EventKey(processBusinessKey, eventName);
-        Event result = eventStorage.remove(k);
-
-        log.debug("remove ['{}', '{}'] -> done ({})", processBusinessKey, eventName, result != null);
-
+    public Event remove(UUID id) {
+        Event result = eventStorage.remove(id);
+        log.debug("remove ['{}'] -> done ({})", id, result != null);
         return result;
     }
 
     @Override
     public Collection<Event> find(String processBusinessKey) {
         Collection<Event> result = eventStorage.find(processBusinessKey);
-
         log.debug("find ['{}'] -> done ({})", processBusinessKey, result.size());
-
         return result;
     }
 
     @Override
-    public void register(String processBusinessKey, Event event) throws ExecutionException {
-        EventKey k = new EventKey(processBusinessKey, event.getName());
-
-        eventStorage.add(k, event);
-
-        log.debug("register ['{}', '{}', '{}'] -> done", processBusinessKey, event, event.getExpiredAt());
+    public Collection<Event> find(String processBusinessKey, String eventName) {
+        Collection<Event> result = eventStorage.find(processBusinessKey, eventName);
+        log.debug("find ['{}', '{}'] -> done ({})", processBusinessKey, eventName, result.size());
+        return result;
+    }
+    
+    @Override
+    public void add(Event event) throws ExecutionException {
+        eventStorage.add(event);
+        log.debug("register ['{}'] -> done", event);
     }
 
     @Override
-    public void clearGroup(String processBusinessKey, String groupId) {
+    public void clearGroup(String processBusinessKey, UUID groupId) {
         int removed = 0;
 
-        Collection<Event> events = eventStorage.find(processBusinessKey);
-        for(Event event : events) {
-            String otherKey = event.getProcessBusinessKey();
-            String otherGid = event.getGroupId();
+        Collection<Event> evs = eventStorage.find(processBusinessKey);
+        for(Event e : evs) {
+            String otherKey = e.getProcessBusinessKey();
+            UUID otherGid = e.getGroupId();
 
             if (processBusinessKey.equals(otherKey) && groupId.equals(otherGid)) {
-                eventStorage.remove(new EventKey(event.getProcessBusinessKey(), event.getName()));
+                eventStorage.remove(e.getId());
                 removed++;
             }
         }
 
-        log.debug("clearGroup ['{}', '{}'] -> total: {}, removed: {}", processBusinessKey, groupId, events.size(), removed);
+        log.debug("clearGroup ['{}', '{}'] -> total: {}, removed: {}", processBusinessKey, groupId, evs.size(), removed);
     }
 
     @Override

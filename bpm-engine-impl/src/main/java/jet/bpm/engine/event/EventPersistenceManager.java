@@ -2,19 +2,22 @@ package jet.bpm.engine.event;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import jet.bpm.engine.api.ExecutionException;
 
 public interface EventPersistenceManager {
 
-    Event get(String processBusinessKey, String eventId);
+    Event get(UUID id);
 
-    Event remove(String processBusinessKey, String eventName);
+    Event remove(UUID id);
 
     Collection<Event> find(String processBusinessKey);
+    
+    Collection<Event> find(String processBusinessKey, String eventName);
 
-    void clearGroup(String processBusinessKey, String groupId);
+    void clearGroup(String processBusinessKey, UUID groupId);
 
-    void register(String processBusinessKey, Event event) throws ExecutionException;
+    void add(Event event) throws ExecutionException;
 
     List<ExpiredEvent> findNextExpiredEvent(int maxEvents) throws ExecutionException;
 }

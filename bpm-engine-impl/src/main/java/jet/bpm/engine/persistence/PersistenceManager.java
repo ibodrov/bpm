@@ -1,12 +1,13 @@
 package jet.bpm.engine.persistence;
 
+import java.util.UUID;
 import jet.bpm.engine.DefaultExecution;
 
 public interface PersistenceManager {
 
     void save(DefaultExecution execution);
     
-    DefaultExecution get(String id);
+    DefaultExecution get(UUID id);
 
-    DefaultExecution remove(String id);
+    DefaultExecution remove(UUID id);
 }

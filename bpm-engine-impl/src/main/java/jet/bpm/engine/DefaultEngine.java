@@ -20,7 +20,7 @@ public class DefaultEngine extends AbstractEngine implements Engine {
     private final ElementHandler elementHandler = new DelegatingElementHandler(this);
     private final PersistenceManager persistenceManager;
     private final LockManager lockManager;
-    private final IdGenerator idGenerator = new UuidGenerator();
+    private final UuidGenerator idGenerator = new JugUuidGenerator();
 
     private final ProcessDefinitionProvider processDefinitionProvider;
     private final ServiceTaskRegistry serviceTaskRegistry;
@@ -92,7 +92,7 @@ public class DefaultEngine extends AbstractEngine implements Engine {
     }
 
     @Override
-    public IdGenerator getIdGenerator() {
+    public UuidGenerator getUuidGenerator() {
         return idGenerator;
     }
 }

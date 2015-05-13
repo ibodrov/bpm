@@ -2,25 +2,20 @@ package jet.bpm.engine.event;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
 public class ExpiredEvent implements Serializable {
 
-    private final String processBusinessKey;
-    private final String eventName;
+    private final UUID id;
     private final Date expiredAt;
 
-    public ExpiredEvent(String processBusinessKey, String eventName, Date expiredAt) {
-        this.processBusinessKey = processBusinessKey;
-        this.eventName = eventName;
+    public ExpiredEvent(UUID id, Date expiredAt) {
+        this.id = id;
         this.expiredAt = expiredAt;
     }
 
-    public String getProcessBusinessKey() {
-        return processBusinessKey;
-    }
-
-    public String getEventName() {
-        return eventName;
+    public UUID geId() {
+        return id;
     }
 
     public Date getExpiredAt() {

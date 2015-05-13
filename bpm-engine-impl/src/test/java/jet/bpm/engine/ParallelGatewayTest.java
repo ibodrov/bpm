@@ -27,7 +27,7 @@ public class ParallelGatewayTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", "gw1"),
                 new ParallelGateway("gw1"),
                     new SequenceFlow("f2", "gw1", "ev", "false"),
-                    new IntermediateCatchEvent("ev"),
+                    new IntermediateCatchEvent("ev", "ev"),
                     new SequenceFlow("f3", "ev", "gw2"),
                 new InclusiveGateway("gw2"),
                 new SequenceFlow("f4", "gw2", "end"),
@@ -69,7 +69,7 @@ public class ParallelGatewayTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", "gw1"),
                 new ParallelGateway("gw1"),
                     new SequenceFlow("f2", "gw1", "ev", "false"),
-                    new IntermediateCatchEvent("ev"),
+                    new IntermediateCatchEvent("ev", "ev"),
                     new SequenceFlow("f3", "ev", "end"),
                     new EndEvent("end")
         )));

@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import jet.bpm.engine.api.Execution;
 import jet.bpm.engine.api.ExecutionContext;
@@ -13,8 +14,8 @@ import jet.bpm.engine.commands.ExecutionCommand;
 
 public class DefaultExecution implements Execution, Serializable {
 
-    private final String id;
-    private final String parentId;
+    private final UUID id;
+    private final UUID parentId;
     private final String processBusinessKey;
     private final Deque<ExecutionCommand> commands = new ConcurrentLinkedDeque<>();
     private final Map<ActivationKey, Integer> activations = Collections.synchronizedMap(new HashMap<ActivationKey, Integer>());
@@ -22,7 +23,7 @@ public class DefaultExecution implements Execution, Serializable {
     private boolean suspended = false;
     private ExecutionContext context;
 
-    public DefaultExecution(String id, String parentId, String processBusinessKey, ExecutionContext context) {
+    public DefaultExecution(UUID id, UUID parentId, String processBusinessKey, ExecutionContext context) {
         this.id = id;
         this.parentId = parentId;
         this.processBusinessKey = processBusinessKey;
@@ -30,12 +31,12 @@ public class DefaultExecution implements Execution, Serializable {
     }
 
     @Override
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
     @Override
-    public String getParentId() {
+    public UUID getParentId() {
         return parentId;
     }
 

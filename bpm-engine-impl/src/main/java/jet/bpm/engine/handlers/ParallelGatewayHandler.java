@@ -2,6 +2,7 @@ package jet.bpm.engine.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.FlowUtils;
@@ -50,7 +51,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
 
             s.push(new ProcessEventMappingCommand());
 
-            String groupId = getEngine().getIdGenerator().create();
+            UUID groupId = getEngine().getUuidGenerator().generate();
 
             FlowUtils.followFlows(s, c.getProcessDefinitionId(), c.getElementId(), groupId, false, filtered);
         } else {

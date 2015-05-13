@@ -4,14 +4,14 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
+import jet.bpm.engine.event.Event;
 import jet.bpm.engine.leveldb.LevelDb;
-import jet.bpm.engine.leveldb.PersistentEvent;
 import jet.bpm.engine.leveldb.Serializer;
 
 public class BusinessKeyEventIndex {
 
     private final LevelDb levelDb;
-
     private final Serializer serializer;
 
     public BusinessKeyEventIndex(LevelDb levelDb, Serializer serializer) {
@@ -27,47 +27,47 @@ public class BusinessKeyEventIndex {
         levelDb.close();
     }
 
-    public void onAdd(PersistentEvent event) {
-        String processBusinessKey = event.getEvent().getProcessBusinessKey();
+    public void onAdd(Event event) {
+        String processBusinessKey = event.getProcessBusinessKey();
 
         byte[] key = marshallKey(processBusinessKey);
-        Set<String> eventNames = list(processBusinessKey);
-        if(eventNames.isEmpty()) {
-            eventNames = new HashSet<>();
+        Set<UUID> ids = list(processBusinessKey);
+        if(ids.isEmpty()) {
+            ids = new HashSet<>();
         }
-        eventNames.add(event.getEvent().getName());
+        ids.add(event.getId());
 
-        levelDb.put(key, marshallValue(eventNames));
+        levelDb.put(key, marshallValue(ids));
     }
 
-    public void onRemove(PersistentEvent event) {
-        String processBusinessKey = event.getEvent().getProcessBusinessKey();
-        Set<String> eventNames = list(processBusinessKey);
-        if(eventNames == null) {
+    public void onRemove(Event e) {
+        String processBusinessKey = e.getProcessBusinessKey();
+        Set<UUID> ids = list(processBusinessKey);
+        if(ids == null) {
             return;
         }
 
-        boolean removed = eventNames.remove(event.getEvent().getName());
+        boolean removed = ids.remove(e.getId());
         if(!removed) {
             return;
         }
 
-        byte[] key = marshallKey(event.getEvent().getProcessBusinessKey());
+        byte[] key = marshallKey(e.getProcessBusinessKey());
 
-        if(eventNames.isEmpty()) {
+        if(ids.isEmpty()) {
             levelDb.delete(key);
         } else {
-            levelDb.put(key, marshallValue(eventNames));
+            levelDb.put(key, marshallValue(ids));
         }
     }
 
-    public Set<String> list(String processBusinessKey) {
+    public Set<UUID> list(String processBusinessKey) {
         byte[] key = marshallKey(processBusinessKey);
-        byte[] eventNameBytes = levelDb.get(key);
-        if(eventNameBytes == null) {
-            return Collections.<String>emptySet();
+        byte[] idsBytes = levelDb.get(key);
+        if(idsBytes == null) {
+            return Collections.<UUID>emptySet();
         }
-        return unmarshallValue(eventNameBytes);
+        return unmarshallValue(idsBytes);
     }
 
     private byte[] marshallKey(String processBusinessKey) {
@@ -75,11 +75,11 @@ public class BusinessKeyEventIndex {
     }
 
     @SuppressWarnings("unchecked")
-    private Set<String> unmarshallValue(byte[] value) {
-        return (Set<String>) serializer.fromBytes(value);
+    private Set<UUID> unmarshallValue(byte[] value) {
+        return (Set<UUID>) serializer.fromBytes(value);
     }
 
-    private byte[] marshallValue(Set<String> value) {
+    private byte[] marshallValue(Set<UUID> value) {
         return serializer.toBytes(value);
     }
 }

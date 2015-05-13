@@ -7,19 +7,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import jet.bpm.engine.event.Event;
 import jet.bpm.engine.event.ExpiredEvent;
 import jet.bpm.engine.leveldb.LevelDb;
-import jet.bpm.engine.leveldb.PersistentEvent;
 import jet.bpm.engine.leveldb.Serializer;
 import org.iq80.leveldb.DBIterator;
-import org.iq80.leveldb.WriteBatch;
-import org.iq80.leveldb.impl.WriteBatchImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ExpiredEventIndex {
 
     private static final Logger log = LoggerFactory.getLogger(ExpiredEventIndex.class);
+    private static final byte[] DUMMY = new byte[0];
 
     private final Serializer serializer;
     private final LevelDb db;
@@ -37,27 +36,24 @@ public class ExpiredEventIndex {
         db.close();
     }
 
-    public void onAdd(PersistentEvent event) {
-        Date expiredAt = event.getEvent().getExpiredAt();
+    public void onAdd(Event e) {
+        Date expiredAt = e.getExpiredAt();
         if (expiredAt == null) {
             return;
         }
 
-        String processBusinessKey = event.getEvent().getProcessBusinessKey();
-        String eventName = event.getEvent().getName();
-
-        byte[] key = marshallKey(event.getId(), expiredAt.getTime());
-        byte[] value = marshallValue(new IndexValue(processBusinessKey, eventName, expiredAt));
+        byte[] key = marshallKey(e.getId(), expiredAt.getTime());
+        byte[] value = DUMMY;
         db.put(key, value);
     }
 
-    public void onRemove(PersistentEvent event) {
-        Date expiredAt = event.getEvent().getExpiredAt();
+    public void onRemove(Event e) {
+        Date expiredAt = e.getExpiredAt();
         if (expiredAt == null) {
             return;
         }
 
-        byte[] key = marshallKey(event.getId(), expiredAt.getTime());
+        byte[] key = marshallKey(e.getId(), expiredAt.getTime());
         db.delete(key);
     }
 
@@ -80,7 +76,7 @@ public class ExpiredEventIndex {
                 }
 
                 IndexValue v = unmarshallValue(entry.getValue());
-                result.add(new ExpiredEvent(v.getProcessBusinessKey(), v.getEventName(), v.getExpiredAt()));
+                result.add(new ExpiredEvent(v.getId(), v.getExpiredAt()));
                 toDelete.add(entry.getKey());
             }
 
@@ -114,10 +110,6 @@ public class ExpiredEventIndex {
         return new IndexKey(new UUID(mostSigBits, leastSigBits), expiredAt);
     }
 
-    private byte[] marshallValue(IndexValue eventBusinessKey) {
-        return serializer.toBytes(eventBusinessKey);
-    }
-
     private IndexValue unmarshallValue(byte[] value) {
         return (IndexValue) serializer.fromBytes(value);
     }
@@ -143,26 +135,20 @@ public class ExpiredEventIndex {
 
     public static final class IndexValue implements Serializable  {
 
-        private final String processBusinessKey;
-        private final String eventName;
+        private final UUID id;
         private final Date expiredAt;
 
-        public IndexValue(String processBusinessKey, String eventName, Date expiredAt) {
-            this.processBusinessKey = processBusinessKey;
-            this.eventName = eventName;
+        public IndexValue(UUID id, Date expiredAt) {
+            this.id = id;
             this.expiredAt = expiredAt;
         }
 
-        public String getEventName() {
-            return eventName;
+        public UUID getId() {
+            return id;
         }
-
+        
         public Date getExpiredAt() {
             return expiredAt;
-        }
-
-        public String getProcessBusinessKey() {
-            return processBusinessKey;
         }
     }
 }

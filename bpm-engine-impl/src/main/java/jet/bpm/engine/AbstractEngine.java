@@ -3,10 +3,12 @@ package jet.bpm.engine;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.ActivationListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import jet.bpm.engine.persistence.PersistenceManager;
 import jet.bpm.engine.api.Engine;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import jet.bpm.engine.api.Execution;
@@ -45,7 +47,7 @@ public abstract class AbstractEngine implements Engine {
 
     public abstract LockManager getLockManager();
 
-    public abstract IdGenerator getIdGenerator();
+    public abstract UuidGenerator getUuidGenerator();
 
     @Override
     public void addListener(ActivationListener l) {
@@ -66,9 +68,9 @@ public abstract class AbstractEngine implements Engine {
         ExecutionContext ctx = new ExecutionContextImpl(null);
         applyVariables(ctx, variables);
 
-        IdGenerator idg = getIdGenerator();
+        UuidGenerator idg = getUuidGenerator();
 
-        DefaultExecution s = new DefaultExecution(idg.create(), null, processBusinessKey, ctx);
+        DefaultExecution s = new DefaultExecution(idg.generate(), null, processBusinessKey, ctx);
         s.push(new ProcessElementCommand(processDefinitionId, start.getId()));
 
         LockManager lm = getLockManager();
@@ -82,45 +84,58 @@ public abstract class AbstractEngine implements Engine {
 
     @Override
     public void resume(String processBusinessKey, String eventName, Map<String, Object> variables) throws ExecutionException {
+        EventPersistenceManager em = getEventManager();
+        Collection<Event> evs = em.find(processBusinessKey, eventName);
+        if (evs == null || evs.isEmpty()) {
+            throw new NoEventFoundException("No event '%s' found for process '%s'", eventName, processBusinessKey);
+        } else if (evs.size() > 1) {
+            throw new ExecutionException("Non-unique event name in process '%s': %s", processBusinessKey, eventName);
+        }
+        
+        Event e = evs.iterator().next();
+        
         LockManager lm = getLockManager();
         lm.lock(processBusinessKey);
         try {
-            EventPersistenceManager em = getEventManager();
-            Event e = em.remove(processBusinessKey, eventName);
-            if (e == null) {
-                throw new NoEventFoundException("No event '%s' found for process '%s'", eventName, processBusinessKey);
-            }
-
-            if (e.isExclusive()) {
-                // exclusive event means that only one event from the group of
-                // events can happen. Rest of events must be removed.
-                em.clearGroup(processBusinessKey, e.getGroupId());
-            }
-
-            String eid = e.getExecutionId();
-            log.debug("resume ['{}', '{}'] -> got '{}'", processBusinessKey, eventName, eid);
-
-            PersistenceManager pm = getPersistenceManager();
-            DefaultExecution s = pm.remove(eid);
-            // TODO do not remove?
-            if (s == null) {
-                throw new ExecutionException("No execution '%s' found for process '%s'", eid, processBusinessKey);
-            }
-
-            s.setSuspended(false);
-            
-            applyVariables(s.getContext(), variables);
-            
-            if (!EventMapHelper.isEmpty(s)) {
-                EventMapHelper.pushCommands(s, eventName);
-            } else if (s.isDone()) {
-                throw new ExecutionException("No event mapping found in process '%s' or no commands in execution", eid);
-            }
-
-            run(s);
+            resume(e, variables);
         } finally {
             lm.unlock(processBusinessKey);
         }
+    }
+    
+    public void resume(Event e, Map<String, Object> variables) throws ExecutionException {
+        String processBusinessKey = e.getProcessBusinessKey();
+        String eventName = e.getName();
+
+        if (e.isExclusive()) {
+            // exclusive event means that only one event from the group of
+            // events can happen. Rest of events must be removed.
+            EventPersistenceManager em = getEventManager();
+            em.clearGroup(processBusinessKey, e.getGroupId());
+        }
+
+        UUID eid = e.getExecutionId();
+        log.debug("resume ['{}', '{}'] -> got '{}'", processBusinessKey, eventName, eid);
+
+        PersistenceManager pm = getPersistenceManager();
+        DefaultExecution s = pm.remove(eid);
+        // TODO do not remove?
+        if (s == null) {
+            throw new ExecutionException("No execution '%s' found for process '%s'", eid, processBusinessKey);
+        }
+
+        s.setSuspended(false);
+
+        applyVariables(s.getContext(), variables);
+
+        if (!EventMapHelper.isEmpty(s)) {
+            EventMapHelper.pushCommands(s, eventName);
+        } else if (s.isDone()) {
+            throw new ExecutionException("No event mapping found in process '%s' or no commands in execution", eid);
+        }
+
+        run(s);
+
     }
 
     private void applyVariables(ExecutionContext ctx, Map<String, Object> m) {
@@ -138,7 +153,7 @@ public abstract class AbstractEngine implements Engine {
 
         while (!s.isSuspended()) {
             if (s.isDone()) {
-                String pid = s.getParentId();
+                UUID pid = s.getParentId();
                 if (pid == null) {
                     log.debug("run ['{}'] -> no parent execution, breaking", s.getId());
                     break;

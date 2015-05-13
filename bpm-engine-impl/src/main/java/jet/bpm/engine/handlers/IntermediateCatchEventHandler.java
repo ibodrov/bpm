@@ -1,6 +1,7 @@
 package jet.bpm.engine.handlers;
 
 import java.util.Date;
+import java.util.UUID;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.EventMapHelper;
@@ -55,21 +56,23 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
             s.push(new ProcessElementCommand(pd.getId(), next.getId(), c.getGroupId(), c.isExclusive()));
         }
         
-        getEngine().getEventManager().register(s.getBusinessKey(), e);
+        getEngine().getEventManager().add(e);
     }
 
     private Event makeEvent(ProcessElementCommand c, DefaultExecution s) throws ExecutionException {
         ProcessDefinition pd = getProcessDefinition(c);
         IntermediateCatchEvent ice = (IntermediateCatchEvent) ProcessDefinitionUtils.findElement(pd, c.getElementId());
         
-        // link execution with the event
-        String evId = getEventId(ice);
+        UUID id = getEngine().getUuidGenerator().generate();
+        String name = getEventName(ice);
+        
         ExpressionManager em = getEngine().getExpressionManager();
         ExecutionContext ctx = s.getContext();
         Date timeDate = parseTimeDate(ice.getTimeDate(), c, ctx, em);
         String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
         Date expiredAt = timeDate != null ? timeDate : parseDuration(timeDuration);
-        Event e = new Event(evId, s.getId(), c.getGroupId(), s.getBusinessKey(), c.isExclusive(), expiredAt);
+        
+        Event e = new Event(id, s.getId(), c.getGroupId(), name, s.getBusinessKey(), c.isExclusive(), expiredAt);
         return e;
     }
     
@@ -103,13 +106,9 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
     private static boolean isDuration(String time) {
         return time.startsWith("P");
     }
-
-    /**
-     * Return the event ID. If the specifed event has message reference, it will
-     * be used as an event ID. Otherwise, element ID will be used.
-     */
-    private String getEventId(IntermediateCatchEvent ev) {
-        return ev.getMessageRef() != null ? ev.getMessageRef() : ev.getId();
+    
+    private static String getEventName(IntermediateCatchEvent e) {
+        return e.getMessageRef() != null ? e.getMessageRef() : e.getId();
     }
 
     private <T> T eval(String expr, ExecutionContext ctx, ExpressionManager em, Class<T> type) {

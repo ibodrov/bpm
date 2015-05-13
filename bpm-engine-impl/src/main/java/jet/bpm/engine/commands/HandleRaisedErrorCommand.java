@@ -3,6 +3,7 @@ package jet.bpm.engine.commands;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.BpmnErrorHelper;
@@ -23,14 +24,14 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
     
     private final String processDefinitionId;
     private final String elementId;
-    private final String groupId;
+    private final UUID groupId;
     private final boolean exclusive;
 
     public HandleRaisedErrorCommand(ProcessElementCommand c) {
         this(c.getProcessDefinitionId(), c.getElementId(), c.getGroupId(), c.isExclusive());
     }
 
-    public HandleRaisedErrorCommand(String processDefinitionId, String elementId, String groupId, boolean exclusive) {
+    public HandleRaisedErrorCommand(String processDefinitionId, String elementId, UUID groupId, boolean exclusive) {
         this.processDefinitionId = processDefinitionId;
         this.elementId = elementId;
         this.groupId = groupId;

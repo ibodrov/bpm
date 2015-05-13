@@ -7,6 +7,7 @@ import com.esotericsoftware.kryo.pool.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
+import java.util.UUID;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.ExecutionContextImpl;
 import jet.bpm.engine.commands.ExecutionCommand;
@@ -16,6 +17,8 @@ import jet.bpm.engine.commands.PersistExecutionCommand;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.commands.ProcessEventMappingCommand;
 import jet.bpm.engine.commands.SuspendExecutionCommand;
+import jet.bpm.engine.event.Event;
+import jet.bpm.engine.event.ExpiredEvent;
 import jet.bpm.engine.leveldb.index.ExpiredEventIndex.IndexValue;
 
 public class KryoSerializer implements Serializer {
@@ -29,8 +32,10 @@ public class KryoSerializer implements Serializer {
             public Kryo create() {
                 Kryo kryo = new Kryo();
                 kryo.setReferences(true);
+                kryo.register(UUID.class);
+                kryo.register(Event.class);
+                kryo.register(ExpiredEvent.class);
                 kryo.register(IndexValue.class);
-                kryo.register(PersistentEvent.class);
                 kryo.register(HashSet.class);
                 kryo.register(DefaultExecution.class);
                 kryo.register(ExecutionContextImpl.class);

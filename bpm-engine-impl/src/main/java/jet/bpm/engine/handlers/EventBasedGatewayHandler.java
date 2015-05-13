@@ -1,5 +1,6 @@
 package jet.bpm.engine.handlers;
 
+import java.util.UUID;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
@@ -22,7 +23,7 @@ public class EventBasedGatewayHandler extends AbstractElementHandler {
         // is done.
         s.push(new ProcessEventMappingCommand());
 
-        String groupId = getEngine().getIdGenerator().create();
+        UUID groupId = getEngine().getUuidGenerator().generate();
 
         // add to the stack all the element of outgoing flows of this gateway
         // and mark them with 'exclusiveness' flag (because in the event gateway

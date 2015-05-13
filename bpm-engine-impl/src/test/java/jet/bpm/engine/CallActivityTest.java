@@ -101,11 +101,11 @@ public class CallActivityTest extends AbstractEngineTest {
                 new SequenceFlow("f1", "start", "gw"),
                 new EventBasedGateway("gw"),
                     new SequenceFlow("f2", "gw", ev1),
-                    new IntermediateCatchEvent(ev1),
+                    new IntermediateCatchEvent(ev1, ev1),
                     new SequenceFlow("f3", ev1, "end"),
 
                     new SequenceFlow("f4", "gw", ev2),
-                    new IntermediateCatchEvent(ev2),
+                    new IntermediateCatchEvent(ev2, ev2),
                     new SequenceFlow("f5", ev2, "end"),
                 new EndEvent("end")
         )));

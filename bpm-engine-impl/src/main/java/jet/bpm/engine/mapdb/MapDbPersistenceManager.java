@@ -2,6 +2,7 @@ package jet.bpm.engine.mapdb;
 
 import java.io.File;
 import java.util.Map;
+import java.util.UUID;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.persistence.PersistenceManager;
 import org.mapdb.DB;
@@ -11,7 +12,7 @@ public class MapDbPersistenceManager implements PersistenceManager {
     
     private String baseDir = "/tmp/";
     private DB db;
-    private Map<String, DefaultExecution> store;
+    private Map<UUID, DefaultExecution> store;
 
     public void setBaseDir(String baseDir) {
         this.baseDir = baseDir;
@@ -40,17 +41,17 @@ public class MapDbPersistenceManager implements PersistenceManager {
 
     @Override
     public void save(DefaultExecution execution) {
-        String id = execution.getId();
+        UUID id = execution.getId();
         store.put(id, execution);
     }
 
     @Override
-    public DefaultExecution get(String id) {
+    public DefaultExecution get(UUID id) {
         return store.get(id);
     }
 
     @Override
-    public DefaultExecution remove(String id) {
+    public DefaultExecution remove(UUID id) {
         return store.remove(id);        
     }
 }
