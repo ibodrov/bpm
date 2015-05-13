@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import jet.bpm.engine.JugUuidGenerator;
-import jet.bpm.engine.UuidGenerator;
 import jet.bpm.engine.event.Event;
 import jet.bpm.engine.event.EventStorage;
 import jet.bpm.engine.event.ExpiredEvent;
@@ -23,7 +21,6 @@ public class LevelDbEventStorage implements EventStorage {
     private final BusinessKeyEventIndex businessKeyEventLevelDbIndex;
     private final LevelDb eventDb;
     private final Serializer serializer;
-    private final UuidGenerator uuidGenerator = new JugUuidGenerator();
 
     public LevelDbEventStorage(Configuration cfg, DBFactory dbFactory, Serializer serializer) {
         eventDb = new LevelDb(dbFactory, cfg.getEventPath(), cfg.isSyncWrite());
