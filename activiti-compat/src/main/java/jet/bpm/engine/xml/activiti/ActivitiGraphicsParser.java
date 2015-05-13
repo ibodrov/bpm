@@ -25,6 +25,7 @@ public class ActivitiGraphicsParser implements GraphicsParser {
 
     private static final Logger log = LoggerFactory.getLogger(ActivitiGraphicsParser.class);
 
+    @Override
     public ProcessGraphics parse(InputStream in) throws ParserException {
         if (in == null) {
             throw new NullPointerException("Input cannot be null");
@@ -59,13 +60,17 @@ public class ActivitiGraphicsParser implements GraphicsParser {
 
         private List<Waypoint> waypoints;
 
-        private final ProcessGraphics graphics = new ProcessGraphics();
+        private ProcessGraphics graphics;
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             log.debug("startElement ['{}']", qName);
 
             switch (qName) {
+                case "process":
+                    String processId = attributes.getValue("id");
+                    graphics = new ProcessGraphics(processId);
+                    break;                
                 case "bpmndi:BPMNShape": {
                     id = attributes.getValue("id");
                     elementId = attributes.getValue("bpmnElement");

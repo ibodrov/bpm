@@ -75,6 +75,7 @@ public class ActivitiParser implements Parser {
         private String id;
         private String name;
         private String processId;
+        private String processName;
         private String attachedToRef;
         private String errorRef;
         private String sourceRef;
@@ -100,6 +101,7 @@ public class ActivitiParser implements Parser {
             switch (qName) {
                 case "process":
                     processId = attributes.getValue("id");
+                    processName = attributes.getValue("name");
                     children = new ArrayList<>();
                     break;
                     
@@ -272,6 +274,8 @@ public class ActivitiParser implements Parser {
             switch (qName) {
                 case "process":
                     process = new ProcessDefinition(processId, children);
+                    process.setName(processName);
+                    
                     children = null;
                     break;
                     

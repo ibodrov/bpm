@@ -9,6 +9,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <name>BPM Engine (Activiti Compat)</name>
+
     <groupId>jet.bpm</groupId>
     <artifactId>activiti-compat</artifactId>
     <packaging>bundle</packaging>
