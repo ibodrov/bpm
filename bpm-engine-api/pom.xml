@@ -26,8 +26,9 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>*</Import-Package>
                         <Export-Package>
-                            jet.bpm.engine.api,
-                            jet.bpm.engine.model
+                            jet.bpm.engine.api;version=${project.version},
+                            jet.bpm.engine.model;version=${project.version},
+                            jet.bpm.engine.model.graphics;version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>
