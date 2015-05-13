@@ -51,7 +51,7 @@ public class DelegatingElementHandler implements ElementHandler {
     }
 
     private void register(Class<? extends AbstractElement> k, ElementHandler h) {
-        delegates.put(k.getSimpleName(), h);
+        delegates.put(k.getName(), h);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class DelegatingElementHandler implements ElementHandler {
         ProcessDefinition pd = provider.getById(c.getProcessDefinitionId());
         AbstractElement e = ProcessDefinitionUtils.findElement(pd, c.getElementId());
 
-        String key = e.getClass().getSimpleName();
+        String key = e.getClass().getName();
         log.debug("handle ['{}', '{}'] -> got {} ('{}')", s.getId(), c.getProcessDefinitionId(), key, e.getId());
 
         ElementHandler h = delegates.get(key);
