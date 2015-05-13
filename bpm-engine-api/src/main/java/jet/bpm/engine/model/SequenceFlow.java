@@ -9,11 +9,11 @@ public class SequenceFlow extends AbstractElement {
     private final ExecutionListener[] listeners;
 
     public SequenceFlow(String id, String from, String to) {
-        this(id, from, to, (String)null, (ExecutionListener) null);
+        this(id, from, to, null, null);
     }
     
     public SequenceFlow(String id, String from, String to, String expression) {
-        this(id, from, to, expression, (ExecutionListener) null);
+        this(id, from, to, expression, null);
     }
     
     public SequenceFlow(String id, String from, String to, ExecutionListener ... listeners) {
