@@ -6,6 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import jet.bpm.engine.DefaultEngine;
+import jet.bpm.engine.api.NoEventFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,6 +139,8 @@ public class EventScheduler {
                 String eventName = event.getEventName();
 
                 engine.resume(processBusinessKey, eventName, null);
+            } catch (NoEventFoundException e) {
+                log.warn("eventExecutionLoop -> no event found: {}", e.getMessage());
             } catch (InterruptedException e) {
                 log.info("eventExecutionLoop -> interrupted");
                 Thread.currentThread().interrupt();

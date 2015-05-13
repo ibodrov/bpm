@@ -38,7 +38,6 @@ public class KryoSerializerTest {
         assertEquals(v.getEventName(), vv.getEventName());
         assertEquals(v.getExpiredAt(), vv.getExpiredAt());
         assertEquals(v.getProcessBusinessKey(), vv.getProcessBusinessKey());
-        assertEquals(v.getProcessedMarker(), vv.getProcessedMarker());
     }
 
     @Test

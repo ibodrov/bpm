@@ -1,9 +1,9 @@
 package jet.bpm.engine.leveldb.index;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -12,6 +12,8 @@ import jet.bpm.engine.leveldb.LevelDb;
 import jet.bpm.engine.leveldb.PersistentEvent;
 import jet.bpm.engine.leveldb.Serializer;
 import org.iq80.leveldb.DBIterator;
+import org.iq80.leveldb.WriteBatch;
+import org.iq80.leveldb.impl.WriteBatchImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,23 +21,20 @@ public class ExpiredEventIndex {
 
     private static final Logger log = LoggerFactory.getLogger(ExpiredEventIndex.class);
 
-    private final String currentMarker = UUID.randomUUID().toString();
-
     private final Serializer serializer;
-
-    private final LevelDb levelDb;
+    private final LevelDb db;
 
     public ExpiredEventIndex(LevelDb levelDb, Serializer serializer) {
-        this.levelDb = levelDb;
+        this.db = levelDb;
         this.serializer = serializer;
     }
 
     public void init() {
-        levelDb.init();
+        db.init();
     }
 
     public void close() {
-        levelDb.close();
+        db.close();
     }
 
     public void onAdd(PersistentEvent event) {
@@ -47,9 +46,9 @@ public class ExpiredEventIndex {
         String processBusinessKey = event.getEvent().getProcessBusinessKey();
         String eventName = event.getEvent().getName();
 
-        byte[] key = marshallKey(new IndexKey(event.getId(), expiredAt.getTime()));
+        byte[] key = marshallKey(event.getId(), expiredAt.getTime());
         byte[] value = marshallValue(new IndexValue(processBusinessKey, eventName, expiredAt));
-        levelDb.put(key, value);
+        db.put(key, value);
     }
 
     public void onRemove(PersistentEvent event) {
@@ -58,18 +57,16 @@ public class ExpiredEventIndex {
             return;
         }
 
-        byte[] key = marshallKey(new IndexKey(event.getId(), expiredAt.getTime()));
-        levelDb.delete(key);
+        byte[] key = marshallKey(event.getId(), expiredAt.getTime());
+        db.delete(key);
     }
 
     public List<ExpiredEvent> list(Date now, int maxEventsCount) {
         List<ExpiredEvent> result = new ArrayList<>();
-
         long nowTime = now.getTime();
 
-        int inProcessItemsCount = 0;
-        Map<IndexKey, IndexValue> processedItems = new HashMap<>();
-        try (DBIterator it = levelDb.iterator();) {
+        List<byte[]> toDelete = new ArrayList<>();
+        try (DBIterator it = db.iterator();) {
             for (it.seekToFirst(); it.hasNext();) {
                 Map.Entry<byte[], byte[]> entry = it.next();
 
@@ -83,43 +80,21 @@ public class ExpiredEventIndex {
                 }
 
                 IndexValue v = unmarshallValue(entry.getValue());
-
-                boolean isInProcess = currentMarker.equals(v.getProcessedMarker());
-
-                if(!isInProcess) {
-                    result.add(new ExpiredEvent(v.getProcessBusinessKey(), v.getEventName(), v.getExpiredAt()));
-                    processedItems.put(k, v);
-                } else {
-                    inProcessItemsCount++;
-                }
+                result.add(new ExpiredEvent(v.getProcessBusinessKey(), v.getEventName(), v.getExpiredAt()));
+                toDelete.add(entry.getKey());
             }
 
-            for (Map.Entry<IndexKey, IndexValue> item : processedItems.entrySet()) {
-                IndexKey k = item.getKey();
-                IndexValue v = item.getValue();
-
-                v.setProcessedMarker(currentMarker);
-
-                levelDb.put(marshallKey(k), marshallValue(v));
-            }
+            db.delete(toDelete);
 
             log.info("list ['{}', {}] -> done ({})", now, maxEventsCount, result.size());
-
-            if(inProcessItemsCount > 0) {
-                log.warn("list ['{}', {}] -> found items in process ({})", now, maxEventsCount, inProcessItemsCount);
-            }
-
             return result;
         } catch (Exception e) {
             log.error("list ['{}', {}] -> error", now, maxEventsCount, e);
-            throw new RuntimeException("call 'list' error");
+            throw new RuntimeException("call 'list' error", e);
         }
     }
 
-    private byte[] marshallKey(IndexKey key) {
-        UUID id = key.getEventId();
-        long expiredAt = key.getExpiredAt();
-
+    private byte[] marshallKey(UUID id, long expiredAt) {
         long mostSigBits = id.getMostSignificantBits();
         long leastSigBits = id.getLeastSignificantBits();
         return ByteBuffer.allocate(8 + 8 + 8)
@@ -147,10 +122,9 @@ public class ExpiredEventIndex {
         return (IndexValue) serializer.fromBytes(value);
     }
 
-    private static final class IndexKey {
+    private static final class IndexKey implements Serializable {
 
         private final UUID eventId;
-
         private final long expiredAt;
 
         public IndexKey(UUID eventId, long expiredAt) {
@@ -167,9 +141,7 @@ public class ExpiredEventIndex {
         }
     }
 
-    public static final class IndexValue {
-
-        private String processedMarker;
+    public static final class IndexValue implements Serializable  {
 
         private final String processBusinessKey;
         private final String eventName;
@@ -179,14 +151,6 @@ public class ExpiredEventIndex {
             this.processBusinessKey = processBusinessKey;
             this.eventName = eventName;
             this.expiredAt = expiredAt;
-        }
-
-        public void setProcessedMarker(String processedMarker) {
-            this.processedMarker = processedMarker;
-        }
-
-        public String getProcessedMarker() {
-            return processedMarker;
         }
 
         public String getEventName() {

@@ -1,11 +1,12 @@
 package jet.bpm.engine;
 
 import java.io.Serializable;
-import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import jet.bpm.engine.api.Execution;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.commands.ExecutionCommand;
@@ -15,8 +16,8 @@ public class DefaultExecution implements Execution, Serializable {
     private final String id;
     private final String parentId;
     private final String processBusinessKey;
-    private final Deque<ExecutionCommand> commands = new ArrayDeque<>();
-    private final Map<ActivationKey, Integer> activations = new HashMap<>();
+    private final Deque<ExecutionCommand> commands = new ConcurrentLinkedDeque<>();
+    private final Map<ActivationKey, Integer> activations = Collections.synchronizedMap(new HashMap<ActivationKey, Integer>());
     
     private boolean suspended = false;
     private ExecutionContext context;

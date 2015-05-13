@@ -9,7 +9,7 @@ import java.util.Set;
 public class ExecutionContextImpl implements ExecutionContext {
     
     private final ExecutionContext parent;
-    private final Map<String, Object> variables = new HashMap<>();
+    private final Map<String, Object> variables = Collections.synchronizedMap(new HashMap<String, Object>());
 
     public ExecutionContextImpl(ExecutionContext parent) {
         this.parent = parent;

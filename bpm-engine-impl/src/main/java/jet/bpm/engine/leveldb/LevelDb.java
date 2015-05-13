@@ -2,13 +2,16 @@ package jet.bpm.engine.leveldb;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
+import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
+import org.iq80.leveldb.impl.WriteBatchImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +66,14 @@ public class LevelDb {
 
     public void delete(byte[] key) throws DBException {
         db.delete(key);
+    }
+
+    public void delete(Collection<byte[]> keys) throws DBException {
+        WriteBatch b = db.createWriteBatch();
+        for (byte[] k : keys) {
+            b.delete(k);
+        }
+        db.write(b);
     }
 
     private DB openDatabase(DBFactory dbFactory, String location, Options options) throws IOException {
