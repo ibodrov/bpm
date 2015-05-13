@@ -67,6 +67,7 @@ public class ExpiredEventIndex {
 
         long nowTime = now.getTime();
 
+        int inProcessItemsCount = 0;
         Map<IndexKey, IndexValue> processedItems = new HashMap<>();
         try (DBIterator it = levelDb.iterator();) {
             for (it.seekToFirst(); it.hasNext();) {
@@ -89,7 +90,7 @@ public class ExpiredEventIndex {
                     result.add(new ExpiredEvent(v.getProcessBusinessKey(), v.getEventName(), v.getExpiredAt()));
                     processedItems.put(k, v);
                 } else {
-                    log.warn("list ['{}', {}] -> found items in process", now, maxEventsCount);
+                    inProcessItemsCount++;
                 }
             }
 
@@ -103,6 +104,10 @@ public class ExpiredEventIndex {
             }
 
             log.info("list ['{}', {}] -> done ({})", now, maxEventsCount, result.size());
+
+            if(inProcessItemsCount > 0) {
+                log.warn("list ['{}', {}] -> found items in process ({})", now, maxEventsCount, inProcessItemsCount);
+            }
 
             return result;
         } catch (Exception e) {
