@@ -1,6 +1,5 @@
 package jet.bpm.engine.leveldb.index;
 
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,7 +9,6 @@ import java.util.UUID;
 import jet.bpm.engine.event.Event;
 import jet.bpm.engine.event.ExpiredEvent;
 import jet.bpm.engine.leveldb.LevelDb;
-import jet.bpm.engine.leveldb.Serializer;
 import org.iq80.leveldb.DBIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +18,10 @@ public class ExpiredEventIndex {
     private static final Logger log = LoggerFactory.getLogger(ExpiredEventIndex.class);
     private static final byte[] DUMMY = new byte[0];
 
-    private final Serializer serializer;
     private final LevelDb db;
 
-    public ExpiredEventIndex(LevelDb levelDb, Serializer serializer) {
-        this.db = levelDb;
-        this.serializer = serializer;
-    }
+    public ExpiredEventIndex(LevelDb levelDb) {
+        this.db = levelDb;    }
 
     public void init() {
         db.init();
@@ -59,15 +54,14 @@ public class ExpiredEventIndex {
 
     public List<ExpiredEvent> list(Date now, int maxEventsCount) {
         List<ExpiredEvent> result = new ArrayList<>();
-        long nowTime = now.getTime();
 
         List<byte[]> toDelete = new ArrayList<>();
         try (DBIterator it = db.iterator();) {
             for (it.seekToFirst(); it.hasNext();) {
                 Map.Entry<byte[], byte[]> entry = it.next();
 
-                IndexKey k = unmarshallKey(entry.getKey());
-                if (k.getExpiredAt() > nowTime) {
+                ExpiredEvent e = unmarshall(entry.getKey());
+                if (e.getExpiredAt().after(now)) {
                     break;
                 }
 
@@ -75,8 +69,7 @@ public class ExpiredEventIndex {
                     break;
                 }
 
-                IndexValue v = unmarshallValue(entry.getValue());
-                result.add(new ExpiredEvent(v.getId(), v.getExpiredAt()));
+                result.add(e);
                 toDelete.add(entry.getKey());
             }
 
@@ -100,55 +93,13 @@ public class ExpiredEventIndex {
                 .array();
     }
 
-    private IndexKey unmarshallKey(byte[] key) {
+    private ExpiredEvent unmarshall(byte[] key) {
         ByteBuffer buffer = ByteBuffer.allocate(8 + 8 + 8).put(key);
         buffer.flip();
         long expiredAt = buffer.getLong();
         long mostSigBits = buffer.getLong();
         long leastSigBits = buffer.getLong();
 
-        return new IndexKey(new UUID(mostSigBits, leastSigBits), expiredAt);
-    }
-
-    private IndexValue unmarshallValue(byte[] value) {
-        return (IndexValue) serializer.fromBytes(value);
-    }
-
-    private static final class IndexKey implements Serializable {
-
-        private final UUID eventId;
-        private final long expiredAt;
-
-        public IndexKey(UUID eventId, long expiredAt) {
-            this.eventId = eventId;
-            this.expiredAt = expiredAt;
-        }
-
-        public UUID getEventId() {
-            return eventId;
-        }
-
-        public long getExpiredAt() {
-            return expiredAt;
-        }
-    }
-
-    public static final class IndexValue implements Serializable  {
-
-        private final UUID id;
-        private final Date expiredAt;
-
-        public IndexValue(UUID id, Date expiredAt) {
-            this.id = id;
-            this.expiredAt = expiredAt;
-        }
-
-        public UUID getId() {
-            return id;
-        }
-        
-        public Date getExpiredAt() {
-            return expiredAt;
-        }
+        return new ExpiredEvent(new UUID(mostSigBits, leastSigBits), new Date(expiredAt));
     }
 }

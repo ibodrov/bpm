@@ -29,7 +29,7 @@ public class LevelDbEventStorage implements EventStorage {
         eventDb = new LevelDb(dbFactory, cfg.getEventPath(), cfg.isSyncWrite());
 
         LevelDb expiredEventIndexDb = new LevelDb(dbFactory, cfg.getExpiredEventIndexPath(), cfg.isSyncWrite());
-        this.expiredEventLevelDbIndex = new ExpiredEventIndex(expiredEventIndexDb, serializer);
+        this.expiredEventLevelDbIndex = new ExpiredEventIndex(expiredEventIndexDb);
 
         LevelDb businessKeyEventIndexDb = new LevelDb(dbFactory, cfg.getBusinessKeyEventIndexPath(), cfg.isSyncWrite());
         this.businessKeyEventLevelDbIndex = new BusinessKeyEventIndex(businessKeyEventIndexDb, serializer);
