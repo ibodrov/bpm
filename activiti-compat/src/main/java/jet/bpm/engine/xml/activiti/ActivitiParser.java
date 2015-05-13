@@ -61,16 +61,19 @@ public class ActivitiParser implements Parser {
     private static final class Handler extends DefaultHandler {
         
         private static final class Item {
+            private final String name;
             private final String processId;
             private final Collection<AbstractElement> children;
 
-            public Item(String processId, Collection<AbstractElement> children) {
+            public Item(String processId, String name, Collection<AbstractElement> children) {
                 this.processId = processId;
+                this.name = name;
                 this.children = children;
             }
         }
         
         private String id;
+        private String name;
         private String processId;
         private String attachedToRef;
         private String errorRef;
@@ -101,7 +104,8 @@ public class ActivitiParser implements Parser {
                     break;
                     
                 case "subProcess":
-                    items.push(new Item(processId, children));
+                    name = attributes.getValue("name");                    
+                    items.push(new Item(processId, name, children));
                     processId = attributes.getValue("id");
                     children = new ArrayList<>();
                     break;
@@ -114,6 +118,7 @@ public class ActivitiParser implements Parser {
 
                 case "callActivity":
                     id = attributes.getValue("id");
+                    name = attributes.getValue("name");
                     calledElement = attributes.getValue("calledElement");
                     break;
 
@@ -133,6 +138,7 @@ public class ActivitiParser implements Parser {
 
                 case "sequenceFlow":
                     id = attributes.getValue("id");
+                    name = attributes.getValue("name");
                     sourceRef = attributes.getValue("sourceRef");
                     targetRef = attributes.getValue("targetRef");
                     break;
@@ -161,7 +167,8 @@ public class ActivitiParser implements Parser {
 
                 case "serviceTask":
                     id = attributes.getValue("id");
-
+                    name = attributes.getValue("name");
+                    
                     String simple = attributes.getValue("activiti:expression");
                     String delegate = attributes.getValue("activiti:delegateExpression");
 
@@ -177,6 +184,7 @@ public class ActivitiParser implements Parser {
                     }
 
                     ServiceTask st = new ServiceTask(id, type, expr);
+                    st.setName(name);
                     children.add(st);
                     break;
 
@@ -274,7 +282,10 @@ public class ActivitiParser implements Parser {
                     processId = i.processId;
                     children = i.children;
                     
+                    p.setName(i.name);
+
                     children.add(p);
+                    
                     break;
 
                 case "boundaryEvent":
@@ -294,8 +305,10 @@ public class ActivitiParser implements Parser {
                     }
 
                     SequenceFlow sf = new SequenceFlow(id, sourceRef, targetRef, expr, l);
+                    sf.setName(name);
                     children.add(sf);
 
+                    name = null;
                     sourceRef = null;
                     targetRef = null;
                     text = null;
@@ -311,10 +324,12 @@ public class ActivitiParser implements Parser {
                     
                 case "callActivity":
                     CallActivity ca = new CallActivity(id, calledElement, in, out);
+                    ca.setName(name);                    
                     children.add(ca);
                     
                     calledElement = null;
                     in = null;
+                    name = null;
                     out = null;
                     break;
                 

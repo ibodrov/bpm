@@ -6,7 +6,7 @@ import jet.bpm.engine.api.ExecutionException;
 
 public interface EventPersistenceManager {
 
-    Event get(String processBusinessKey, String eventId);
+    Event get(String processBusinessKey, String eventName);
 
     Event remove(String processBusinessKey, String eventName);
 
