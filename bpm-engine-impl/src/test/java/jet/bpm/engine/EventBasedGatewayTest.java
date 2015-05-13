@@ -111,7 +111,7 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
 
         // ---
 
-        verify(eventManager, times(1)).clearGroup(eq(key), eq(eventGroup));
+        verify(eventManager, times(1)).clearGroup(eq(key), anyString());
     }
 
     /**

@@ -22,9 +22,11 @@ public class EventBasedGatewayHandler extends AbstractElementHandler {
         // is done.
         s.push(new ProcessEventMappingCommand());
 
+        String groupId = getEngine().getIdGenerator().create();
+
         // add to the stack all the element of outgoing flows of this gateway
         // and mark them with 'exclusiveness' flag (because in the event gateway
         // only one flow can complete)
-        FlowUtils.followFlows(getEngine(), s, c, c.getElementId(), true);
+        FlowUtils.followFlows(getEngine(), s, c, groupId, true);
     }
 }
