@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.UUID;
 import jet.bpm.engine.DefaultExecution;
+import jet.bpm.engine.EventMapHelper.EventRecord;
 import jet.bpm.engine.ExecutionContextImpl;
 import jet.bpm.engine.commands.ExecutionCommand;
 import jet.bpm.engine.commands.HandleRaisedErrorCommand;
@@ -37,6 +38,7 @@ public class KryoSerializer implements Serializer {
                 kryo.register(HashSet.class);
                 kryo.register(DefaultExecution.class);
                 kryo.register(ExecutionContextImpl.class);
+                kryo.register(EventRecord.class);
 
                 kryo.register(ProcessElementCommand.class);
                 kryo.register(ExecutionCommand.class);

@@ -1,5 +1,6 @@
 package jet.bpm.engine.leveldb.index;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -101,5 +102,21 @@ public class ExpiredEventIndex {
         long leastSigBits = buffer.getLong();
 
         return new ExpiredEvent(new UUID(mostSigBits, leastSigBits), new Date(expiredAt));
+    }
+
+    public void stats() throws IOException {
+        System.out.print("calculating size... ");
+        System.err.println(count(db) + " expired index item(s), ");
+    }
+
+    private int count(LevelDb db) throws IOException {
+        int cnt = 0;
+        try (DBIterator i = db.iterator()) {
+            while (i.hasNext()) {
+                i.next();
+                cnt++;
+            }
+        }
+        return cnt;
     }
 }

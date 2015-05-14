@@ -45,7 +45,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
             // grouped event
             SequenceFlow next = ProcessDefinitionUtils.findOutgoingFlow(pd, c.getElementId());
             
-            EventMapHelper.put(s, e.getName(),
+            EventMapHelper.put(s, e,
                     new PersistExecutionCommand(),
                     new ProcessElementCommand(pd.getId(), next.getId(), c.getGroupId(), c.isExclusive()));
         } else {
