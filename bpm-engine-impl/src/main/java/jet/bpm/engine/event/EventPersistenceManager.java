@@ -11,8 +11,6 @@ public interface EventPersistenceManager {
 
     Event remove(UUID id);
 
-    Collection<Event> find(String processBusinessKey);
-    
     Collection<Event> find(String processBusinessKey, String eventName);
 
     void clearGroup(String processBusinessKey, UUID groupId);

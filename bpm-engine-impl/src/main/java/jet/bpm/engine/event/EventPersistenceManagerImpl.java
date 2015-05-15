@@ -32,13 +32,6 @@ public class EventPersistenceManagerImpl implements EventPersistenceManager {
     }
 
     @Override
-    public Collection<Event> find(String processBusinessKey) {
-        Collection<Event> result = eventStorage.find(processBusinessKey);
-        log.debug("find ['{}'] -> done ({})", processBusinessKey, result.size());
-        return result;
-    }
-
-    @Override
     public Collection<Event> find(String processBusinessKey, String eventName) {
         Collection<Event> result = eventStorage.find(processBusinessKey, eventName);
         log.debug("find ['{}', '{}'] -> done ({})", processBusinessKey, eventName, result.size());

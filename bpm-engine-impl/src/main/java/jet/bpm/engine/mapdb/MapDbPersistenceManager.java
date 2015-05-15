@@ -26,7 +26,6 @@ public class MapDbPersistenceManager implements PersistenceManager {
         db = DBMaker.newFileDB(f)
                 .transactionDisable()
                 .mmapFileEnableIfSupported()
-                .asyncWriteEnable()
                 .make();
 
         store = db.getHashMap("executions");
