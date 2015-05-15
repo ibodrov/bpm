@@ -1,5 +1,6 @@
 package jet.bpm.engine.handlers;
 
+import javax.el.ELException;
 import jet.bpm.engine.api.BpmnError;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.BpmnErrorHelper;
@@ -70,6 +71,13 @@ public class ServiceTaskHandler extends AbstractElementHandler {
                     }
                 }
                 FlowUtils.followFlows(getEngine(), s, c);
+            } catch (ELException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof BpmnError) {
+                    handleBpmError(s, pd, c, (BpmnError) cause);
+                } else {
+                    throw e;
+                }
             } catch (BpmnError e) {
                 handleBpmError(s, pd, c, e);
             } catch (ExecutionException e) {
