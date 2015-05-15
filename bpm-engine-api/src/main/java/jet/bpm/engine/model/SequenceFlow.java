@@ -2,6 +2,7 @@ package jet.bpm.engine.model;
 
 public class SequenceFlow extends AbstractElement {
 
+    private String name;
     private final String from;
     private final String to;
     private final String expression;
@@ -41,6 +42,14 @@ public class SequenceFlow extends AbstractElement {
 
     public ExecutionListener[] getListeners() {
         return listeners;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
     
     public static final class ExecutionListener {

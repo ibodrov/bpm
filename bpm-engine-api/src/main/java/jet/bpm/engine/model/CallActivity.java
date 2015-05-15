@@ -4,6 +4,7 @@ import java.util.Set;
 
 public class CallActivity extends AbstractElement {
 
+    private String name;
     private final String calledElement;
     private final Set<VariableMapping> in;
     private final Set<VariableMapping> out;
@@ -29,5 +30,13 @@ public class CallActivity extends AbstractElement {
 
     public Set<VariableMapping> getOut() {
         return out;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

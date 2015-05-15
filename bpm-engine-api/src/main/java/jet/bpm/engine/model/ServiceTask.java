@@ -2,6 +2,7 @@ package jet.bpm.engine.model;
 
 public class ServiceTask extends AbstractElement {
     
+    private String name;
     private final String expression;
     private final ExpressionType type;
 
@@ -22,4 +23,12 @@ public class ServiceTask extends AbstractElement {
     public ExpressionType getType() {
         return type;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }            
 }

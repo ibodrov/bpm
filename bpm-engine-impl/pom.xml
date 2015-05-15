@@ -9,6 +9,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <name>BPM Engine (Impl)</name>
+
     <groupId>jet.bpm</groupId>
     <artifactId>bpm-engine-impl</artifactId>
     <packaging>bundle</packaging>
@@ -48,6 +50,7 @@
             <groupId>org.mapdb</groupId>
             <artifactId>mapdb</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.iq80.leveldb</groupId>
             <artifactId>leveldb</artifactId>

@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class ProcessDefinition extends AbstractElement {
 
+    private String name;
+    
     private final Map<String, AbstractElement> entities;
 
     public ProcessDefinition(String id, Collection<AbstractElement> children) {
@@ -32,5 +34,13 @@ public class ProcessDefinition extends AbstractElement {
 
     public Collection<AbstractElement> getChildren() {
         return entities.values();
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 }
