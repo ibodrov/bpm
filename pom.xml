@@ -130,4 +130,9 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <scm>
+        <developerConnection>scm:git:https://github.com/ibodrov/bpm.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 </project>
