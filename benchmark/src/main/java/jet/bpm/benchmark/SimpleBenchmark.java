@@ -10,17 +10,14 @@ import jet.bpm.engine.api.JavaDelegate;
 import jet.bpm.engine.event.EventPersistenceManager;
 import jet.bpm.engine.event.EventPersistenceManagerImpl;
 import jet.bpm.engine.leveldb.Configuration;
-import jet.bpm.engine.leveldb.KryoSerializer;
-import jet.bpm.engine.leveldb.LevelDbEventStorage;
 import jet.bpm.engine.lock.LockManager;
 import jet.bpm.engine.lock.StripedLockManagerImpl;
-import jet.bpm.engine.mapdb.MapDbPersistenceManager;
 import jet.bpm.engine.model.ProcessDefinition;
+import jet.bpm.engine.mvstore.MvStoreEventStorage;
+import jet.bpm.engine.mvstore.MvStorePersistenceManager;
 import jet.bpm.engine.task.ServiceTaskRegistryImpl;
 import jet.bpm.engine.xml.ParserException;
 import jet.bpm.engine.xml.activiti.ActivitiParser;
-import org.iq80.leveldb.DBFactory;
-import org.iq80.leveldb.impl.Iq80DBFactory;
 
 public class SimpleBenchmark {
 
@@ -55,14 +52,18 @@ public class SimpleBenchmark {
         ldbCfg.setExecutionPath(baseDir + "/executions");
         ldbCfg.setExpiredEventIndexPath(baseDir + "/expired");
 
-        DBFactory dbf = new Iq80DBFactory();
-        KryoSerializer kryo = new KryoSerializer();
-        LevelDbEventStorage es = new LevelDbEventStorage(ldbCfg, dbf, kryo);
-        es.init();
+//        DBFactory dbf = new Iq80DBFactory();
+//        KryoSerializer kryo = new KryoSerializer();
+//        LevelDbEventStorage es = new LevelDbEventStorage(ldbCfg, dbf, kryo);
+//        es.init();
+        MvStoreEventStorage es = new MvStoreEventStorage();
+        es.setBaseDir(baseDir + "/events");
+        es.start();
 
         EventPersistenceManager epm = new EventPersistenceManagerImpl(es);
-        MapDbPersistenceManager pm = new MapDbPersistenceManager();
-        pm.setBaseDir(baseDir + "/mapdb");
+        MvStorePersistenceManager pm = new MvStorePersistenceManager();
+//        MapDbPersistenceManager pm = new MapDbPersistenceManager();
+        pm.setBaseDir(baseDir + "/execs");
         pm.start();
 
         LockManager lm = new StripedLockManagerImpl(32);
@@ -71,8 +72,8 @@ public class SimpleBenchmark {
 
         // ---
 
-        int tests = 10;
-        int iterations = 100000;
+        int tests = 1;
+        int iterations = 50000;
 
         for (int t = 0; t < tests; t++) {
             long time = System.currentTimeMillis();
@@ -82,7 +83,7 @@ public class SimpleBenchmark {
 
                 if (events != null) {
                     for (String e : events) {
-                        engine.resume(key, e, null);
+//                        engine.resume(key, e, null);
                     }
                 }
             }
@@ -91,7 +92,8 @@ public class SimpleBenchmark {
         }
 
         pm.stop();
-        es.close();
+        es.stop();
+//        es.close();
     }
 
     private static ProcessDefinition parse(String path) throws ParserException {

@@ -18,6 +18,8 @@ import jet.bpm.engine.lock.StripedLockManagerImpl;
 import jet.bpm.engine.task.ServiceTaskRegistry;
 import jet.bpm.engine.task.ServiceTaskRegistryImpl;
 import jet.bpm.engine.model.ProcessDefinition;
+import jet.bpm.engine.mvstore.MvStoreEventStorage;
+import jet.bpm.engine.mvstore.MvStorePersistenceManager;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.After;
@@ -36,22 +38,34 @@ public abstract class AbstractEngineTest implements ActivationListener {
     protected EventPersistenceManager eventManager;
     private AbstractEngine engine;
     private Map<String, List<String>> activations;
-    private LevelDbPersistenceManager levelDbPersistenceManager;
+    private MvStoreEventStorage es;
+    private MvStorePersistenceManager pm;
 
     @Before
     public void init() {
         processDefinitionProvider = new ProcessDefinitionProviderImpl();
+        
+        es = new MvStoreEventStorage();
+        es.setBaseDir("/tmp/events");
+        es.start();
+        
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
-        eventManager = spy(new EventPersistenceManagerImpl(new InMemEventStorage()));
+        eventManager = spy(new EventPersistenceManagerImpl(es));
 
-        Configuration cfg = new Configuration();
-        cfg.setExecutionPath("/tmp/bpm/");
-        DBFactory f = new Iq80DBFactory();
-        levelDbPersistenceManager = new LevelDbPersistenceManager(cfg, f, new KryoSerializer());
-        levelDbPersistenceManager.init();
+        pm = new MvStorePersistenceManager();
+        pm.setBaseDir("/tmp/execs");
+        pm.start();
+        
+//        Configuration cfg = new Configuration();
+//        cfg.setExecutionPath("/tmp/bpm/");
+//        DBFactory f = new Iq80DBFactory();
+//        levelDbPersistenceManager = new LevelDbPersistenceManager(cfg, f, new KryoSerializer());
+//        levelDbPersistenceManager.init();
 
-        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager, levelDbPersistenceManager, new StripedLockManagerImpl(1));
+//        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager, levelDbPersistenceManager, new StripedLockManagerImpl(1));
 //        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager);
+        
+        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager, pm, new StripedLockManagerImpl(1));
 
         activations = new HashMap<>();
         engine.addListener(this);
@@ -59,7 +73,8 @@ public abstract class AbstractEngineTest implements ActivationListener {
 
     @After
     public void initLevelDb() {
-        levelDbPersistenceManager.close();
+        es.stop();
+        pm.stop();
     }
 
     protected void deploy(ProcessDefinition pd) {

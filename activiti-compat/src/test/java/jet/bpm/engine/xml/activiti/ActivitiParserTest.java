@@ -21,6 +21,16 @@ public class ActivitiParserTest {
     }
     
     @Test
+    public void testComplexStax() throws Exception {
+        InputStream in = ClassLoader.getSystemResourceAsStream("complex.bpmn");
+        ActivitiStaxParser p = new ActivitiStaxParser();
+
+        jet.bpm.engine.model2.ProcessDefinition pd = p.parse(in);
+        assertNotNull(pd);
+        assertEquals("cpaChargingReserve", pd.getId());
+    }
+    
+    @Test
     public void testMixed() throws Exception {
         InputStream in = ClassLoader.getSystemResourceAsStream("mixed.bpmn");
         Parser p = new ActivitiParser();
