@@ -31,7 +31,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEngineTest.class);
 
-    private ProcessDefinitionProvider processDefinitionProvider;
+    private IndexedProcessDefinitionProviderImpl processDefinitionProvider;
     private ServiceTaskRegistry serviceTaskRegistry;
     protected EventPersistenceManager eventManager;
     private AbstractEngine engine;
@@ -40,7 +40,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
 
     @Before
     public void init() {
-        processDefinitionProvider = new ProcessDefinitionProviderImpl();
+        processDefinitionProvider = new IndexedProcessDefinitionProviderImpl();
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
         eventManager = spy(new EventPersistenceManagerImpl(new InMemEventStorage()));
 
@@ -63,7 +63,8 @@ public abstract class AbstractEngineTest implements ActivationListener {
     }
 
     protected void deploy(ProcessDefinition pd) {
-        ((ProcessDefinitionProviderImpl) processDefinitionProvider).add(pd);
+        IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd.getId(), pd.getChildren());
+        processDefinitionProvider.add(ipd);
     }
 
     protected AbstractEngine getEngine() {

@@ -1,5 +1,8 @@
 package jet.bpm.engine;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -29,8 +32,8 @@ public final class FlowUtils {
     }
 
     public static void followFlows(AbstractEngine engine, DefaultExecution execution, String processDefinitionId, String elementId, UUID groupId, boolean exclusive) throws ExecutionException {
-        ProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
-        ProcessDefinition pd = provider.getById(processDefinitionId);
+        IndexedProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
+        IndexedProcessDefinition pd = provider.getById(processDefinitionId);
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, elementId);
         
         followFlows(execution, processDefinitionId, elementId, groupId, exclusive, flows);
@@ -42,19 +45,18 @@ public final class FlowUtils {
 
     public static void followFlows(DefaultExecution execution, String processDefinitionId, String elementId, UUID groupId, boolean exclusive, List<SequenceFlow> flows) {
         // reverse the collection, to fill up the stack in correct order
-        Collections.reverse(flows);
-        for (SequenceFlow next : flows) {
+        for (SequenceFlow next : Lists.reverse(flows)) {
             log.debug("followFlows ['{}'] -> continuing from '{}', '{}' to {}", execution.getId(), processDefinitionId, elementId, next.getId());
             execution.push(new ProcessElementCommand(processDefinitionId, next.getId(), groupId, exclusive));
         }
     }
     
-    public static void activateFilteredFlows(DefaultExecution s, ProcessDefinition pd, String from, String ... filtered) throws ExecutionException {
+    public static void activateFilteredFlows(DefaultExecution s, IndexedProcessDefinition pd, String from, String ... filtered) throws ExecutionException {
         Collection<SequenceFlow> flows = ProcessDefinitionUtils.filterOutgoingFlows(pd, from, filtered);
         activateFlows(s, pd, flows);
     }
     
-    public static void activateFlows(DefaultExecution s, ProcessDefinition pd, Collection<? extends AbstractElement> elements) throws ExecutionException {
+    public static void activateFlows(DefaultExecution s, IndexedProcessDefinition pd, Collection<? extends AbstractElement> elements) throws ExecutionException {
         for (AbstractElement f : elements) {
             String gwId = ProcessDefinitionUtils.findNextGatewayId(pd, f.getId());
             if (gwId == null) {

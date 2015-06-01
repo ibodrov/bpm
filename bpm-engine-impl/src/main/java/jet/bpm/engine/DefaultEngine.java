@@ -22,28 +22,28 @@ public class DefaultEngine extends AbstractEngine implements Engine {
     private final LockManager lockManager;
     private final UuidGenerator idGenerator = new JugUuidGenerator();
 
-    private final ProcessDefinitionProvider processDefinitionProvider;
+    private final IndexedProcessDefinitionProvider processDefinitionProvider;
     private final ServiceTaskRegistry serviceTaskRegistry;
     private final ExpressionManager expressionManager;
     private final EventPersistenceManager eventManager;
 
     public DefaultEngine(EventStorage eventStorage) {
-        this(new ProcessDefinitionProviderImpl(), new ServiceTaskRegistryImpl(), new EventPersistenceManagerImpl(eventStorage));
+        this(new IndexedProcessDefinitionProviderImpl(), new ServiceTaskRegistryImpl(), new EventPersistenceManagerImpl(eventStorage));
     }
 
-    public DefaultEngine(ProcessDefinitionProvider processDefinitionProvider, ServiceTaskRegistry serviceTaskRegistry, EventStorage eventStorage) {
+    public DefaultEngine(IndexedProcessDefinitionProvider processDefinitionProvider, ServiceTaskRegistry serviceTaskRegistry, EventStorage eventStorage) {
         this(processDefinitionProvider, serviceTaskRegistry, new EventPersistenceManagerImpl(eventStorage));
     }
 
     public DefaultEngine(
-            ProcessDefinitionProvider processDefinitionProvider,
+            IndexedProcessDefinitionProvider processDefinitionProvider,
             ServiceTaskRegistry serviceTaskRegistry,
             EventPersistenceManager eventPersistenceManager) {
         this(processDefinitionProvider, serviceTaskRegistry, eventPersistenceManager, new DummyPersistenceManager(), new NoopLockManager());
     }
 
     public DefaultEngine(
-            ProcessDefinitionProvider processDefinitionProvider,
+            IndexedProcessDefinitionProvider processDefinitionProvider,
             ServiceTaskRegistry serviceTaskRegistry,
             EventPersistenceManager eventPersistenceManager,
             PersistenceManager persistenceManager,
@@ -57,7 +57,7 @@ public class DefaultEngine extends AbstractEngine implements Engine {
     }
 
     @Override
-    public ProcessDefinitionProvider getProcessDefinitionProvider() {
+    public IndexedProcessDefinitionProvider getProcessDefinitionProvider() {
         return processDefinitionProvider;
     }
 

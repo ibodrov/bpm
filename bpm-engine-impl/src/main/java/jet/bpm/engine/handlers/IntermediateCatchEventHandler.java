@@ -5,6 +5,7 @@ import java.util.UUID;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.EventMapHelper;
+import jet.bpm.engine.IndexedProcessDefinition;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.ExecutionException;
@@ -39,7 +40,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         
         Event e = makeEvent(c, s);
         
-        ProcessDefinition pd = getProcessDefinition(c);
+        IndexedProcessDefinition pd = getProcessDefinition(c);
 
         if (c.getGroupId() != null) {
             // grouped event

@@ -43,7 +43,7 @@ public class SubProcessElementHandler extends AbstractCallHandler {
     @Override
     protected ProcessDefinition findCalledProcess(ProcessElementCommand c) throws ExecutionException {
         ProcessDefinition pd = getProcessDefinition(c);
-        return ProcessDefinitionUtils.findSubProces(pd, c.getElementId());
+        return ProcessDefinitionUtils.findSubProcess(pd, c.getElementId());
     }
 
     @Override
