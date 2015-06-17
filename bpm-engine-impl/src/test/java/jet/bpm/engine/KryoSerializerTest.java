@@ -33,7 +33,7 @@ public class KryoSerializerTest {
         c.setVariable("v1", "v2");
         c.setVariable("v2", new Service("sid"));
 
-        DefaultExecution e = new DefaultExecution(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "bus-key", c);
+        DefaultExecution e = new DefaultExecution(UUID.randomUUID(), "bus-key", c);
 
         ProcessElementCommand cmd1 = new ProcessElementCommand("pid", "eid");
 
@@ -45,8 +45,6 @@ public class KryoSerializerTest {
         DefaultExecution ee = (DefaultExecution) s.fromBytes(bytes);
         assertEquals(e.getId(), ee.getId());
         assertEquals(e.getBusinessKey(), ee.getBusinessKey());
-        assertEquals(e.getParentId(), ee.getParentId());
-        assertEquals(e.getRootId(), ee.getRootId());
         assertEquals(e.size(), ee.size());
     }
 

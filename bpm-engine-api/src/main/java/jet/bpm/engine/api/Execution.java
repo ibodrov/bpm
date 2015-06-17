@@ -14,11 +14,6 @@ public interface Execution extends Serializable {
     public UUID getId();
 
     /**
-     * The ID of parent process instance.
-     */
-    public UUID getParentId();
-
-    /**
      * The business key of this process instance.
      */
     public String getBusinessKey();

@@ -72,7 +72,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
         Date expiredAt = timeDate != null ? timeDate : parseDuration(timeDuration);
         
-        Event e = new Event(id, s.getId(), s.getRootId(), c.getGroupId(), name, s.getBusinessKey(), c.isExclusive(), expiredAt);
+        Event e = new Event(id, s.getId(), c.getGroupId(), name, s.getBusinessKey(), c.isExclusive(), expiredAt);
         return e;
     }
     

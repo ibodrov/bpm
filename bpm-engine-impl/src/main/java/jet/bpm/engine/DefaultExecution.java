@@ -15,8 +15,6 @@ import jet.bpm.engine.commands.ExecutionCommand;
 public class DefaultExecution implements Execution, Serializable {
 
     private final UUID id;
-    private final UUID parentId;
-    private final UUID rootId;
     private final String processBusinessKey;
     private final Deque<ExecutionCommand> commands = new ConcurrentLinkedDeque<>();
     private final Map<ActivationKey, Integer> activations = Collections.synchronizedMap(new HashMap<ActivationKey, Integer>());
@@ -24,10 +22,8 @@ public class DefaultExecution implements Execution, Serializable {
     private boolean suspended = false;
     private ExecutionContext context;
 
-    public DefaultExecution(UUID id, UUID parentId, UUID rootId, String processBusinessKey, ExecutionContext context) {
+    public DefaultExecution(UUID id, String processBusinessKey, ExecutionContext context) {
         this.id = id;
-        this.parentId = parentId;
-        this.rootId = rootId;
         this.processBusinessKey = processBusinessKey;
         this.context = context;
     }
@@ -35,15 +31,6 @@ public class DefaultExecution implements Execution, Serializable {
     @Override
     public UUID getId() {
         return id;
-    }
-
-    @Override
-    public UUID getParentId() {
-        return parentId;
-    }
-
-    public UUID getRootId() {
-        return rootId;
     }
 
     @Override
