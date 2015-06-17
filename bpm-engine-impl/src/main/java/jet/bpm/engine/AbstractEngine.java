@@ -69,16 +69,17 @@ public abstract class AbstractEngine implements Engine {
         applyVariables(ctx, variables);
 
         UuidGenerator idg = getUuidGenerator();
+        UUID executionId = idg.generate();
 
-        DefaultExecution s = new DefaultExecution(idg.generate(), null, processBusinessKey, ctx);
+        DefaultExecution s = new DefaultExecution(executionId, null, executionId, processBusinessKey, ctx);
         s.push(new ProcessElementCommand(processDefinitionId, start.getId()));
 
         LockManager lm = getLockManager();
-        lm.lock(processBusinessKey);
+        lm.lock(executionId);
         try {
             run(s);
         } finally {
-            lm.unlock(processBusinessKey);
+            lm.unlock(executionId);
         }
     }
 
@@ -98,9 +99,10 @@ public abstract class AbstractEngine implements Engine {
     
     public void resume(Event e, Map<String, Object> variables) throws ExecutionException {
         String processBusinessKey = e.getProcessBusinessKey();
+        UUID lockId = e.getRootExecutionId();
 
         LockManager lm = getLockManager();
-        lm.lock(processBusinessKey);
+        lm.lock(lockId);
         try {
             String eventName = e.getName();
 
@@ -137,7 +139,7 @@ public abstract class AbstractEngine implements Engine {
 
             run(s);
         } finally {
-            lm.unlock(processBusinessKey);
+            lm.unlock(lockId);
         }
     }
 

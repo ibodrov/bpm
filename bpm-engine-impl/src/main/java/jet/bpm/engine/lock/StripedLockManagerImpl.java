@@ -1,6 +1,7 @@
 package jet.bpm.engine.lock;
 
 import com.google.common.util.concurrent.Striped;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +17,15 @@ public class StripedLockManagerImpl implements LockManager {
     }
 
     @Override
-    public void lock(String processBusinessKey) {
-        log.debug("lock ['{}'] -> locking...", processBusinessKey);
-        locks.get(processBusinessKey).lock();
-        log.debug("lock ['{}'] -> locked", processBusinessKey);
+    public void lock(UUID k) {
+        log.debug("lock ['{}'] -> locking...", k);
+        locks.get(k).lock();
+        log.debug("lock ['{}'] -> locked", k);
     }
 
     @Override
-    public void unlock(String processBusinessKey) {
-        locks.get(processBusinessKey).unlock();
-        log.debug("lock ['{}'] -> unlocked", processBusinessKey);
+    public void unlock(UUID k) {
+        locks.get(k).unlock();
+        log.debug("lock ['{}'] -> unlocked", k);
     }
 }

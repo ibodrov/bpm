@@ -1,5 +1,6 @@
 package jet.bpm.engine.lock;
 
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
@@ -12,14 +13,14 @@ public class SingleLockManagerImpl implements LockManager {
     private final Lock lock = new ReentrantLock();
     
     @Override
-    public void lock(String processBusinnessKey) {
-        log.debug("lock ['{}'] -> locking...", processBusinnessKey);
+    public void lock(UUID k) {
+        log.debug("lock ['{}'] -> locking...", k);
         lock.lock();
-        log.debug("lock ['{}'] -> locked", processBusinnessKey);
+        log.debug("lock ['{}'] -> locked", k);
     }
 
     @Override
-    public void unlock(String processBusinessKey) {
+    public void unlock(UUID processBusinessKey) {
         lock.unlock();
         log.debug("lock ['{}'] -> unlocked", processBusinessKey);
     }

@@ -1,12 +1,14 @@
 package jet.bpm.engine.lock;
 
+import java.util.UUID;
+
 public class NoopLockManager implements LockManager {
 
     @Override
-    public void lock(String processBusinnessKey) {
+    public void lock(UUID k) {
     }
 
     @Override
-    public void unlock(String processBusinessKey) {
+    public void unlock(UUID k) {
     }
 }

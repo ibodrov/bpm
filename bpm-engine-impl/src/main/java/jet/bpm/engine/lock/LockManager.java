@@ -1,8 +1,10 @@
 package jet.bpm.engine.lock;
 
+import java.util.UUID;
+
 public interface LockManager {
 
-    void lock(String processBusinessKey);
+    void lock(UUID k);
 
-    void unlock(String processBusinessKey);
+    void unlock(UUID k);
 }

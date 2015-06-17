@@ -9,15 +9,17 @@ public final class Event implements Serializable {
 
     private final UUID id;
     private final UUID executionId;
+    private final UUID rootExecutionId;
     private final UUID groupId;
     private final String name;
     private final String processBusinessKey;
     private final boolean exclusive;
     private final Date expiredAt;
 
-    public Event(UUID id, UUID executionId, UUID groupId, String name, String processBusinessKey, boolean exclusive, Date expiredAt) {
+    public Event(UUID id, UUID executionId, UUID rootExecutionId, UUID groupId, String name, String processBusinessKey, boolean exclusive, Date expiredAt) {
         this.id = id;
         this.executionId = executionId;
+        this.rootExecutionId = rootExecutionId;
         this.groupId = groupId;
         this.name = name;
         this.processBusinessKey = processBusinessKey;
@@ -31,6 +33,10 @@ public final class Event implements Serializable {
     
     public UUID getExecutionId() {
         return executionId;
+    }
+
+    public UUID getRootExecutionId() {
+        return rootExecutionId;
     }
 
     public UUID getGroupId() {

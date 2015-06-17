@@ -72,11 +72,11 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
         Date expiredAt = timeDate != null ? timeDate : parseDuration(timeDuration);
         
-        Event e = new Event(id, s.getId(), c.getGroupId(), name, s.getBusinessKey(), c.isExclusive(), expiredAt);
+        Event e = new Event(id, s.getId(), s.getRootId(), c.getGroupId(), name, s.getBusinessKey(), c.isExclusive(), expiredAt);
         return e;
     }
     
-    private Date parseTimeDate(String s, ProcessElementCommand c, ExecutionContext ctx, ExpressionManager em) throws ExecutionException {
+    private static Date parseTimeDate(String s, ProcessElementCommand c, ExecutionContext ctx, ExpressionManager em) throws ExecutionException {
         Object v = eval(s, ctx, em, Object.class);
         if (v == null) {
             return null;
@@ -111,7 +111,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         return e.getMessageRef() != null ? e.getMessageRef() : e.getId();
     }
 
-    private <T> T eval(String expr, ExecutionContext ctx, ExpressionManager em, Class<T> type) {
+    private static <T> T eval(String expr, ExecutionContext ctx, ExpressionManager em, Class<T> type) {
         if (expr == null || expr.trim().isEmpty()) {
             return null;
         }
