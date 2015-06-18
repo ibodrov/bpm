@@ -2,10 +2,10 @@ package jet.bpm.engine.handlers;
 
 import java.util.Set;
 import jet.bpm.engine.api.ExecutionException;
-import jet.bpm.engine.ProcessDefinitionProvider;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.ExecutionContextImpl;
+import jet.bpm.engine.IndexedProcessDefinitionProvider;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.commands.MergeExecutionContextCommand;
@@ -25,7 +25,7 @@ public class CallActivityElementHandler extends AbstractCallHandler {
         ProcessDefinition pd = getProcessDefinition(c);
         CallActivity act = (CallActivity) ProcessDefinitionUtils.findElement(pd, c.getElementId());
 
-        ProcessDefinitionProvider provider = getEngine().getProcessDefinitionProvider();
+        IndexedProcessDefinitionProvider provider = getEngine().getProcessDefinitionProvider();
         return provider.getById(act.getCalledElement());
     }
 

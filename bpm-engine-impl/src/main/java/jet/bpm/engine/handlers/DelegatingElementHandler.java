@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.DefaultExecution;
-import jet.bpm.engine.ProcessDefinitionProvider;
 import jet.bpm.engine.AbstractEngine;
+import jet.bpm.engine.IndexedProcessDefinitionProvider;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.model.AbstractElement;
@@ -56,7 +56,7 @@ public class DelegatingElementHandler implements ElementHandler {
 
     @Override
     public void handle(DefaultExecution s, ProcessElementCommand c) throws ExecutionException {
-        ProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
+        IndexedProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
         ProcessDefinition pd = provider.getById(c.getProcessDefinitionId());
         AbstractElement e = ProcessDefinitionUtils.findElement(pd, c.getElementId());
 

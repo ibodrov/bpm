@@ -1,10 +1,10 @@
 package jet.bpm.engine.handlers;
 
 import jet.bpm.engine.api.ExecutionException;
-import jet.bpm.engine.ProcessDefinitionProvider;
 import jet.bpm.engine.AbstractEngine;
+import jet.bpm.engine.IndexedProcessDefinition;
+import jet.bpm.engine.IndexedProcessDefinitionProvider;
 import jet.bpm.engine.commands.ProcessElementCommand;
-import jet.bpm.engine.model.ProcessDefinition;
 
 public abstract class AbstractElementHandler implements ElementHandler {
 
@@ -18,12 +18,12 @@ public abstract class AbstractElementHandler implements ElementHandler {
         return engine;
     }
 
-    protected ProcessDefinition getProcessDefinition(ProcessElementCommand c) throws ExecutionException {
+    protected IndexedProcessDefinition getProcessDefinition(ProcessElementCommand c) throws ExecutionException {
         return getProcessDefinition(c.getProcessDefinitionId());
     }
 
-    protected ProcessDefinition getProcessDefinition(String processDefinitionId) throws ExecutionException {
-        ProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
+    protected IndexedProcessDefinition getProcessDefinition(String processDefinitionId) throws ExecutionException {
+        IndexedProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
         return provider.getById(processDefinitionId);
     }
 }

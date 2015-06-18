@@ -2,15 +2,13 @@ package jet.bpm.engine;
 
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.ActivationListener;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import jet.bpm.engine.persistence.PersistenceManager;
 import jet.bpm.engine.api.Engine;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.CopyOnWriteArrayList;
 import jet.bpm.engine.api.Execution;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.api.NoEventFoundException;
@@ -33,7 +31,7 @@ public abstract class AbstractEngine implements Engine {
 
     private final ActivationListenerHolder listenerHolder = new ActivationListenerHolder();
 
-    public abstract ProcessDefinitionProvider getProcessDefinitionProvider();
+    public abstract IndexedProcessDefinitionProvider getProcessDefinitionProvider();
 
     public abstract ElementHandler getElementHandler();
 
@@ -60,7 +58,7 @@ public abstract class AbstractEngine implements Engine {
 
     @Override
     public void start(String processBusinessKey, String processDefinitionId, Map<String, Object> variables) throws ExecutionException {
-        ProcessDefinitionProvider pdp = getProcessDefinitionProvider();
+        IndexedProcessDefinitionProvider pdp = getProcessDefinitionProvider();
 
         ProcessDefinition pd = pdp.getById(processDefinitionId);
         StartEvent start = ProcessDefinitionUtils.findStartEvent(pd);
@@ -188,26 +186,15 @@ public abstract class AbstractEngine implements Engine {
 
     private static final class ActivationListenerHolder {
 
-        private final List<ActivationListener> listeners = new ArrayList<>();
-        private final ReadWriteLock lock = new ReentrantReadWriteLock();
-
+        private final List<ActivationListener> listeners = new CopyOnWriteArrayList<>();
+        
         public void addListener(ActivationListener l) {
-            try {
-                lock.writeLock().lock();
-                listeners.add(l);
-            } finally {
-                lock.writeLock().unlock();
-            }
+            listeners.add(l);
         }
 
         public void fireOnElementActivation(Execution e, String processDefinitionId, String elementId) {
-            try {
-                lock.readLock().lock();
-                for (ActivationListener l : listeners) {
-                    l.onActivation(e, processDefinitionId, elementId);
-                }
-            } finally {
-                lock.readLock().unlock();
+            for (ActivationListener l : listeners) {
+                l.onActivation(e, processDefinitionId, elementId);
             }
         }
     }

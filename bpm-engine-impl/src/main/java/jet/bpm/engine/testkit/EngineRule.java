@@ -4,10 +4,11 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.UUID;
-import jet.bpm.engine.ProcessDefinitionProviderImpl;
 import jet.bpm.engine.api.Engine;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.DefaultEngine;
+import jet.bpm.engine.IndexedProcessDefinition;
+import jet.bpm.engine.IndexedProcessDefinitionProviderImpl;
 import jet.bpm.engine.event.EventPersistenceManager;
 import jet.bpm.engine.event.EventPersistenceManagerImpl;
 import jet.bpm.engine.event.InMemEventStorage;
@@ -22,16 +23,12 @@ import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EngineRule implements TestRule {
 
-    private static final Logger log = LoggerFactory.getLogger(EngineRule.class);
-
     private final Parser parser;
 
-    private ProcessDefinitionProviderImpl processDefinitionProvider;
+    private IndexedProcessDefinitionProviderImpl processDefinitionProvider;
     private EventPersistenceManager eventManager;
     private Engine engine;
 
@@ -56,7 +53,7 @@ public class EngineRule implements TestRule {
 
     protected void before(Description description) throws Exception {
         if (engine == null) {
-            processDefinitionProvider = new ProcessDefinitionProviderImpl();
+            processDefinitionProvider = new IndexedProcessDefinitionProviderImpl();
             eventManager = new EventPersistenceManagerImpl(new InMemEventStorage());
             Configuration cfg = new Configuration();
             cfg.setExecutionPath("/tmp/bpm/" + System.currentTimeMillis());
@@ -76,7 +73,8 @@ public class EngineRule implements TestRule {
                     for (String s : d.resources()) {
                         InputStream in = ClassLoader.getSystemResourceAsStream(s);
                         ProcessDefinition pd = parser.parse(in);
-                        processDefinitionProvider.add(pd);
+                        IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd.getId(), pd.getChildren());
+                        processDefinitionProvider.add(ipd);
                     }
                 }
             }

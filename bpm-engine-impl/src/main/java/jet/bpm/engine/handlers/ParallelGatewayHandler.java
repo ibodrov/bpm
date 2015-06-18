@@ -6,11 +6,11 @@ import java.util.UUID;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.FlowUtils;
+import jet.bpm.engine.IndexedProcessDefinition;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.commands.ProcessEventMappingCommand;
-import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
         String defId = c.getProcessDefinitionId();
 
         // join
-        ProcessDefinition pd = getProcessDefinition(defId);
+        IndexedProcessDefinition pd = getProcessDefinition(defId);
         List<SequenceFlow> in = ProcessDefinitionUtils.findIncomingFlows(pd, eId);
 
         int activated = s.getActivationCount(defId, eId) + 1; // add current activation

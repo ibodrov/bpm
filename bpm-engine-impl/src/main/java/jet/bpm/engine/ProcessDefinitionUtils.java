@@ -43,28 +43,11 @@ public final class ProcessDefinitionUtils {
      * subprocesses.
      */
     public static ProcessDefinition findElementProcess(ProcessDefinition pd, String id) throws ExecutionException {
-        ProcessDefinition sub = findElementProcess0(pd, id);
+        ProcessDefinition sub = pd;
         if (sub == null) {
             throw new ExecutionException("Invalid process definition '%s': unknown element '%s'", pd.getId(), id);
         }
         return sub;
-    }
-
-    private static ProcessDefinition findElementProcess0(ProcessDefinition pd, String id) {
-        if (pd.hasChild(id)) {
-            return pd;
-        }
-
-        for (AbstractElement e : pd.getChildren()) {
-            if (e instanceof ProcessDefinition) {
-                ProcessDefinition sub = findElementProcess0((ProcessDefinition) e, id);
-                if (sub != null) {
-                    return sub;
-                }
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -84,7 +67,7 @@ public final class ProcessDefinitionUtils {
      * @param id
      * @throws ExecutionException if the subprocesss is not found.
      */
-    public static SubProcess findSubProces(ProcessDefinition pd, String id) throws ExecutionException {
+    public static SubProcess findSubProcess(ProcessDefinition pd, String id) throws ExecutionException {
         AbstractElement e = findElement(pd, id);
         if (e instanceof SubProcess) {
             return (SubProcess) e;
@@ -93,20 +76,8 @@ public final class ProcessDefinitionUtils {
         }
     }
     
-    public static List<SequenceFlow> findOptionalOutgoingFlows(ProcessDefinition pd, String from) throws ExecutionException {
-        List<SequenceFlow> result = new ArrayList<>();
-
-        ProcessDefinition sub = findElementProcess(pd, from);
-        for (AbstractElement e : sub.getChildren()) {
-            if (e instanceof SequenceFlow) {
-                SequenceFlow f = (SequenceFlow) e;
-                if (from.equals(f.getFrom())) {
-                    result.add(f);
-                }
-            }
-        }
-        
-        return result;
+    public static List<SequenceFlow> findOptionalOutgoingFlows(IndexedProcessDefinition pd, String from) throws ExecutionException {
+        return pd.findOptionalOutgoingFlows(from);
     }
 
     /**
@@ -115,7 +86,7 @@ public final class ProcessDefinitionUtils {
      * @param from
      * @throws ExecutionException if the element has no outgoing flows..
      */
-    public static List<SequenceFlow> findOutgoingFlows(ProcessDefinition pd, String from) throws ExecutionException {
+    public static List<SequenceFlow> findOutgoingFlows(IndexedProcessDefinition pd, String from) throws ExecutionException {
         List<SequenceFlow> result = findOptionalOutgoingFlows(pd, from);
 
         if (result.isEmpty()) {
@@ -125,7 +96,7 @@ public final class ProcessDefinitionUtils {
         return result;
     }
     
-    public static SequenceFlow findOutgoingFlow(ProcessDefinition pd, String from) throws ExecutionException {
+    public static SequenceFlow findOutgoingFlow(IndexedProcessDefinition pd, String from) throws ExecutionException {
         List<SequenceFlow> l = findOutgoingFlows(pd, from);
         if (l.size() != 1) {
             throw new ExecutionException("Invalid process definition '%s': expected single flow from '%s'", pd.getId(), from);
@@ -206,10 +177,12 @@ public final class ProcessDefinitionUtils {
         return null;
     }
     
-    public static Collection<SequenceFlow> filterOutgoingFlows(ProcessDefinition pd, String from, String ... filtered) throws ExecutionException {
+    public static Collection<SequenceFlow> filterOutgoingFlows(IndexedProcessDefinition pd, String from, String ... filtered) throws ExecutionException {
         List<SequenceFlow> l = findOutgoingFlows(pd, from);
         
         if (filtered != null && filtered.length > 0) {
+            l = new ArrayList<>(l);
+
             for (Iterator<SequenceFlow> i = l.iterator(); i.hasNext();) {
                 SequenceFlow f = i.next();
                 for (String id : filtered) {
@@ -223,7 +196,7 @@ public final class ProcessDefinitionUtils {
         return l;
     }
     
-    public static String findNextGatewayId(ProcessDefinition pd, String from) throws ExecutionException {
+    public static String findNextGatewayId(IndexedProcessDefinition pd, String from) throws ExecutionException {
         AbstractElement e = findElement(pd, from);
         if (!(e instanceof SequenceFlow)) {
             e = findOutgoingFlow(pd, from);

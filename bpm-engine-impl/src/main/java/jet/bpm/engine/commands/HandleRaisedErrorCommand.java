@@ -1,6 +1,7 @@
 package jet.bpm.engine.commands;
 
-import java.util.Collections;
+import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -10,10 +11,10 @@ import jet.bpm.engine.BpmnErrorHelper;
 import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.FlowUtils;
-import jet.bpm.engine.ProcessDefinitionProvider;
+import jet.bpm.engine.IndexedProcessDefinition;
+import jet.bpm.engine.IndexedProcessDefinitionProvider;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.model.BoundaryEvent;
-import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +52,8 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
             return execution;
         }
 
-        ProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
-        ProcessDefinition pd = provider.getById(processDefinitionId);
+        IndexedProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
+        IndexedProcessDefinition pd = provider.getById(processDefinitionId);
 
         BoundaryEvent ev = ProcessDefinitionUtils.findBoundaryEvent(pd, elementId, errorRef);
         if (ev == null) {
@@ -74,7 +75,7 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
             // process inactive
             List<SequenceFlow> flows = ProcessDefinitionUtils.findOptionalOutgoingFlows(pd, elementId);
             FlowUtils.activateFlows(execution, pd, flows);
-            List<BoundaryEvent> evs = ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, elementId);
+            List<BoundaryEvent> evs = new ArrayList<>(ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, elementId));
             for (Iterator<BoundaryEvent> i = evs.iterator(); i.hasNext();) {
                 BoundaryEvent e = i.next();
                 if (e.getId().equals(ev.getId())) {
@@ -87,10 +88,9 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
         return execution;
     }
 
-    protected void followFlows(DefaultExecution s, ProcessDefinition pd, String elementId, ExecutionContext context) throws ExecutionException {
+    protected void followFlows(DefaultExecution s, IndexedProcessDefinition pd, String elementId, ExecutionContext context) throws ExecutionException {
         List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, elementId);
-        Collections.reverse(flows);
-        for (SequenceFlow next : flows) {
+        for (SequenceFlow next : Lists.reverse(flows)) {
             s.push(new ProcessElementCommand(pd.getId(), next.getId()));
         }
     }

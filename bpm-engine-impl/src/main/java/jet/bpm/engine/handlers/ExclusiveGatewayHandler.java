@@ -8,11 +8,11 @@ import jet.bpm.engine.DefaultExecution;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.AbstractEngine;
 import jet.bpm.engine.FlowUtils;
+import jet.bpm.engine.IndexedProcessDefinition;
 import jet.bpm.engine.ProcessDefinitionUtils;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.el.ExpressionManager;
 import jet.bpm.engine.model.ExclusiveGateway;
-import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +31,11 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
 
         String nextId = null;
 
-        ProcessDefinition pd = getProcessDefinition(c);
+        IndexedProcessDefinition pd = getProcessDefinition(c);
 
         // find all outgoing flows and eval their expressions
-        List<SequenceFlow> flows = ProcessDefinitionUtils.findOutgoingFlows(pd, c.getElementId());
-        List<SequenceFlow> originalFlows = new ArrayList<>(flows);
-        
+        List<SequenceFlow> flows = new ArrayList<>(ProcessDefinitionUtils.findOutgoingFlows(pd, c.getElementId()));
+
         for (Iterator<SequenceFlow> i = flows.iterator(); i.hasNext();) {
             SequenceFlow f = i.next();
             if (f.getExpression() != null) {
