@@ -10,7 +10,7 @@ public class SingleLockManagerImpl implements LockManager {
     private static final Logger log = LoggerFactory.getLogger(SingleLockManagerImpl.class);
     
     private final Lock lock = new ReentrantLock();
-    
+
     @Override
     public void lock(String processBusinnessKey) {
         log.debug("lock ['{}'] -> locking...", processBusinnessKey);

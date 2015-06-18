@@ -15,9 +15,10 @@ public final class EventScheduler {
     private static final Logger log = LoggerFactory.getLogger(EventScheduler.class);
 
     private final EventPersistenceManager eventManager;
-    private final DefaultEngine engine;
     private final BlockingQueue<ExpiredEvent> acquiredEventQueue;
     private final List<Thread> eventExecutorThreads = new ArrayList<>();
+
+    private EventDispatcher dispatcher;
 
     private Thread eventAcquisitionThread;
     private volatile boolean stopped = true;
@@ -28,9 +29,13 @@ public final class EventScheduler {
     private long executionErrorDelay = SECONDS.toMillis(5);
 
     public EventScheduler(DefaultEngine engine, int maxAcquiredEventQueueSize) {
-        this.engine = engine;
+        this(engine, maxAcquiredEventQueueSize, new DirectEventDispatcher(engine));
+    }
+
+    public EventScheduler(DefaultEngine engine, int maxAcquiredEventQueueSize, EventDispatcher dispatcher) {
         this.eventManager = engine.getEventManager();
         this.acquiredEventQueue = new LinkedBlockingQueue<>(maxAcquiredEventQueueSize);
+        this.dispatcher = dispatcher;
     }
 
     public void setEventExecutorsCount(int eventExecutorsCount) {
@@ -130,8 +135,8 @@ public final class EventScheduler {
             try {
                 ExpiredEvent x = acquiredEventQueue.take();
                 Event e = eventManager.get(x.geId());
-
-                engine.resume(e, null);
+                
+                dispatcher.dispatch(e);
             } catch (NoEventFoundException e) {
                 log.warn("eventExecutionLoop -> no event found: {}", e.getMessage());
             } catch (InterruptedException e) {

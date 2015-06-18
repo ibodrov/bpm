@@ -1,6 +1,7 @@
 package jet.bpm.engine.api;
 
 import java.util.Map;
+import java.util.UUID;
 
 public interface Engine {
 
@@ -24,4 +25,13 @@ public interface Engine {
      * @throws ExecutionException
      */
     void resume(String processBusinessKey, String eventName, Map<String, Object> variables) throws ExecutionException;
+
+    /**
+     * Resumes a process instance, waiting for specific event.
+     * @param eventId ID of event.
+     * @param variables variables to be passed, can be null. Values with the same
+     * name will be replaced.
+     * @throws ExecutionException
+     */
+    void resume(UUID eventId, Map<String, Object> variables) throws ExecutionException;
 }

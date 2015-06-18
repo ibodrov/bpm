@@ -95,12 +95,23 @@ public abstract class AbstractEngine implements Engine {
         Event e = evs.iterator().next();
         resume(e, variables);
     }
+
+    @Override
+    public void resume(UUID eventId, Map<String, Object> variables) throws ExecutionException {
+        EventPersistenceManager em = getEventManager();
+        Event e = em.get(eventId);
+        if (e == null) {
+            throw new NoEventFoundException("No event '%s' found", eventId);
+        }
+
+        resume(e, variables);
+    }
     
     public void resume(Event e, Map<String, Object> variables) throws ExecutionException {
         String processBusinessKey = e.getProcessBusinessKey();
 
         LockManager lm = getLockManager();
-        lm.lock(processBusinessKey);
+        lm.lock(processBusinessKey);        
         try {
             String eventName = e.getName();
 
