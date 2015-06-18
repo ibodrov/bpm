@@ -70,7 +70,7 @@ public abstract class AbstractEngine implements Engine {
 
         UuidGenerator idg = getUuidGenerator();
 
-        DefaultExecution s = new DefaultExecution(idg.generate(), null, processBusinessKey, ctx);
+        DefaultExecution s = new DefaultExecution(idg.generate(), processBusinessKey, ctx);
         s.push(new ProcessElementCommand(processDefinitionId, start.getId()));
 
         LockManager lm = getLockManager();
@@ -172,25 +172,8 @@ public abstract class AbstractEngine implements Engine {
                     pm.remove(s.getId());
                     log.debug("run ['{}'] -> execution removed", s.getId());
                 }
-
-                // try to switch to the parent execution
-                UUID pid = s.getParentId();
-                if (pid == null) {
-                    log.debug("run ['{}'] -> no parent execution, breaking", s.getId());
-                    break;
-                } else {
-                    log.debug("run ['{}'] -> switching to '{}'", s.getId(), pid);
-                    DefaultExecution parent = pm.remove(pid);
-                    if (parent == null) {
-                        // this is typical for the scenarios where the parent
-                        // process ends before its children
-                        log.debug("run ['{}'] -> parent execution not found", pid);
-                        break;
-                    } else {
-                        parent.setSuspended(false);
-                        s = parent;
-                    }
-                }
+                
+                break;
             }
 
             ExecutionCommand c = s.peek();
