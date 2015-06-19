@@ -1,5 +1,6 @@
 package jet.bpm.engine;
 
+import jet.bpm.engine.testkit.TestProcessDefinitionProvider;
 import jet.bpm.engine.api.ActivationListener;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +32,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEngineTest.class);
 
-    private IndexedProcessDefinitionProviderImpl processDefinitionProvider;
+    private TestProcessDefinitionProvider processDefinitionProvider;
     private ServiceTaskRegistry serviceTaskRegistry;
     protected EventPersistenceManager eventManager;
     private AbstractEngine engine;
@@ -40,7 +41,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
 
     @Before
     public void init() {
-        processDefinitionProvider = new IndexedProcessDefinitionProviderImpl();
+        processDefinitionProvider = new TestProcessDefinitionProvider();
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
         eventManager = spy(new EventPersistenceManagerImpl(new InMemEventStorage()));
 

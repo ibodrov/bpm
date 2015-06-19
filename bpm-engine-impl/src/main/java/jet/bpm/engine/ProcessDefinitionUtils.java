@@ -20,21 +20,6 @@ import jet.bpm.engine.model.SubProcess;
 public final class ProcessDefinitionUtils {
 
     /**
-     * Finds process definition by its ID.
-     * @param provider
-     * @param id
-     * @return
-     * @throws ExecutionException if the process definition is not found.
-     */
-    public static ProcessDefinition findProcess(ProcessDefinitionProvider provider, String id) throws ExecutionException {
-        ProcessDefinition pd = provider.getById(id);
-        if (pd == null) {
-            throw new ExecutionException("Unknown process definition '%s'", id);
-        }
-        return pd;
-    }
-
-    /**
      * Finds (sub)process definition by its element ID.
      * @param pd parent process definition.
      * @param id the (sub)process element ID.
@@ -43,11 +28,28 @@ public final class ProcessDefinitionUtils {
      * subprocesses.
      */
     public static ProcessDefinition findElementProcess(ProcessDefinition pd, String id) throws ExecutionException {
-        ProcessDefinition sub = pd;
+        ProcessDefinition sub = findElementProcess0(pd, id);
         if (sub == null) {
             throw new ExecutionException("Invalid process definition '%s': unknown element '%s'", pd.getId(), id);
         }
         return sub;
+    }
+
+    private static ProcessDefinition findElementProcess0(ProcessDefinition pd, String id) {
+        if (pd.hasChild(id)) {
+            return pd;
+        }
+
+        for (AbstractElement e : pd.getChildren()) {
+            if (e instanceof ProcessDefinition) {
+                ProcessDefinition sub = findElementProcess0((ProcessDefinition) e, id);
+                if (sub != null) {
+                    return sub;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -20,6 +20,10 @@ public class IndexedProcessDefinition extends ProcessDefinition {
         this.outgoingFlows = indexOutgoingFlows();
     }
 
+    public IndexedProcessDefinition(ProcessDefinition pd) {
+        this(pd.getId(), pd.getChildren());
+    }
+
     public List<SequenceFlow> findOptionalOutgoingFlows(String from) {
         return outgoingFlows.get(from);
     }

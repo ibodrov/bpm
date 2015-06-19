@@ -13,7 +13,6 @@ import jet.bpm.engine.handlers.DelegatingElementHandler;
 import jet.bpm.engine.handlers.ElementHandler;
 import jet.bpm.engine.lock.NoopLockManager;
 import jet.bpm.engine.task.ServiceTaskRegistry;
-import jet.bpm.engine.task.ServiceTaskRegistryImpl;
 
 public class DefaultEngine extends AbstractEngine implements Engine {
 
@@ -27,28 +26,24 @@ public class DefaultEngine extends AbstractEngine implements Engine {
     private final ExpressionManager expressionManager;
     private final EventPersistenceManager eventManager;
 
-    public DefaultEngine(EventStorage eventStorage) {
-        this(new IndexedProcessDefinitionProviderImpl(), new ServiceTaskRegistryImpl(), new EventPersistenceManagerImpl(eventStorage));
-    }
-
-    public DefaultEngine(IndexedProcessDefinitionProvider processDefinitionProvider, ServiceTaskRegistry serviceTaskRegistry, EventStorage eventStorage) {
+    public DefaultEngine(ProcessDefinitionProvider processDefinitionProvider, ServiceTaskRegistry serviceTaskRegistry, EventStorage eventStorage) {
         this(processDefinitionProvider, serviceTaskRegistry, new EventPersistenceManagerImpl(eventStorage));
     }
 
     public DefaultEngine(
-            IndexedProcessDefinitionProvider processDefinitionProvider,
+            ProcessDefinitionProvider processDefinitionProvider,
             ServiceTaskRegistry serviceTaskRegistry,
             EventPersistenceManager eventPersistenceManager) {
         this(processDefinitionProvider, serviceTaskRegistry, eventPersistenceManager, new DummyPersistenceManager(), new NoopLockManager());
     }
 
     public DefaultEngine(
-            IndexedProcessDefinitionProvider processDefinitionProvider,
+            ProcessDefinitionProvider processDefinitionProvider,
             ServiceTaskRegistry serviceTaskRegistry,
             EventPersistenceManager eventPersistenceManager,
             PersistenceManager persistenceManager,
             LockManager lockManager) {
-        this.processDefinitionProvider = processDefinitionProvider;
+        this.processDefinitionProvider = new IndexedProcessDefinitionProvider(processDefinitionProvider);
         this.serviceTaskRegistry = serviceTaskRegistry;
         this.eventManager = eventPersistenceManager;
         this.expressionManager = new DefaultExpressionManager(serviceTaskRegistry);

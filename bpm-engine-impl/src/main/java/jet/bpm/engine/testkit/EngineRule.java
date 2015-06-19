@@ -8,7 +8,6 @@ import jet.bpm.engine.api.Engine;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.DefaultEngine;
 import jet.bpm.engine.IndexedProcessDefinition;
-import jet.bpm.engine.IndexedProcessDefinitionProviderImpl;
 import jet.bpm.engine.event.EventPersistenceManager;
 import jet.bpm.engine.event.EventPersistenceManagerImpl;
 import jet.bpm.engine.event.InMemEventStorage;
@@ -28,7 +27,7 @@ public class EngineRule implements TestRule {
 
     private final Parser parser;
 
-    private IndexedProcessDefinitionProviderImpl processDefinitionProvider;
+    private TestProcessDefinitionProvider processDefinitionProvider;
     private EventPersistenceManager eventManager;
     private Engine engine;
 
@@ -53,7 +52,7 @@ public class EngineRule implements TestRule {
 
     protected void before(Description description) throws Exception {
         if (engine == null) {
-            processDefinitionProvider = new IndexedProcessDefinitionProviderImpl();
+            processDefinitionProvider = new TestProcessDefinitionProvider();
             eventManager = new EventPersistenceManagerImpl(new InMemEventStorage());
             Configuration cfg = new Configuration();
             cfg.setExecutionPath("/tmp/bpm/" + System.currentTimeMillis());

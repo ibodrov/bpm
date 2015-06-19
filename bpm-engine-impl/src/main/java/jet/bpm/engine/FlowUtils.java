@@ -1,16 +1,12 @@
 package jet.bpm.engine;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.model.AbstractElement;
-import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
