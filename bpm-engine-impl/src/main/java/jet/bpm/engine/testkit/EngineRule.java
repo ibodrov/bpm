@@ -72,7 +72,7 @@ public class EngineRule implements TestRule {
                     for (String s : d.resources()) {
                         InputStream in = ClassLoader.getSystemResourceAsStream(s);
                         ProcessDefinition pd = parser.parse(in);
-                        IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd.getId(), pd.getChildren());
+                        IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd);
                         processDefinitionProvider.add(ipd);
                     }
                 }

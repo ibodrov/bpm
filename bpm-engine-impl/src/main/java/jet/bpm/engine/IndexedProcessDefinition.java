@@ -3,7 +3,6 @@ package jet.bpm.engine;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,13 +14,10 @@ public class IndexedProcessDefinition extends ProcessDefinition {
 
     private final Map<String, List<SequenceFlow>> outgoingFlows;
 
-    public IndexedProcessDefinition(String id, Collection<AbstractElement> children) {
-        super(id, children);
-        this.outgoingFlows = indexOutgoingFlows();
-    }
-
     public IndexedProcessDefinition(ProcessDefinition pd) {
-        this(pd.getId(), pd.getChildren());
+        super(pd.getId(), pd.getChildren());
+        setName(pd.getName());
+        this.outgoingFlows = indexOutgoingFlows();
     }
 
     public List<SequenceFlow> findOptionalOutgoingFlows(String from) {

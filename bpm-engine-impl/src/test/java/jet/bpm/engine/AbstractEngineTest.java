@@ -64,7 +64,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
     }
 
     protected void deploy(ProcessDefinition pd) {
-        IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd.getId(), pd.getChildren());
+        IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd);
         processDefinitionProvider.add(ipd);
     }
 
