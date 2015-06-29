@@ -135,7 +135,10 @@ public final class EventScheduler {
             try {
                 ExpiredEvent x = acquiredEventQueue.take();
                 Event e = eventManager.get(x.geId());
-                
+                if (e == null) {
+                    continue;
+                }
+
                 dispatcher.dispatch(e);
             } catch (NoEventFoundException e) {
                 log.warn("eventExecutionLoop -> no event found: {}", e.getMessage());
