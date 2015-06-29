@@ -41,7 +41,7 @@ public class EventPersistenceManagerImpl implements EventPersistenceManager {
     @Override
     public void add(Event event) throws ExecutionException {
         eventStorage.add(event);
-        log.debug("register ['{}'] -> done", event);
+        log.debug("add ['{}'] -> done", event);
     }
 
     @Override

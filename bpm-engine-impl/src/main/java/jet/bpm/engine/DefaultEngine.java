@@ -19,7 +19,7 @@ public class DefaultEngine extends AbstractEngine implements Engine {
     private final ElementHandler elementHandler = new DelegatingElementHandler(this);
     private final PersistenceManager persistenceManager;
     private final LockManager lockManager;
-    private final UuidGenerator idGenerator = new JugUuidGenerator();
+    private final UuidGenerator idGenerator = new RandomUuidGenerator();
 
     private final IndexedProcessDefinitionProvider processDefinitionProvider;
     private final ServiceTaskRegistry serviceTaskRegistry;

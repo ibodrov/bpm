@@ -8,8 +8,12 @@ import java.util.UUID;
 import jet.bpm.engine.event.Event;
 import jet.bpm.engine.leveldb.LevelDb;
 import jet.bpm.engine.leveldb.Serializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BusinessKeyEventIndex {
+
+    private static final Logger log = LoggerFactory.getLogger(BusinessKeyEventIndex.class);
 
     private final LevelDb levelDb;
     private final Serializer serializer;
@@ -38,6 +42,7 @@ public class BusinessKeyEventIndex {
         ids.add(event.getId());
 
         levelDb.put(key, marshallValue(ids));
+        log.debug("onAdd ['{}', '{}'] -> done, {}", processBusinessKey, event, ids);
     }
 
     public void onRemove(Event e) {
@@ -56,8 +61,10 @@ public class BusinessKeyEventIndex {
 
         if(ids.isEmpty()) {
             levelDb.delete(key);
+            log.debug("onRemove ['{}', '{}'] -> delete {}", processBusinessKey, e, key);
         } else {
             levelDb.put(key, marshallValue(ids));
+            log.debug("onRemove ['{}', '{}'] -> put {}", processBusinessKey, e, ids);
         }
     }
 

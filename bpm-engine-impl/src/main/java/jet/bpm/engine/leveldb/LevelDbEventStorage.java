@@ -86,7 +86,7 @@ public class LevelDbEventStorage implements EventStorage {
     
     @Override
     public Collection<Event> find(String processBusinessKey) {
-        List<Event> result = new ArrayList<>();
+        Collection<Event> result = new ArrayList<>();
 
         Set<UUID> ids = businessKeyEventLevelDbIndex.list(processBusinessKey);
         for (UUID id : ids) {
@@ -95,6 +95,7 @@ public class LevelDbEventStorage implements EventStorage {
                 result.add(e);
             }
         }
+        
         return result;
     }
 

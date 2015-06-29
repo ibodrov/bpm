@@ -73,8 +73,7 @@ public class IntermediateCatchEventHandler extends AbstractElementHandler {
         String timeDuration = eval(ice.getTimeDuration(), ctx, em, String.class);
         Date expiredAt = timeDate != null ? timeDate : parseDuration(timeDuration);
         
-        Event e = new Event(id, s.getId(), c.getGroupId(), name, s.getBusinessKey(), c.isExclusive(), expiredAt);
-        return e;
+        return new Event(id, s.getId(), c.getGroupId(), name, s.getBusinessKey(), c.isExclusive(), expiredAt);
     }
     
     private Date parseTimeDate(String s, ProcessElementCommand c, ExecutionContext ctx, ExpressionManager em) throws ExecutionException {
