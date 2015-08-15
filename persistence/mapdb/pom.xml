@@ -38,6 +38,7 @@
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>*</Import-Package>
+                        <Export-Package>jet.bpm.engine.mapdb</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

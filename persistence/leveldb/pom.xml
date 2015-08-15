@@ -53,6 +53,10 @@
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>*</Import-Package>
+                        <Export-Package>
+                            jet.bpm.engine.leveldb,
+                            jet.bpm.engine.leveldb.index
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
