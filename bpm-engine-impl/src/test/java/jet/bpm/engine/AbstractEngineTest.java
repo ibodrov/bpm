@@ -1,6 +1,5 @@
 package jet.bpm.engine;
 
-import jet.bpm.engine.testkit.TestProcessDefinitionProvider;
 import jet.bpm.engine.api.ActivationListener;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,16 +11,9 @@ import jet.bpm.engine.event.EventPersistenceManager;
 import jet.bpm.engine.event.EventPersistenceManagerImpl;
 import jet.bpm.engine.api.JavaDelegate;
 import jet.bpm.engine.event.InMemEventStorage;
-import jet.bpm.engine.leveldb.Configuration;
-import jet.bpm.engine.leveldb.KryoSerializer;
-import jet.bpm.engine.leveldb.LevelDbPersistenceManager;
-import jet.bpm.engine.lock.StripedLockManagerImpl;
 import jet.bpm.engine.task.ServiceTaskRegistry;
 import jet.bpm.engine.task.ServiceTaskRegistryImpl;
 import jet.bpm.engine.model.ProcessDefinition;
-import org.iq80.leveldb.DBFactory;
-import org.iq80.leveldb.impl.Iq80DBFactory;
-import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import static org.mockito.Mockito.*;
@@ -37,7 +29,6 @@ public abstract class AbstractEngineTest implements ActivationListener {
     protected EventPersistenceManager eventManager;
     private AbstractEngine engine;
     private Map<String, List<String>> activations;
-    private LevelDbPersistenceManager levelDbPersistenceManager;
 
     @Before
     public void init() {
@@ -45,22 +36,10 @@ public abstract class AbstractEngineTest implements ActivationListener {
         serviceTaskRegistry = new ServiceTaskRegistryImpl();
         eventManager = spy(new EventPersistenceManagerImpl(new InMemEventStorage()));
 
-        Configuration cfg = new Configuration();
-        cfg.setExecutionPath("/tmp/bpm/");
-        DBFactory f = new Iq80DBFactory();
-        levelDbPersistenceManager = new LevelDbPersistenceManager(cfg, f, new KryoSerializer());
-        levelDbPersistenceManager.init();
-
-        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager, levelDbPersistenceManager, new StripedLockManagerImpl(1));
-//        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager);
+        engine = new DefaultEngine(processDefinitionProvider, serviceTaskRegistry, eventManager);
 
         activations = new HashMap<>();
         engine.addListener(this);
-    }
-
-    @After
-    public void initLevelDb() {
-        levelDbPersistenceManager.close();
     }
 
     protected void deploy(ProcessDefinition pd) {

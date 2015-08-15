@@ -1,11 +1,12 @@
-package jet.bpm.engine;
+package jet.bpm.engine.leveldb;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import jet.bpm.engine.DefaultExecution;
+import jet.bpm.engine.ExecutionContextImpl;
 import jet.bpm.engine.commands.ProcessElementCommand;
-import jet.bpm.engine.leveldb.KryoSerializer;
 import static org.junit.Assert.*;
 import org.junit.Ignore;
 import org.junit.Test;

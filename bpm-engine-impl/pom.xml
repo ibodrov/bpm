@@ -8,8 +8,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <name>BPM Engine (Impl)</name>
-
     <groupId>jet.bpm</groupId>
     <artifactId>bpm-engine-impl</artifactId>
     <packaging>bundle</packaging>
@@ -50,14 +48,6 @@
             <artifactId>mapdb</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.iq80.leveldb</groupId>
-            <artifactId>leveldb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.esotericsoftware</groupId>
-            <artifactId>kryo</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.fasterxml.uuid</groupId>
             <artifactId>java-uuid-generator</artifactId>

@@ -9,7 +9,10 @@
     <modules>
         <module>bpm-engine-api</module>
         <module>bpm-engine-impl</module>
+        <module>persistence/leveldb</module>
+        <module>persistence/mapdb</module>
         <module>activiti-compat</module>
+        <module>testkit</module>
     </modules>
 
     <properties>

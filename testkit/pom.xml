@@ -8,8 +8,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>jet.bpm</groupId>
-    <artifactId>activiti-compat</artifactId>
+    <artifactId>testkit</artifactId>
     <packaging>bundle</packaging>
 
     <dependencies>
@@ -18,16 +17,14 @@
             <artifactId>bpm-engine-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>persistence-leveldb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -41,9 +38,6 @@
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>*</Import-Package>
-                        <Export-Package>
-                            jet.bpm.engine.xml.activiti
-                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

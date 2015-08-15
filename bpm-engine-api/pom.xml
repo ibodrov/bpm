@@ -8,8 +8,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <name>BPM Engine (API)</name>
-
     <groupId>jet.bpm</groupId>
     <artifactId>bpm-engine-api</artifactId>
     <packaging>bundle</packaging>
