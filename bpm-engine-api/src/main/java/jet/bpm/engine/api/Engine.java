@@ -5,8 +5,6 @@ import java.util.UUID;
 
 public interface Engine {
 
-    void addListener(ActivationListener l);
-
     /**
      * Starts a new process process instance with the given ID.
      * @param processBusinessKey external process instance ID, must be unique.

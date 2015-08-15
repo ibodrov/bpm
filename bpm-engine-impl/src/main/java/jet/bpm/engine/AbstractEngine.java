@@ -1,7 +1,6 @@
 package jet.bpm.engine;
 
 import jet.bpm.engine.api.ExecutionContext;
-import jet.bpm.engine.api.ActivationListener;
 import java.util.Collection;
 import java.util.List;
 import jet.bpm.engine.persistence.PersistenceManager;
@@ -47,7 +46,6 @@ public abstract class AbstractEngine implements Engine {
 
     public abstract UuidGenerator getUuidGenerator();
 
-    @Override
     public void addListener(ActivationListener l) {
         listenerHolder.addListener(l);
     }

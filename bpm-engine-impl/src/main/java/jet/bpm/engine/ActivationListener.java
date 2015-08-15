@@ -1,4 +1,6 @@
-package jet.bpm.engine.api;
+package jet.bpm.engine;
+
+import jet.bpm.engine.api.Execution;
 
 public interface ActivationListener {
 
