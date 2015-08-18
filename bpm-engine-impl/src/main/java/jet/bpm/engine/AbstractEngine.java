@@ -88,7 +88,11 @@ public abstract class AbstractEngine implements Engine {
             if (evs == null || evs.isEmpty()) {
                 throw new NoEventFoundException("No event '%s' found for process '%s'", eventName, processBusinessKey);
             } else if (evs.size() > 1) {
-                throw new ExecutionException("Non-unique event name in process '%s': %s", processBusinessKey, eventName);
+                StringBuilder b = new StringBuilder();
+                for (Event e : evs) {
+                    b.append(e).append(",");
+                }
+                throw new ExecutionException("Non-unique event name in process '%s': %s. Events: %s", processBusinessKey, eventName, b);
             }
 
             Event e = evs.iterator().next();
