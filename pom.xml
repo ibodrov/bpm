@@ -3,7 +3,7 @@
 
     <groupId>jet.bpm</groupId>
     <artifactId>parent</artifactId>
-    <version>0.6.3</version>
+    <version>0.6.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -131,6 +131,6 @@
 
     <scm>
         <developerConnection>scm:git:https://github.com/ibodrov/bpm.git</developerConnection>
-        <tag>0.6.3</tag>
+        <tag>0.6.2</tag>
     </scm>
 </project>
