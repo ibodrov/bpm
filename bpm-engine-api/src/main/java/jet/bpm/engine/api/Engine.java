@@ -31,7 +31,8 @@ public interface Engine {
      * @param eventId ID of event.
      * @param variables variables to be passed, can be null. Values with the same
      * name will be replaced.
+     * @return external process instance ID, defined on its start.
      * @throws ExecutionException
      */
-    void resume(UUID eventId, Map<String, Object> variables) throws ExecutionException;
+    String resume(UUID eventId, Map<String, Object> variables) throws ExecutionException;
 }

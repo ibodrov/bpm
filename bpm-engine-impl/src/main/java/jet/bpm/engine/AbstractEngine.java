@@ -101,7 +101,7 @@ public abstract class AbstractEngine implements Engine {
     }
 
     @Override
-    public void resume(UUID eventId, Map<String, Object> variables) throws ExecutionException {
+    public String resume(UUID eventId, Map<String, Object> variables) throws ExecutionException {
         EventPersistenceManager em = getEventManager();
         Event e = em.get(eventId);
         if (e == null) {
@@ -117,6 +117,8 @@ public abstract class AbstractEngine implements Engine {
         } finally {
             lm.unlock(processBusinessKey);
         }
+
+        return processBusinessKey;
     }
     
     public void resume(Event e, Map<String, Object> variables) throws ExecutionException {
