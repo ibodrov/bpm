@@ -3,7 +3,7 @@
 
     <groupId>jet.bpm</groupId>
     <artifactId>parent</artifactId>
-    <version>0.6.3</version>
+    <version>0.6.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -47,7 +47,7 @@
             <dependency>
                 <groupId>com.esotericsoftware</groupId>
                 <artifactId>kryo</artifactId>
-                <version>3.0.0</version>
+                <version>3.0.3</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>

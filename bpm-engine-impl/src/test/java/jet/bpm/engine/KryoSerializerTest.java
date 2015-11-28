@@ -7,10 +7,21 @@ import java.util.UUID;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.leveldb.KryoSerializer;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class KryoSerializerTest {
+    
+    @Test
+    public void testNonDefaultConstructor() throws Exception {
+        KryoSerializer s = new KryoSerializer();
+        
+        UUID uuid1 = UUID.randomUUID();
+        
+        byte[] bytes = s.toBytes(uuid1);
+        assertNotNull(bytes);
+        
+        assertEquals(uuid1, s.fromBytes(bytes));
+    }
 
     @Test
     public void hashSetSerialize() throws Exception {
@@ -25,7 +36,6 @@ public class KryoSerializerTest {
     }
 
     @Test
-    @Ignore
     public void defaultExecutionSerialize() throws Exception {
         KryoSerializer s = new KryoSerializer();
         
