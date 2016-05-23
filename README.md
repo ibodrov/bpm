@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/ibodrov/bpm.svg?branch=master)](https://travis-ci.org/ibodrov/bpm)
+[![Coverage Status](https://coveralls.io/repos/github/ibodrov/bpm/badge.svg?branch=master)](https://coveralls.io/github/ibodrov/bpm?branch=master)
+
 BPM Engine
 ==
 
