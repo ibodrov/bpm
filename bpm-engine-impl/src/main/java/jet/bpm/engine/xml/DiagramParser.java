@@ -1,9 +1,9 @@
 package jet.bpm.engine.xml;
 
 import java.io.InputStream;
-import jet.bpm.engine.model.graphics.ProcessGraphics;
+import jet.bpm.engine.model.diagram.ProcessGraphics;
 
-public interface GraphicsParser {
+public interface DiagramParser {
     
     ProcessGraphics parse(InputStream in) throws ParserException;
 }

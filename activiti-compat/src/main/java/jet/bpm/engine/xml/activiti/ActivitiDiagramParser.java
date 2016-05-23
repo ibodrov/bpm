@@ -7,23 +7,23 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import jet.bpm.engine.model.graphics.Label;
-import jet.bpm.engine.model.graphics.Bounds;
-import jet.bpm.engine.model.graphics.Edge;
-import jet.bpm.engine.model.graphics.ProcessGraphics;
-import jet.bpm.engine.model.graphics.Shape;
-import jet.bpm.engine.model.graphics.Waypoint;
-import jet.bpm.engine.xml.GraphicsParser;
+import jet.bpm.engine.model.diagram.Label;
+import jet.bpm.engine.model.diagram.Bounds;
+import jet.bpm.engine.model.diagram.Edge;
+import jet.bpm.engine.model.diagram.ProcessGraphics;
+import jet.bpm.engine.model.diagram.Shape;
+import jet.bpm.engine.model.diagram.Waypoint;
 import jet.bpm.engine.xml.ParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+import jet.bpm.engine.xml.DiagramParser;
 
-public class ActivitiGraphicsParser implements GraphicsParser {
+public class ActivitiDiagramParser implements DiagramParser {
 
-    private static final Logger log = LoggerFactory.getLogger(ActivitiGraphicsParser.class);
+    private static final Logger log = LoggerFactory.getLogger(ActivitiDiagramParser.class);
 
     @Override
     public ProcessGraphics parse(InputStream in) throws ParserException {

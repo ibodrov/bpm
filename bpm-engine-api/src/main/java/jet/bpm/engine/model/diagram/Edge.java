@@ -1,4 +1,4 @@
-package jet.bpm.engine.model.graphics;
+package jet.bpm.engine.model.diagram;
 
 import java.io.Serializable;
 import java.util.List;

@@ -10,7 +10,6 @@ Main features
 - high-performance on-disk persistence;
 - event scheduling (e.g. "timers");
 - supports Activiti's XML format (both process and visual elements);
-- process visualization;
 - supports JUEL in flow expressions, task delegates, etc;
 - JUnit support (and easy unit testing in general).
 
