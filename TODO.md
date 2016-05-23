@@ -1,1 +1,2 @@
-- flow expression eval for inclusive gateways
+- evaluate flow expressions for inclusive gateways
+- replace JUEL with Scripting API
