@@ -140,7 +140,7 @@ public abstract class AbstractEngine implements Engine {
         EventPersistenceManager em = getEventManager();
         if (e.isExclusive()) {
             // exclusive event means that only one event from the group of
-            // events can happen. Rest of events must be removed.
+            // events can happen. The rest of the events must be removed.
             em.clearGroup(processBusinessKey, e.getGroupId());
         } else {
             em.remove(e.getId());
@@ -149,14 +149,14 @@ public abstract class AbstractEngine implements Engine {
         UUID eid = e.getExecutionId();
         log.debug("resumeLockSafe ['{}', '{}'] -> got '{}'", processBusinessKey, eventName, eid);
 
-        // load execution
+        // load an execution
         PersistenceManager pm = getPersistenceManager();
         DefaultExecution s = pm.get(eid);
         if (s == null) {
             throw new ExecutionException("No execution '%s' found for process '%s'", eid, processBusinessKey);
         }
 
-        // enable loaded execution
+        // enable the execution
         s.setSuspended(false);
 
         applyVariables(s.getContext(), variables);
@@ -190,7 +190,7 @@ public abstract class AbstractEngine implements Engine {
 
         while (!s.isSuspended()) {
             if (s.isDone()) {
-                // check if no more events want this execution
+                // check if no more events need this execution
                 if (EventMapHelper.isEmpty(s)) {
                     pm.remove(s.getId());
                     log.debug("runLockSafe ['{}'] -> execution removed", s.getId());

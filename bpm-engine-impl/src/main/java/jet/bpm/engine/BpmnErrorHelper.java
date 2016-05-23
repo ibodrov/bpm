@@ -20,7 +20,7 @@ public final class BpmnErrorHelper {
     }
     
     /**
-     * Clears raised error in the given context.
+     * Clears the raised error in the given context.
      * @param ctx the execution context.
      */
     public static void clear(ExecutionContext ctx) {
