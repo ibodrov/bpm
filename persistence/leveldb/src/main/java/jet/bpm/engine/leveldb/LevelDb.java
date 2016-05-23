@@ -11,7 +11,6 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
-import org.iq80.leveldb.impl.WriteBatchImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
