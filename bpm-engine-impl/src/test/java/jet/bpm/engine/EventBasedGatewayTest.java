@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import jet.bpm.engine.api.NoEventFoundException;
 import jet.bpm.engine.event.Event;
 import jet.bpm.engine.handlers.IntermediateCatchEventHandler;
 import jet.bpm.engine.model.AbstractElement;
@@ -233,5 +234,31 @@ public class EventBasedGatewayTest extends AbstractEngineTest {
         assertNotNull(ev);
         Date actualDt = IntermediateCatchEventHandler.parseIso8601(dt);
         assertEquals(actualDt, ev.getExpiredAt());
+    }
+    
+    /**
+     * start --> gw --> ev1 --> end
+     */
+    @Test(expected = NoEventFoundException.class)
+    public void testNoEventFound() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "gw"),
+                new EventBasedGateway("gw"),
+                    new SequenceFlow("f2", "gw", "ev1"),
+                    new IntermediateCatchEvent("ev1", "ev1", null, null),
+                    new SequenceFlow("f3", "ev1", "end"),
+                    new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        getEngine().resume(key, "unknown_event", null);
     }
 }

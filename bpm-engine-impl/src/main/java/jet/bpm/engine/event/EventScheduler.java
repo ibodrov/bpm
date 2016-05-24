@@ -38,6 +38,12 @@ public final class EventScheduler {
         this.dispatcher = dispatcher;
     }
 
+    public EventScheduler(EventPersistenceManager eventManager, int maxAcquiredEventQueueSize, EventDispatcher dispatcher) {
+        this.eventManager = eventManager;
+        this.acquiredEventQueue = new LinkedBlockingQueue<>(maxAcquiredEventQueueSize);
+        this.dispatcher = dispatcher;
+    }
+
     public void setEventExecutorsCount(int eventExecutorsCount) {
         this.eventExecutorsCount = eventExecutorsCount;
     }
