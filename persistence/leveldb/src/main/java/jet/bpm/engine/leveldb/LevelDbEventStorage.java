@@ -14,8 +14,12 @@ import jet.bpm.engine.event.ExpiredEvent;
 import jet.bpm.engine.leveldb.index.BusinessKeyEventIndex;
 import jet.bpm.engine.leveldb.index.ExpiredEventIndex;
 import org.iq80.leveldb.DBFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LevelDbEventStorage implements EventStorage {
+    
+    private static final Logger log = LoggerFactory.getLogger(LevelDbEventStorage.class);
 
     private final ExpiredEventIndex expiredEventLevelDbIndex;
     private final BusinessKeyEventIndex businessKeyEventLevelDbIndex;
@@ -40,6 +44,7 @@ public class LevelDbEventStorage implements EventStorage {
             expiredEventLevelDbIndex.init();
             businessKeyEventLevelDbIndex.init();
         } catch (Exception e) {
+            log.error("init -> error, closing...", e);
             close();
         }
     }
