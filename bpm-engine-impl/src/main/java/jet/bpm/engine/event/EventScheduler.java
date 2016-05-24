@@ -28,10 +28,6 @@ public final class EventScheduler {
     private long acquisitionErrorDelay = SECONDS.toMillis(5);
     private long executionErrorDelay = SECONDS.toMillis(5);
 
-    public EventScheduler(DefaultEngine engine, int maxAcquiredEventQueueSize) {
-        this(engine, maxAcquiredEventQueueSize, new DirectEventDispatcher(engine));
-    }
-
     public EventScheduler(DefaultEngine engine, int maxAcquiredEventQueueSize, EventDispatcher dispatcher) {
         this.eventManager = engine.getEventManager();
         this.acquiredEventQueue = new LinkedBlockingQueue<>(maxAcquiredEventQueueSize);
