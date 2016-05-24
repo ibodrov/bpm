@@ -1,0 +1,70 @@
+$ java -jar target/benchmarks.jar -wi 5 -i 5 -t max -f 1 -jvmArgsAppend="-Djava.security.egd=file:/dev/./urandom" > RESULTS.txt
+
+# Detecting actual CPU count: 4 detected
+# JMH 1.12 (released 53 days ago)
+# VM version: JDK 1.8.0_77, VM 25.77-b03
+# VM invoker: /home/ibodrov/opt/jdk/jdk1.8.0_77/jre/bin/java
+# VM options: -Djava.security.egd=file:/dev/./urandom
+# Warmup: 5 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 4 threads, will synchronize iterations
+# Benchmark mode: Throughput, ops/time
+# Benchmark: jet.bpm.benchmark.Linear10DelegateBenchmark.test
+
+# Run progress: 0.00% complete, ETA 00:00:20
+# Fork: 1 of 1
+# Warmup Iteration   1: 71482.580 ops/s
+# Warmup Iteration   2: 223419.985 ops/s
+# Warmup Iteration   3: 229647.874 ops/s
+# Warmup Iteration   4: 243939.319 ops/s
+# Warmup Iteration   5: 241126.761 ops/s
+Iteration   1: 239938.779 ops/s
+Iteration   2: 233579.539 ops/s
+Iteration   3: 244356.635 ops/s
+Iteration   4: 241677.864 ops/s
+Iteration   5: 244260.851 ops/s
+
+
+Result "test":
+  240762.733 ±(99.9%) 17033.127 ops/s [Average]
+  (min, avg, max) = (233579.539, 240762.733, 244356.635), stdev = 4423.449
+  CI (99.9%): [223729.606, 257795.861] (assumes normal distribution)
+
+
+# JMH 1.12 (released 53 days ago)
+# VM version: JDK 1.8.0_77, VM 25.77-b03
+# VM invoker: /home/ibodrov/opt/jdk/jdk1.8.0_77/jre/bin/java
+# VM options: -Djava.security.egd=file:/dev/./urandom
+# Warmup: 5 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 4 threads, will synchronize iterations
+# Benchmark mode: Throughput, ops/time
+# Benchmark: jet.bpm.benchmark.Linear10JuelInMemBenchmark.test
+
+# Run progress: 50.00% complete, ETA 00:00:10
+# Fork: 1 of 1
+# Warmup Iteration   1: 103359.743 ops/s
+# Warmup Iteration   2: 240293.675 ops/s
+# Warmup Iteration   3: 264518.066 ops/s
+# Warmup Iteration   4: 266069.162 ops/s
+# Warmup Iteration   5: 269610.535 ops/s
+Iteration   1: 266628.965 ops/s
+Iteration   2: 271101.905 ops/s
+Iteration   3: 262275.264 ops/s
+Iteration   4: 262790.210 ops/s
+Iteration   5: 269843.225 ops/s
+
+
+Result "test":
+  266527.914 ±(99.9%) 15399.970 ops/s [Average]
+  (min, avg, max) = (262275.264, 266527.914, 271101.905), stdev = 3999.323
+  CI (99.9%): [251127.944, 281927.884] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:00:21
+
+Benchmark                         Mode  Cnt       Score       Error  Units
+Linear10DelegateBenchmark.test   thrpt    5  240762.733 ± 17033.127  ops/s
+Linear10JuelInMemBenchmark.test  thrpt    5  266527.914 ± 15399.970  ops/s

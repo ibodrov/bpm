@@ -9,22 +9,28 @@ import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.event.InMemEventStorage;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.task.ServiceTaskRegistry;
-import jet.bpm.engine.task.ServiceTaskRegistryImpl;
 
 public abstract class AbstractBenchmarkState {
     
     private final Engine engine;
-
+    private final ServiceTaskRegistry serviceTaskRegistry;
+    
     public AbstractBenchmarkState(ProcessDefinition def) {
+        this.serviceTaskRegistry = new DummyServiceTaskRegistry();
+        
         DummyProcessDefinitionProvider defs = new DummyProcessDefinitionProvider();
         defs.publish(def.getId(), def);
-        this.engine = new DefaultEngine(defs, new ServiceTaskRegistryImpl(), new InMemEventStorage());
+        this.engine = new DefaultEngine(defs, serviceTaskRegistry, new InMemEventStorage());
     }
 
-    public Engine getEngine() {
+    public final Engine getEngine() {
         return engine;
     }
 
+    public final ServiceTaskRegistry getServiceTaskRegistry() {
+        return serviceTaskRegistry;
+    }
+    
     public static class DummyProcessDefinitionProvider implements ProcessDefinitionProvider {
 
         private final Map<String, ProcessDefinition> defs = new HashMap<>();
@@ -41,14 +47,16 @@ public abstract class AbstractBenchmarkState {
 
     public static class DummyServiceTaskRegistry implements ServiceTaskRegistry {
 
+        private final Map<String, Object> tasks = new HashMap<>();
+        
         @Override
         public void register(String key, Object instance) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            tasks.put(key, instance);
         }
 
         @Override
         public Object getByKey(String key) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return tasks.get(key);
         }
     }    
 }

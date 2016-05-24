@@ -16,7 +16,7 @@ import org.openjdk.jmh.annotations.State;
  * Linear process with 10 JUEL tasks. It is not really meaningful because
  * it is basically a JUEL benchmark.
  */
-public class Linear10InMemBenchmark {
+public class Linear10JuelInMemBenchmark {
 
     @State(Scope.Benchmark)
     public static class BenchmarkState extends AbstractBenchmarkState {
