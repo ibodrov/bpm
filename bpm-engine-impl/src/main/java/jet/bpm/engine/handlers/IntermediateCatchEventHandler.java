@@ -21,8 +21,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Period;
 
 /**
- * Itermediate event handler. Its job is to create child execution, suspend it
- * and link it with the event.
+ * Intermediate event handler. Its job is to create the child execution, suspend
+ * it and link it with the event.
  */
 public class IntermediateCatchEventHandler extends AbstractElementHandler {
     

@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Detected element type and delegates its handling to the specific processor.
+ * Determines the element type and delegates its handling to the concrete
+ * processor.
  */
 public class DelegatingElementHandler implements ElementHandler {
 

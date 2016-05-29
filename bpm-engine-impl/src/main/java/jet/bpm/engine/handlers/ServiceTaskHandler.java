@@ -51,13 +51,13 @@ public class ServiceTaskHandler extends AbstractElementHandler {
             try {
                 switch (type) {
                     case SIMPLE: {
-                        // simple case: task execution its just an eval
+                        // simple case: task is just an expression
                         em.eval(ctx, expr, Object.class);
                         break;
                     }
                     case DELEGATE: {
-                        // delegation: task execution its execution of delegate
-                        // reference
+                        // delegation: task is an expression that evals into a
+                        // delegate
                         JavaDelegate d = em.eval(ctx, expr, JavaDelegate.class);
                         d.execute(ctx);
                         break;
@@ -94,7 +94,7 @@ public class ServiceTaskHandler extends AbstractElementHandler {
     /**
      * BPMN error handling. Unlike common exceptions, error references is used.
      * Handles error boundary events.
-     * @param s currenct execution.
+     * @param s current execution.
      * @param pd current process definition.
      * @param c current process command.
      * @param e handled error.
@@ -111,15 +111,15 @@ public class ServiceTaskHandler extends AbstractElementHandler {
         }
 
         if (ev != null) {
-            // task element had boundary error event - the execution will use
-            // its flow
+            // the task element has an boundary error event - the process
+            // execution will follow its flow
             log.debug("handleBpmError ['{}', '{}'] -> handle boundary error '{}'", bk, eid, errorRef);
             // save errorRef for later
             s.getContext().setVariable(ExecutionContext.ERROR_CODE_KEY, errorRef);
             FlowUtils.followFlows(getEngine(), s, c, ev.getId());
         } else {
-            // no boundary error events was found - error will be raised to the
-            // parent execution
+            // no boundary error events were found - an error will be raised to
+            // the parent execution
             log.debug("handleBpmError ['{}', '{}'] -> no boundary error", bk, eid, errorRef);
             BpmnErrorHelper.raiseError(s.getContext(), errorRef);
         }

@@ -41,7 +41,7 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
             if (f.getExpression() != null) {
                 i.remove();
                 if (eval(s.getContext(), f)) {
-                    // we found flow, which evaluated into 'true'
+                    // we found a flow, which has been evaluated into a 'true' value
                     nextId = f.getId();
                     break;
                 }
@@ -51,10 +51,10 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
         ExclusiveGateway element = (ExclusiveGateway) ProcessDefinitionUtils.findElement(pd, c.getElementId());
 
         if (nextId == null && !flows.isEmpty()) {
-            // only flows left without EL expressions
+            // only flows left is without EL expressions
             String defaultFlow = element.getDefaultFlow();
             if (defaultFlow != null) {
-                // we have default flow, lets try him
+                // we have the default flow, lets try it
                 for (SequenceFlow f : flows) {
                     if (f.getId().equals(defaultFlow)) {
                         nextId = f.getId();
@@ -62,7 +62,7 @@ public class ExclusiveGatewayHandler extends AbstractElementHandler {
                     }
                 }
             } else {
-                // default flow is not specified, will take first one
+                // a default flow is not specified, will take the first one
                 nextId = flows.iterator().next().getId();
             }
         }

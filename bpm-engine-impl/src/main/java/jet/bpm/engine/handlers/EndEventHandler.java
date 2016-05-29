@@ -23,7 +23,7 @@ public class EndEventHandler extends AbstractElementHandler {
         EndEvent e = (EndEvent) ProcessDefinitionUtils.findElement(pd, c.getElementId());
 
         if (e.getErrorRef() != null) {
-            // the element has an error ref - must raise error to the parent
+            // the element has an error ref - will raise an error to the parent
             // process.
             BpmnErrorHelper.raiseError(s.getContext(), e.getErrorRef());
         }

@@ -26,16 +26,16 @@ public class SubProcessElementHandler extends AbstractCallHandler {
 
         ProcessDefinition sub = findCalledProcess(c);
 
-        // add error handling command to stack
+        // add an error handling command to the stack
         s.push(new HandleRaisedErrorCommand(c));
 
-        // get the ID of the called process. Depends on call type ('sub-process'
-        // or 'call activity') it can be:
+        // get the ID of the called process. Depending on the call type
+        // ('sub-process' or 'call activity') it can be:
         // - ID of process, which contains the element of calling process;
-        // - ID of external process from separate process definition
+        // - ID of external process from a separate process definition
         String id = getCalledProcessId(c, sub);
 
-        // first command is put to the called process' stack
+        // push the first command to the called process' stack
         AbstractElement start = ProcessDefinitionUtils.findStartEvent(sub);
         s.push(new ProcessElementCommand(id, start.getId()));
     }

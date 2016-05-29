@@ -18,16 +18,16 @@ public class EventBasedGatewayHandler extends AbstractElementHandler {
     public void handle(DefaultExecution s, ProcessElementCommand c) throws ExecutionException {
         s.pop();
 
-        // add to the stack process suspension command. It is expected that it
-        // will be called when all outgoind sequence flows of this gateway
+        // add the process suspension command to the stack. It is expected that
+        // it will be called when all outgoing sequence flows of this gateway
         // is done.
         s.push(new ProcessEventMappingCommand());
 
         UUID groupId = getEngine().getUuidGenerator().generate();
 
-        // add to the stack all the element of outgoing flows of this gateway
-        // and mark them with 'exclusiveness' flag (because in the event gateway
-        // only one flow can complete)
+        // add all elements of outgoing flows of this gateway to the stack 
+        // and mark them with the 'exclusiveness' flag (this way only one flow
+        // can be completed)
         FlowUtils.followFlows(getEngine(), s, c, groupId, true);
     }
 }

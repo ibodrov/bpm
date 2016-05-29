@@ -1,2 +1,3 @@
 - evaluate flow expressions for inclusive gateways
 - replace JUEL with Scripting API
+- refactor AbstractCallHandler, CallActivityElementHandler and SubProcessElementHandler: maybe they shouldn't have common hierarchy

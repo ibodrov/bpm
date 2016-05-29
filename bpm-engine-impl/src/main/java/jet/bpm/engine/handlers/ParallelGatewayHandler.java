@@ -30,7 +30,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
         String eId = c.getElementId();
         String defId = c.getProcessDefinitionId();
 
-        // join
+        // try to join
         IndexedProcessDefinition pd = getProcessDefinition(defId);
         List<SequenceFlow> in = ProcessDefinitionUtils.findIncomingFlows(pd, eId);
 
@@ -38,7 +38,7 @@ public class ParallelGatewayHandler extends AbstractElementHandler {
         int total = in.size();
 
         if (activated > total) {
-            throw new ExecutionException("Incorrect number of activation of element '%s' in process '%s': %d", eId, defId, activated);
+            throw new ExecutionException("Incorrect number of activations for the element '%s' in the process '%s': %d", eId, defId, activated);
         } else if (activated == total) {
             log.debug("handle ['{}', '{}'] -> forking", s.getId(), c.getProcessDefinitionId());
             // fork
