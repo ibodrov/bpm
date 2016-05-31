@@ -4,11 +4,11 @@
 BPM Engine
 ==
 
-Simple implementation of an BPM engine, designed to mimic Activiti's behaviour. Optimized for high performance (rather than for the strict following of the BPMN specification).
+A simple implementation of an BPM engine, designed to mimic Activiti's behaviour. Optimized for high performance (rather than for the strict following of the BPMN specification).
 
 Main features
 --
-- lightweight BPM engine, designed to be almost a drop-in replacement for the Activiti's engine;
+- an lightweight BPM engine, inspired by Activiti BPM engine;
 - high-performance on-disk persistence;
 - event scheduling (e.g. "timers");
 - supports Activiti's XML format (both process and visual elements);
@@ -32,4 +32,4 @@ Supported elements:
 
 Limitations
 --
-- in the current implementation of engine, "inclusive gateways" work exactly as "exclusive" - e.g. without the evaluation of flow expressions.
+- in the current implementation of the engine, "inclusive gateways" work exactly as "exclusive" - e.g. without the evaluation of flow expressions.
