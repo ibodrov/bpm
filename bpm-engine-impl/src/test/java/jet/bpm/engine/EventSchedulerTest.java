@@ -38,7 +38,7 @@ public class EventSchedulerTest {
         sched.start();
         
         ArgumentCaptor<Event> args = ArgumentCaptor.forClass(Event.class);
-        verify(dispatcher, timeout(500000).times(1)).dispatch(args.capture());
+        verify(dispatcher, timeout(5000).times(1)).dispatch(args.capture());
         
         args.getValue().getId().equals(ev1.geId());
         
