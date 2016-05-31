@@ -5,8 +5,8 @@ import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.DefaultExecution;
 
 /**
- * Process suspension command. Invokes saving of process state and interrupts
- * its execution.
+ * Process suspension command. Invokes saving of the process state and
+ * interrupts it execution.
  */
 public class SuspendExecutionCommand implements ExecutionCommand {
 

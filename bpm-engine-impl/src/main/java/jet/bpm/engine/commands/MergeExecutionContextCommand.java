@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Command to merge contexts of parent and child processes. Designed to run
- * after child process ends. On its execution, the out variables of the child process
- * will become variables in parent process.
+ * Command to merge contexts of a parent and child processes. Designed to run
+ * after the child process ends. On its execution, out variables of the child
+ * process will become variables in the parent process.
  */
 public class MergeExecutionContextCommand implements ExecutionCommand {
 
@@ -43,10 +43,10 @@ public class MergeExecutionContextCommand implements ExecutionCommand {
         ExecutionContext source = execution.getContext();
         execution.setContext(target);
         
-        // TODO: refactor as conditional command?
+        // TODO: refactor as a conditional command?
         String errorRef = BpmnErrorHelper.getRaisedError(source);
         if (errorRef != null) {
-            // perform error raise
+            // raise the error to the parent process
             BpmnErrorHelper.raiseError(target, errorRef);
             log.debug("raising error '{}'", errorRef);
             return execution;

@@ -1,7 +1,7 @@
 package jet.bpm.engine.api;
 
 /**
- * BPMN error, wrapped in exception.
+ * BPMN error, wrapped in an exception.
  */
 public class BpmnError extends RuntimeException {
 

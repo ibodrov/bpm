@@ -47,7 +47,7 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
 
         String errorRef = BpmnErrorHelper.getRaisedError(ctx);
         if (errorRef == null) {
-            // no errors was raised, will continue execution
+            // no errors were raised, will continue the execution
             FlowUtils.followFlows(engine, execution, processDefinitionId, elementId, groupId, exclusive);
             return execution;
         }
@@ -57,14 +57,14 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
 
         BoundaryEvent ev = ProcessDefinitionUtils.findBoundaryEvent(pd, elementId, errorRef);
         if (ev == null) {
-            // try to find boundary event without specified error reference
+            // trying to find a boundary event without the specified error reference
             ev = ProcessDefinitionUtils.findBoundaryEvent(pd, elementId, null);
         }
         
         if (ev != null) {
             log.debug("apply ['{}', '{}'] -> handle boundary error '{}'", execution.getBusinessKey(), elementId, errorRef);
             
-            // error is handled
+            // the error is handled
             BpmnErrorHelper.clear(ctx);
             
             // save errorRef for later
@@ -72,7 +72,7 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
             
             followFlows(execution, pd, ev.getId(), ctx);
             
-            // process inactive
+            // process the inactive flows
             List<SequenceFlow> flows = ProcessDefinitionUtils.findOptionalOutgoingFlows(pd, elementId);
             FlowUtils.activateFlows(execution, pd, flows);
             List<BoundaryEvent> evs = new ArrayList<>(ProcessDefinitionUtils.findOptionalBoundaryEvents(pd, elementId));

@@ -8,7 +8,7 @@ import jet.bpm.engine.DefaultExecution;
 public interface ExecutionCommand extends Serializable {
 
     /**
-     * Executes command with specified process state.
+     * Executes a command with the specified process state.
      * @param engine
      * @param execution
      * @return modified or new process state.

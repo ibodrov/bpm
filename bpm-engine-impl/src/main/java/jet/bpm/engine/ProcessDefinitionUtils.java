@@ -20,12 +20,13 @@ import jet.bpm.engine.model.SubProcess;
 public final class ProcessDefinitionUtils {
 
     /**
-     * Finds (sub)process definition by its element ID.
-     * @param pd parent process definition.
-     * @param id the (sub)process element ID.
-     * @return process definition, which contains element with specified ID.
-     * @throws ExecutionException if the element is not found in parent or any
-     * subprocesses.
+     * Finds a (sub)process definition by its element ID.
+     * @param pd a parent process definition.
+     * @param id a (sub)process element ID.
+     * @return the process definition, which contains an element with the
+     * specified ID.
+     * @throws ExecutionException if the element is not found in the parent
+     * process or any of its subprocesses.
      */
     public static ProcessDefinition findElementProcess(ProcessDefinition pd, String id) throws ExecutionException {
         ProcessDefinition sub = findElementProcess0(pd, id);
@@ -53,7 +54,7 @@ public final class ProcessDefinitionUtils {
     }
 
     /**
-     * Finds element of (sub)process by ID;
+     * Finds an element of (sub)process by its ID;
      * @param pd
      * @param id
      * @throws ExecutionException if the element is not found.
@@ -64,10 +65,10 @@ public final class ProcessDefinitionUtils {
     }
 
     /**
-     * Finds subprocess by ID.
+     * Finds a subprocess by its ID.
      * @param pd
      * @param id
-     * @throws ExecutionException if the subprocesss is not found.
+     * @throws ExecutionException if the subprocess is not found.
      */
     public static SubProcess findSubProcess(ProcessDefinition pd, String id) throws ExecutionException {
         AbstractElement e = findElement(pd, id);
@@ -83,7 +84,7 @@ public final class ProcessDefinitionUtils {
     }
 
     /**
-     * Finds all outgoind flows for the specified element.
+     * Finds all outgoing flows for the specified element.
      * @param pd
      * @param from
      * @throws ExecutionException if the element has no outgoing flows..
@@ -133,7 +134,7 @@ public final class ProcessDefinitionUtils {
     }
 
     /**
-     * Finds (first) start event of the process.
+     * Finds a (first) start event of the process.
      * @param pd
      * @throws ExecutionException if process has no start events.
      */

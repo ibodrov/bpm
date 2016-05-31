@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 /**
- * Process execution instance.
+ * Instance of the process execution.
  */
 public interface Execution extends Serializable {
 
@@ -19,12 +19,12 @@ public interface Execution extends Serializable {
     public String getBusinessKey();
 
     /**
-     * Indicates when execution is done (no more process steps to run).
+     * Indicates when the execution is done (no more process steps to run).
      */
     public boolean isDone();
     
     /**
-     * Indicates when execution is suspended (waiting for an event).
+     * Indicates when the execution is suspended (waiting for an event).
      */
     public boolean isSuspended();
 }

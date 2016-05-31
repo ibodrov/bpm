@@ -36,8 +36,8 @@ public class ProcessElementCommand implements ExecutionCommand {
     }
 
     /**
-     * Indicates exclusiveness of this flow. Used to mark exclusive branches of
-     * parallel flows.
+     * Indicates the exclusiveness of this flow. Used to mark exclusive branches
+     * of parallel flows.
      */
     public boolean isExclusive() {
         return exclusive;
