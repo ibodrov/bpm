@@ -121,7 +121,6 @@ public abstract class AbstractBenchmarkState {
 
         private final Map<String, Object> tasks = new HashMap<>();
         
-        @Override
         public void register(String key, Object instance) {
             tasks.put(key, instance);
         }
