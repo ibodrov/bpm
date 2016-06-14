@@ -30,7 +30,7 @@ import org.openjdk.jmh.annotations.TearDown;
 public abstract class AbstractBenchmarkState {
     
     private final Engine engine;
-    private final ServiceTaskRegistry serviceTaskRegistry;
+    private final DummyServiceTaskRegistry serviceTaskRegistry;
     private LevelDbEventStorage levelDbEventStorage;
     private MapDbPersistenceManager mapDbPersistenceManager;
     
@@ -99,7 +99,7 @@ public abstract class AbstractBenchmarkState {
         return engine;
     }
 
-    public final ServiceTaskRegistry getServiceTaskRegistry() {
+    public final DummyServiceTaskRegistry getServiceTaskRegistry() {
         return serviceTaskRegistry;
     }
     
