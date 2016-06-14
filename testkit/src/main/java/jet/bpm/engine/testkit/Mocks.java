@@ -21,7 +21,6 @@ public final class Mocks {
     
     public static class Registry implements ServiceTaskRegistry {
 
-        @Override
         public void register(String key, Object instance) {
             Mocks.register(key, instance);
         }

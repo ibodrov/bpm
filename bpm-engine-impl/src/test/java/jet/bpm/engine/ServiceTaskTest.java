@@ -34,7 +34,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
                 System.out.println("Hello, " + ctx.getVariable("name") + "!");
             }
         });
-        getEngine().getServiceTaskRegistry().register("hello", helloTask);
+        getServiceTaskRegistry().register("hello", helloTask);
 
         // ---
 
@@ -85,7 +85,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
                 throw new BpmnError(errorRef);
             }
         });
-        getEngine().getServiceTaskRegistry().register("t1", t1);
+        getServiceTaskRegistry().register("t1", t1);
 
         // ---
 
@@ -136,7 +136,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
                 throw new BpmnError(errorRef);
             }
         });
-        getEngine().getServiceTaskRegistry().register("t1", t1);
+        getServiceTaskRegistry().register("t1", t1);
         
         JavaDelegate t2 = spy(new JavaDelegate() {
 
@@ -146,7 +146,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
                 Assert.assertEquals(errorRef, v);
             }
         });
-        getEngine().getServiceTaskRegistry().register("t2", t2);
+        getServiceTaskRegistry().register("t2", t2);
 
         // ---
 
@@ -180,7 +180,7 @@ public class ServiceTaskTest extends AbstractEngineTest {
     @Test
     public void testSimpleTaskExpression() throws Exception {
         SampleTask t = mock(SampleTask.class);
-        getEngine().getServiceTaskRegistry().register("hello", t);
+        getServiceTaskRegistry().register("hello", t);
 
         // ---
 

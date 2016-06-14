@@ -189,7 +189,7 @@ public class CallActivityTest extends AbstractEngineTest {
                 assertEquals(v, o);
             }
         });
-        getEngine().getServiceTaskRegistry().register("t1", t1Task);
+        getServiceTaskRegistry().register("t1", t1Task);
 
         // ---
 

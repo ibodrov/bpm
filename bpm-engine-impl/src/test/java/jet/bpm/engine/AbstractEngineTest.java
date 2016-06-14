@@ -10,7 +10,6 @@ import jet.bpm.engine.event.EventPersistenceManager;
 import jet.bpm.engine.event.EventPersistenceManagerImpl;
 import jet.bpm.engine.api.JavaDelegate;
 import jet.bpm.engine.event.InMemEventStorage;
-import jet.bpm.engine.task.ServiceTaskRegistry;
 import jet.bpm.engine.task.ServiceTaskRegistryImpl;
 import jet.bpm.engine.model.ProcessDefinition;
 import static org.junit.Assert.*;
@@ -24,7 +23,7 @@ public abstract class AbstractEngineTest implements ActivationListener {
     private static final Logger log = LoggerFactory.getLogger(AbstractEngineTest.class);
 
     private TestProcessDefinitionProvider processDefinitionProvider;
-    private ServiceTaskRegistry serviceTaskRegistry;
+    private ServiceTaskRegistryImpl serviceTaskRegistry;
     protected EventPersistenceManager eventManager;
     private AbstractEngine engine;
     private Map<String, List<String>> activations;
@@ -41,6 +40,10 @@ public abstract class AbstractEngineTest implements ActivationListener {
         engine.addListener(this);
     }
 
+    protected ServiceTaskRegistryImpl getServiceTaskRegistry() {
+        return serviceTaskRegistry;
+    }
+    
     protected void deploy(ProcessDefinition pd) {
         IndexedProcessDefinition ipd = new IndexedProcessDefinition(pd);
         processDefinitionProvider.add(ipd);

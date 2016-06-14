@@ -31,10 +31,10 @@ public class SubProcessTest extends AbstractEngineTest {
     @Test
     public void testSimple() throws Exception {
         JavaDelegate t1 = mock(JavaDelegate.class);
-        getEngine().getServiceTaskRegistry().register("t1", t1);
+        getServiceTaskRegistry().register("t1", t1);
 
         JavaDelegate t2 = mock(JavaDelegate.class);
-        getEngine().getServiceTaskRegistry().register("t2", t2);
+        getServiceTaskRegistry().register("t2", t2);
 
         // --
 
@@ -99,10 +99,10 @@ public class SubProcessTest extends AbstractEngineTest {
                 throw new BpmnError(errorRef);
             }
         });
-        getEngine().getServiceTaskRegistry().register("t1", t1);
+        getServiceTaskRegistry().register("t1", t1);
 
         JavaDelegate t2 = mock(JavaDelegate.class);
-        getEngine().getServiceTaskRegistry().register("t2", t2);
+        getServiceTaskRegistry().register("t2", t2);
 
         JavaDelegate t3 = spy(new JavaDelegate() {
 
@@ -112,7 +112,7 @@ public class SubProcessTest extends AbstractEngineTest {
                 Assert.assertEquals(errorRef, v);
             }
         });
-        getEngine().getServiceTaskRegistry().register("t3", t3);
+        getServiceTaskRegistry().register("t3", t3);
 
         // ---
 
@@ -227,7 +227,7 @@ public class SubProcessTest extends AbstractEngineTest {
                 ctx.setVariable(k, v);
             }
         });
-        getEngine().getServiceTaskRegistry().register("t1", t1);
+        getServiceTaskRegistry().register("t1", t1);
 
         JavaDelegate t2 = spy(new JavaDelegate() {
 
@@ -237,7 +237,7 @@ public class SubProcessTest extends AbstractEngineTest {
                 Assert.assertEquals(v, v2);
             }
         });
-        getEngine().getServiceTaskRegistry().register("t2", t2);
+        getServiceTaskRegistry().register("t2", t2);
 
         // --
 

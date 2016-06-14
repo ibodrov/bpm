@@ -7,7 +7,6 @@ public class ServiceTaskRegistryImpl implements ServiceTaskRegistry {
 
     private final Map<String, Object> items = new HashMap<>();
 
-    @Override
     public void register(String key, Object instance) {
         items.put(key, instance);
     }

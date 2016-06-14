@@ -21,7 +21,7 @@ public class SequenceFlowTest extends AbstractEngineTest {
     @Test
     public void testDelegateListener() throws Exception {
         ExecutionListener l = mock(ExecutionListener.class);
-        getEngine().getServiceTaskRegistry().register("hello", l);
+        getServiceTaskRegistry().register("hello", l);
         
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
@@ -54,7 +54,7 @@ public class SequenceFlowTest extends AbstractEngineTest {
     @Test
     public void testSimpleListener() throws Exception {
         SampleListener l = mock(SampleListener.class);
-        getEngine().getServiceTaskRegistry().register("hello", l);
+        getServiceTaskRegistry().register("hello", l);
         
         String processId = "test";
         deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
