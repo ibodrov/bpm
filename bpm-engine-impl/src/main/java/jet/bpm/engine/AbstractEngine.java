@@ -29,6 +29,7 @@ public abstract class AbstractEngine implements Engine {
     private static final Logger log = LoggerFactory.getLogger(AbstractEngine.class);
 
     private final ActivationListenerHolder listenerHolder = new ActivationListenerHolder();
+    private final ExecutionInterceptorHolder interceptorHolder = new ExecutionInterceptorHolder();
 
     public abstract IndexedProcessDefinitionProvider getProcessDefinitionProvider();
 
@@ -46,14 +47,20 @@ public abstract class AbstractEngine implements Engine {
 
     public abstract UuidGenerator getUuidGenerator();
 
+    @Deprecated
     public void addListener(ActivationListener l) {
         listenerHolder.addListener(l);
     }
 
+    @Deprecated
     public void fireOnElementActivation(DefaultExecution e, String processDefinitionId, String elementId) {
         listenerHolder.fireOnElementActivation(e, processDefinitionId, elementId);
     }
-
+    
+    public void addInterceptor(ExecutionInterceptor i) {
+        interceptorHolder.addInterceptor(i);
+    }
+    
     @Override
     public void start(String processBusinessKey, String processDefinitionId, Map<String, Object> variables) throws ExecutionException {
         IndexedProcessDefinitionProvider pdp = getProcessDefinitionProvider();
@@ -66,12 +73,15 @@ public abstract class AbstractEngine implements Engine {
 
         UuidGenerator idg = getUuidGenerator();
 
-        DefaultExecution s = new DefaultExecution(idg.generate(), processBusinessKey, ctx);
+        UUID executionId = idg.generate();
+        DefaultExecution s = new DefaultExecution(executionId, processBusinessKey, ctx);
         s.push(new ProcessElementCommand(processDefinitionId, start.getId()));
 
         LockManager lm = getLockManager();
         lm.lock(processBusinessKey);
+        
         try {
+            interceptorHolder.fireOnStart(processBusinessKey, processDefinitionId, executionId, variables);
             runLockSafe(s);
         } finally {
             lm.unlock(processBusinessKey);
@@ -136,6 +146,11 @@ public abstract class AbstractEngine implements Engine {
     private void resumeLockSafe(Event e, Map<String, Object> variables) throws ExecutionException {
         String processBusinessKey = e.getProcessBusinessKey();
         String eventName = e.getName();
+        
+        UUID eid = e.getExecutionId();
+        log.debug("resumeLockSafe ['{}', '{}'] -> got '{}'", processBusinessKey, eventName, eid);
+        
+        interceptorHolder.fireOnResume(processBusinessKey, eid, e.getId(), variables);
 
         EventPersistenceManager em = getEventManager();
         if (e.isExclusive()) {
@@ -145,9 +160,6 @@ public abstract class AbstractEngine implements Engine {
         } else {
             em.remove(e.getId());
         }
-
-        UUID eid = e.getExecutionId();
-        log.debug("resumeLockSafe ['{}', '{}'] -> got '{}'", processBusinessKey, eventName, eid);
 
         // load an execution
         PersistenceManager pm = getPersistenceManager();
@@ -204,6 +216,14 @@ public abstract class AbstractEngine implements Engine {
                 s = c.exec(this, s);
             }
         }
+        
+        if (s.isSuspended()) {
+            // the process is suspended and may continue in the future
+            interceptorHolder.fireOnSuspend();
+        } else if (s.isDone()) {
+            // the process is finished
+            interceptorHolder.fireOnFinish(s.getBusinessKey());
+        }
 
         log.debug("runLockSafe ['{}'] -> (done: {}, suspended: {})", s.getId(), s.isDone(), s.isSuspended());
     }
@@ -219,6 +239,45 @@ public abstract class AbstractEngine implements Engine {
         public void fireOnElementActivation(Execution e, String processDefinitionId, String elementId) {
             for (ActivationListener l : listeners) {
                 l.onActivation(e, processDefinitionId, elementId);
+            }
+        }
+    }
+    
+    private static final class ExecutionInterceptorHolder {
+        
+        private final List<ExecutionInterceptor> interceptors = new CopyOnWriteArrayList<>();
+        
+        public void addInterceptor(ExecutionInterceptor i) {
+            interceptors.add(i);
+        }
+        
+        public void fireOnStart(String processBusinessKey, String processDefinitionId, UUID executionId, Map<String, Object> variables) throws ExecutionException {
+            for (ExecutionInterceptor i : interceptors) {
+                i.onStart(processBusinessKey);
+            }
+        }
+        
+        public void fireOnSuspend() throws ExecutionException {
+            for (ExecutionInterceptor i : interceptors) {
+                i.onSuspend();
+            }
+        }
+        
+        public void fireOnResume(String processBusinessKey, UUID executuonId, UUID eventId, Map<String, Object> variables) throws ExecutionException {
+            for (ExecutionInterceptor i : interceptors) {
+                i.onResume();
+            }
+        }
+        
+        public void fireOnFinish(String processBusinessKey) throws ExecutionException {
+            for (ExecutionInterceptor i : interceptors) {
+                i.onFinish(processBusinessKey);
+            }
+        }
+        
+        public void fireOnCommand() throws ExecutionException {
+            for (ExecutionInterceptor i : interceptors) {
+                i.onCommand();
             }
         }
     }
