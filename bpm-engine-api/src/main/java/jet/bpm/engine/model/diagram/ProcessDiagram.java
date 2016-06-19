@@ -4,15 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProcessGraphics implements Serializable {
+public class ProcessDiagram implements Serializable {
 
     private final String id;
-
     private final List<Shape> shapes = new ArrayList<>();
-
     private final List<Edge> edges = new ArrayList<>();
 
-    public ProcessGraphics(String id) {
+    public ProcessDiagram(String id) {
         this.id = id;
     }
 

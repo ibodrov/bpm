@@ -6,11 +6,8 @@ import java.util.List;
 public class Edge implements Serializable {
 
     private final String id;
-
     private final String elementId;
-
     private final Label label;
-    
     private final List<Waypoint> waypoints;
     
     public Edge(String id, String elementId, Label label, List<Waypoint> waypoints) {

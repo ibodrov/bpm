@@ -5,10 +5,13 @@ import java.util.UUID;
 import jet.bpm.engine.model.AbstractElement;
 import jet.bpm.engine.model.EndEvent;
 import jet.bpm.engine.model.EventBasedGateway;
+import jet.bpm.engine.model.ExpressionType;
 import jet.bpm.engine.model.IntermediateCatchEvent;
 import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
+import jet.bpm.engine.model.ServiceTask;
 import jet.bpm.engine.model.StartEvent;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
@@ -56,5 +59,32 @@ public class ExecutionInterceptorTest extends AbstractEngineTest {
 
         verify(interceptor, times(1)).onResume();
         verify(interceptor, times(1)).onFinish(eq(key));
+    }
+    
+    /**
+     * start --> t1 (exception!) --> end
+     */
+    @Test
+    public void testException() throws Exception {
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${t1}"),
+                new SequenceFlow("f2", "t1", "end"),
+                new EndEvent("end")
+        )));
+
+        // ---
+
+        String key = UUID.randomUUID().toString();
+        
+        try {
+            getEngine().start(key, processId, null);
+            fail("whoa there");
+        } catch (Exception e) {
+        }
+        
+        verify(interceptor).onError(eq(key), any(Throwable.class));
     }
 }

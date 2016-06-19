@@ -23,4 +23,8 @@ public abstract class ExecutionInterceptorAdapter implements ExecutionIntercepto
     @Override
     public void onCommand() throws ExecutionException {
     }
+
+    @Override
+    public void onError(String processBusinessKey, Throwable cause) throws ExecutionException {
+    }
 }

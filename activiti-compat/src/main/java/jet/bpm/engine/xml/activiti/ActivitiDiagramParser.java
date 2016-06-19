@@ -10,7 +10,7 @@ import javax.xml.parsers.SAXParserFactory;
 import jet.bpm.engine.model.diagram.Label;
 import jet.bpm.engine.model.diagram.Bounds;
 import jet.bpm.engine.model.diagram.Edge;
-import jet.bpm.engine.model.diagram.ProcessGraphics;
+import jet.bpm.engine.model.diagram.ProcessDiagram;
 import jet.bpm.engine.model.diagram.Shape;
 import jet.bpm.engine.model.diagram.Waypoint;
 import jet.bpm.engine.xml.ParserException;
@@ -26,7 +26,7 @@ public class ActivitiDiagramParser implements DiagramParser {
     private static final Logger log = LoggerFactory.getLogger(ActivitiDiagramParser.class);
 
     @Override
-    public ProcessGraphics parse(InputStream in) throws ParserException {
+    public ProcessDiagram parse(InputStream in) throws ParserException {
         if (in == null) {
             throw new NullPointerException("Input cannot be null");
         }
@@ -60,7 +60,7 @@ public class ActivitiDiagramParser implements DiagramParser {
 
         private List<Waypoint> waypoints;
 
-        private ProcessGraphics graphics;
+        private ProcessDiagram graphics;
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -69,7 +69,7 @@ public class ActivitiDiagramParser implements DiagramParser {
             switch (qName) {
                 case "process":
                     String processId = attributes.getValue("id");
-                    graphics = new ProcessGraphics(processId);
+                    graphics = new ProcessDiagram(processId);
                     break;                
                 case "bpmndi:BPMNShape": {
                     id = attributes.getValue("id");

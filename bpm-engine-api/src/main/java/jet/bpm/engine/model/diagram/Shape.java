@@ -5,9 +5,7 @@ import java.io.Serializable;
 public class Shape implements Serializable {
 
     private final String id;
-
     private final String elementId;
-
     private final Bounds bounds;
     
     public Shape(String id, String elementId, Bounds bounds) {

@@ -13,4 +13,6 @@ public interface ExecutionInterceptor {
     void onFinish(String processBusinessKey) throws ExecutionException;
     
     void onCommand() throws ExecutionException;
+    
+    void onError(String processBusinessKey, Throwable cause) throws ExecutionException;
 }

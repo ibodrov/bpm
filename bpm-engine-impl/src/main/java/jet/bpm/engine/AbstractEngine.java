@@ -83,6 +83,9 @@ public abstract class AbstractEngine implements Engine {
         try {
             interceptorHolder.fireOnStart(processBusinessKey, processDefinitionId, executionId, variables);
             runLockSafe(s);
+        } catch (Exception e) {
+            interceptorHolder.fireOnError(processBusinessKey, e);
+            throw e;
         } finally {
             lm.unlock(processBusinessKey);
         }
@@ -107,6 +110,9 @@ public abstract class AbstractEngine implements Engine {
 
             Event e = evs.iterator().next();
             resumeLockSafe(e, variables);
+        } catch (Exception e) {
+            interceptorHolder.fireOnError(processBusinessKey, e);
+            throw e;
         } finally {
             lm.unlock(processBusinessKey);
         }
@@ -115,17 +121,20 @@ public abstract class AbstractEngine implements Engine {
     @Override
     public void resume(UUID eventId, Map<String, Object> variables) throws ExecutionException {
         EventPersistenceManager em = getEventManager();
-        Event e = em.get(eventId);
-        if (e == null) {
+        Event ev = em.get(eventId);
+        if (ev == null) {
             throw new NoEventFoundException("No event '%s' found", eventId);
         }
 
-        String processBusinessKey = e.getProcessBusinessKey();
+        String processBusinessKey = ev.getProcessBusinessKey();
 
         LockManager lm = getLockManager();
         lm.lock(processBusinessKey);
         try {
-            resumeLockSafe(e, variables);
+            resumeLockSafe(ev, variables);
+        } catch (ExecutionException e) {
+            interceptorHolder.fireOnError(processBusinessKey, e);
+            throw e;
         } finally {
             lm.unlock(processBusinessKey);
         }
@@ -138,6 +147,9 @@ public abstract class AbstractEngine implements Engine {
         lm.lock(processBusinessKey);        
         try {
             resumeLockSafe(e, variables);
+        } catch (Exception ev) {
+            interceptorHolder.fireOnError(processBusinessKey, ev);
+            throw ev;
         } finally {
             lm.unlock(processBusinessKey);
         }
@@ -278,6 +290,12 @@ public abstract class AbstractEngine implements Engine {
         public void fireOnCommand() throws ExecutionException {
             for (ExecutionInterceptor i : interceptors) {
                 i.onCommand();
+            }
+        }
+        
+        public void fireOnError(String processBusinessKey, Throwable cause) throws ExecutionException {
+            for (ExecutionInterceptor i : interceptors) {
+                i.onError(processBusinessKey, cause);
             }
         }
     }
