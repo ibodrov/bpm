@@ -111,9 +111,9 @@ public class ServiceTaskHandler extends AbstractElementHandler {
         String bk = s.getBusinessKey();
         String eid = c.getElementId();
 
-        BoundaryEvent ev = ProcessDefinitionUtils.findBoundaryEvent(pd, eid, errorRef);
+        BoundaryEvent ev = ProcessDefinitionUtils.findBoundaryErrorEvent(pd, eid, errorRef);
         if (ev == null) {
-            ev = ProcessDefinitionUtils.findBoundaryEvent(pd, eid, null);
+            ev = ProcessDefinitionUtils.findBoundaryErrorEvent(pd, eid, null);
         }
 
         if (ev != null) {

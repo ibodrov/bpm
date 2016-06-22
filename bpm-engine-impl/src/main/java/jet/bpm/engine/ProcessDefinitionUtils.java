@@ -164,7 +164,7 @@ public final class ProcessDefinitionUtils {
         return l;
     }
 
-    public static BoundaryEvent findBoundaryEvent(ProcessDefinition pd, String attachedToRef, String errorRef) throws ExecutionException {
+    public static BoundaryEvent findBoundaryErrorEvent(ProcessDefinition pd, String attachedToRef, String errorRef) throws ExecutionException {
         List<BoundaryEvent> l = findOptionalBoundaryEvents(pd, attachedToRef);
         for (BoundaryEvent ev : l) {
             if (attachedToRef.equals(ev.getAttachedToRef())) {
@@ -172,7 +172,7 @@ public final class ProcessDefinitionUtils {
                     if (errorRef.equals(ev.getErrorRef())) {
                         return ev;
                     }
-                } else if (ev.getErrorRef() == null) {
+                } else if (ev.getErrorRef() == null && ev.getTimeDuration() == null) {
                     return ev;
                 }
             }

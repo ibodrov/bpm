@@ -2,6 +2,7 @@ package jet.bpm.engine;
 
 import java.util.Arrays;
 import java.util.UUID;
+import jet.bpm.engine.api.BpmnError;
 import jet.bpm.engine.api.ExecutionContext;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.api.JavaDelegate;
@@ -129,5 +130,61 @@ public class TimerBoundaryEvent extends AbstractEngineTest {
         // ---
 
         verify(longTask, times(1)).execute(any(ExecutionContext.class));
+    }
+    
+    /**
+     * start --> t1 ---------> end1
+     *            |\
+     *            | timer1 --> end2
+     *            \
+     *             error1 ----> end3
+     */
+    @Test
+    public void testMixedEvents() throws Exception {
+        JavaDelegate failingTask = spy(new JavaDelegate() {
+
+            @Override
+            public void execute(ExecutionContext ctx) throws ExecutionException {
+                throw new BpmnError("error1");
+            }
+        });
+        
+        getServiceTaskRegistry().register("failingTask", failingTask);
+        
+        // ---
+        
+        String processId = "test";
+        deploy(new ProcessDefinition(processId, Arrays.<AbstractElement>asList(
+                new StartEvent("start"),
+                new SequenceFlow("f1", "start", "t1"),
+                new ServiceTask("t1", ExpressionType.DELEGATE, "${failingTask}"),
+                new BoundaryEvent("timer1", "t1", null, "PT3S"),
+                new BoundaryEvent("error1", "t1", "error1"),
+                new SequenceFlow("f2", "t1", "end1"),
+                new SequenceFlow("f3", "timer1", "end2"),
+                new SequenceFlow("f4", "error1", "end3"),
+                new EndEvent("end1"),
+                new EndEvent("end2"),
+                new EndEvent("end3")
+        )));
+
+        // ---
+        
+        String key = UUID.randomUUID().toString();
+        getEngine().start(key, processId, null);
+
+        // ---
+
+        assertActivations(key, processId,
+                "start",
+                "f1",
+                "t1",
+                "f4",
+                "end3");
+        assertNoMoreActivations();
+
+        // ---
+
+        verify(failingTask, times(1)).execute(any(ExecutionContext.class));
     }
 }

@@ -55,10 +55,10 @@ public class HandleRaisedErrorCommand implements ExecutionCommand {
         IndexedProcessDefinitionProvider provider = engine.getProcessDefinitionProvider();
         IndexedProcessDefinition pd = provider.getById(processDefinitionId);
 
-        BoundaryEvent ev = ProcessDefinitionUtils.findBoundaryEvent(pd, elementId, errorRef);
+        BoundaryEvent ev = ProcessDefinitionUtils.findBoundaryErrorEvent(pd, elementId, errorRef);
         if (ev == null) {
             // trying to find a boundary event without the specified error reference
-            ev = ProcessDefinitionUtils.findBoundaryEvent(pd, elementId, null);
+            ev = ProcessDefinitionUtils.findBoundaryErrorEvent(pd, elementId, null);
         }
         
         if (ev != null) {
