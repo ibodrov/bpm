@@ -277,7 +277,7 @@ public class ServiceTaskHandler extends AbstractElementHandler {
                     for (TimerDefinition d : timers) {
                         long dt = now2 - now;
                         if (d.duration <= dt) {
-                            // cancel the running task (atleas attempt to cancel
+                            // cancel the running task (at least attempts to do
                             // it)
                             f.cancel(true);
 
