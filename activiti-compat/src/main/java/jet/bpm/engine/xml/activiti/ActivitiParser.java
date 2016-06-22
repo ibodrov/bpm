@@ -293,11 +293,12 @@ public class ActivitiParser implements Parser {
                     break;
 
                 case "boundaryEvent":
-                    BoundaryEvent be = new BoundaryEvent(id, attachedToRef, errorRef);
+                    BoundaryEvent be = new BoundaryEvent(id, attachedToRef, errorRef, timeDuration);
                     children.add(be);
-
+                    
                     attachedToRef = null;
                     errorRef = null;
+                    timeDuration = null;
                     break;
 
                 case "sequenceFlow":

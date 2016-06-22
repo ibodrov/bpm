@@ -17,7 +17,7 @@ Main features
 
 Supported elements:
 --
-- boundary event;
+- boundary event (errors and timers);
 - call activity;
 - end event;
 - event-based gateway;
@@ -33,3 +33,4 @@ Supported elements:
 Limitations
 --
 - in the current implementation of the engine, "inclusive gateways" work exactly as "exclusive" - e.g. without the evaluation of flow expressions.
+- tasks with TimerBoundaryEvents executed in the separate thread inside unbounded Executor
