@@ -2,6 +2,7 @@ package jet.bpm.engine.api.interceptors;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -19,7 +20,7 @@ public class InterceptorStartEvent implements Serializable {
         this.executionId = executionId;
         
         // TODO deep-copy the variables map
-        this.variables = new HashMap<>(variables);
+        this.variables = variables != null ? new HashMap<>(variables) : Collections.emptyMap();
     }
 
     public String getProcessBusinessKey() {
