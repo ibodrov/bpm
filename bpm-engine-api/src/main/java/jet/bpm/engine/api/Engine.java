@@ -2,6 +2,7 @@ package jet.bpm.engine.api;
 
 import java.util.Map;
 import java.util.UUID;
+import jet.bpm.engine.api.interceptors.ExecutionInterceptor;
 
 public interface Engine {
 
@@ -33,4 +34,12 @@ public interface Engine {
      * @throws ExecutionException
      */
     void resume(UUID eventId, Map<String, Object> variables) throws ExecutionException;
+    
+    /**
+     * Adds an execution interceptor. Execution interceptor will receive events
+     * synchronously and may block the execution. It is recommended to configure
+     * all interceptors before the first execution.
+     * @param i
+     */
+    void addInterceptor(ExecutionInterceptor i);
 }

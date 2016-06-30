@@ -1,5 +1,6 @@
 package jet.bpm.engine;
 
+import jet.bpm.engine.api.interceptors.ExecutionInterceptor;
 import jet.bpm.engine.api.ExecutionContext;
 import java.util.Collection;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import jet.bpm.engine.api.Execution;
 import jet.bpm.engine.api.ExecutionException;
 import jet.bpm.engine.api.NoEventFoundException;
+import jet.bpm.engine.api.interceptors.InterceptorStartEvent;
 import jet.bpm.engine.commands.ExecutionCommand;
 import jet.bpm.engine.commands.ProcessElementCommand;
 import jet.bpm.engine.el.ExpressionManager;
@@ -57,6 +59,7 @@ public abstract class AbstractEngine implements Engine {
         listenerHolder.fireOnElementActivation(e, processDefinitionId, elementId);
     }
     
+    @Override
     public void addInterceptor(ExecutionInterceptor i) {
         interceptorHolder.addInterceptor(i);
     }
@@ -264,8 +267,9 @@ public abstract class AbstractEngine implements Engine {
         }
         
         public void fireOnStart(String processBusinessKey, String processDefinitionId, UUID executionId, Map<String, Object> variables) throws ExecutionException {
+            InterceptorStartEvent ev = new InterceptorStartEvent(processBusinessKey, processDefinitionId, executionId, variables);
             for (ExecutionInterceptor i : interceptors) {
-                i.onStart(processBusinessKey);
+                i.onStart(ev);
             }
         }
         

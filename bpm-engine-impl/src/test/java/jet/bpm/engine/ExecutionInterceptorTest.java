@@ -1,7 +1,9 @@
 package jet.bpm.engine;
 
+import jet.bpm.engine.api.interceptors.ExecutionInterceptor;
 import java.util.Arrays;
 import java.util.UUID;
+import jet.bpm.engine.api.interceptors.InterceptorStartEvent;
 import jet.bpm.engine.model.AbstractElement;
 import jet.bpm.engine.model.EndEvent;
 import jet.bpm.engine.model.EventBasedGateway;
@@ -11,9 +13,10 @@ import jet.bpm.engine.model.ProcessDefinition;
 import jet.bpm.engine.model.SequenceFlow;
 import jet.bpm.engine.model.ServiceTask;
 import jet.bpm.engine.model.StartEvent;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.*;
 
 public class ExecutionInterceptorTest extends AbstractEngineTest {
@@ -47,8 +50,10 @@ public class ExecutionInterceptorTest extends AbstractEngineTest {
         String key = UUID.randomUUID().toString();
         getEngine().start(key, processId, null);
         
+        ArgumentCaptor<InterceptorStartEvent> args = ArgumentCaptor.forClass(InterceptorStartEvent.class);
+        verify(interceptor, times(1)).onStart(args.capture());
+        assertEquals(key, args.getValue().getProcessBusinessKey());
         
-        verify(interceptor, times(1)).onStart(eq(key));
         verify(interceptor, times(1)).onSuspend();
 
         // ---

@@ -1,11 +1,11 @@
-package jet.bpm.engine;
+package jet.bpm.engine.api.interceptors;
 
 import jet.bpm.engine.api.ExecutionException;
 
 public abstract class ExecutionInterceptorAdapter implements ExecutionInterceptor {
 
     @Override
-    public void onStart(String processBusinessKey) throws ExecutionException {
+    public void onStart(InterceptorStartEvent ev) throws ExecutionException {
     }
 
     @Override

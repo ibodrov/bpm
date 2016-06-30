@@ -1,10 +1,10 @@
-package jet.bpm.engine;
+package jet.bpm.engine.api.interceptors;
 
 import jet.bpm.engine.api.ExecutionException;
 
 public interface ExecutionInterceptor {
     
-    void onStart(String processBusinessKey) throws ExecutionException;
+    void onStart(InterceptorStartEvent ev) throws ExecutionException;
     
     void onSuspend() throws ExecutionException;
     
