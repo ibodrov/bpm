@@ -6,7 +6,7 @@
         <groupId>jet.bpm</groupId>
         <artifactId>parent</artifactId>
         <version>0.6.3-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     
     <groupId>jet.bpm.examples</groupId>
