@@ -78,6 +78,7 @@ public abstract class AbstractEngine implements Engine {
 
         UUID executionId = idg.generate();
         DefaultExecution s = new DefaultExecution(executionId, processBusinessKey, ctx);
+        ExecutionContextHelper.fillBasicVariables(s, ctx);
         s.push(new ProcessElementCommand(processDefinitionId, start.getId()));
 
         LockManager lm = getLockManager();

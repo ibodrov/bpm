@@ -2,10 +2,13 @@ package jet.bpm.engine;
 
 import jet.bpm.engine.api.ExecutionContext;
 import java.util.Set;
+import jet.bpm.engine.api.Execution;
 import jet.bpm.engine.el.ExpressionManager;
 import jet.bpm.engine.model.VariableMapping;
 
 public final class ExecutionContextHelper {
+    
+    public static final String PROCESS_BUSINESS_KEY = "__processBusinessKey";
 
     /**
      * Copy variables from one context to another. If the source variable is
@@ -43,6 +46,10 @@ public final class ExecutionContextHelper {
             Object v = src.getVariable(k);
             dst.setVariable(k, v);
         }
+    }
+    
+    public static void fillBasicVariables(Execution execution, ExecutionContext ctx) {
+        ctx.setVariable(PROCESS_BUSINESS_KEY, execution.getBusinessKey());
     }
 
     private ExecutionContextHelper() {

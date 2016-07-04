@@ -26,10 +26,12 @@ public class DefaultEngine extends AbstractEngine implements Engine {
     private final ExpressionManager expressionManager;
     private final EventPersistenceManager eventManager;
 
+    @Deprecated
     public DefaultEngine(ProcessDefinitionProvider processDefinitionProvider, ServiceTaskRegistry serviceTaskRegistry, EventStorage eventStorage) {
         this(processDefinitionProvider, serviceTaskRegistry, new EventPersistenceManagerImpl(eventStorage));
     }
 
+    @Deprecated
     public DefaultEngine(
             ProcessDefinitionProvider processDefinitionProvider,
             ServiceTaskRegistry serviceTaskRegistry,
@@ -37,6 +39,7 @@ public class DefaultEngine extends AbstractEngine implements Engine {
         this(processDefinitionProvider, serviceTaskRegistry, eventPersistenceManager, new DummyPersistenceManager(), new NoopLockManager());
     }
 
+    @Deprecated
     public DefaultEngine(
             ProcessDefinitionProvider processDefinitionProvider,
             ServiceTaskRegistry serviceTaskRegistry,
