@@ -126,7 +126,7 @@ public class Main {
     }
     
     /**
-     * Out custom task executor. It could be a distributed task executor or
+     * Our custom task executor. It could be a distributed task executor or
      * a local fork/join pool or whatever you like.
      * 
      * Receives taskNames to start a task and sends notification on a task
@@ -135,7 +135,6 @@ public class Main {
      * Simple callback is used to notify for task completion. In real world, it
      * could be replaced with selectors, promises, etc.
      */
-    
     public interface TaskExecutor {
         
         void submit(String taskName, TaskCallback callback);
@@ -168,7 +167,7 @@ public class Main {
     }
     
     /**
-     * Example of the long-running task.
+     * Example of a long-running task.
      */
     public static final class LongTask implements Runnable {
         
