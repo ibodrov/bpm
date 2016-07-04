@@ -132,8 +132,8 @@ public class Main {
      * Receives taskNames to start a task and sends notification on a task
      * completion.
      * 
-     * Simple callback is used to notify for task completion. In real world, it
-     * could be replaced with selectors, promises, etc.
+     * A simple callback is used to notify for the task completion. In real
+     * world, it could be replaced with selectors, promises, etc.
      */
     public interface TaskExecutor {
         
