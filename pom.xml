@@ -22,6 +22,7 @@
         <module>persistence/mapdb</module>
         <module>activiti-compat</module>
         <module>testkit</module>
+        <module>examples/async</module>
         <module>benchmark</module>
     </modules>
 
