@@ -1,4 +1,4 @@
-package jet.bpm.engine.xml.activiti;
+package jet.bpm.engine.xml.camunda;
 
 import java.io.InputStream;
 import jet.bpm.engine.model.ProcessDefinition;
@@ -12,7 +12,7 @@ public class CamundaParserTest {
     @Test
     public void testSimple() throws Exception {
         InputStream in = ClassLoader.getSystemResourceAsStream("camunda.bpmn");
-        Parser p = new ActivitiParser();
+        Parser p = new CamundaParser();
 
         ProcessDefinition pd = p.parse(in);
         assertNotNull(pd);
