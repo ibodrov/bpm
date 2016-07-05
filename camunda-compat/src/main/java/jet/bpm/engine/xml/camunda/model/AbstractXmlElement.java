@@ -7,8 +7,15 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlType
 @XmlSeeAlso({
+    XmlEndEvent.class,
+    XmlEventBasedGateway.class,
+    XmlExclusiveGateway.class,
+    XmlInclusiveGateway.class,
+    XmlIntermediateCatchEvent.class,
+    XmlIntermediateThrowEvent.class,
+    XmlSequenceFlow.class,
+    XmlServiceTask.class,
     XmlStartEvent.class,
-    XmlEndEvent.class
 })
 public class AbstractXmlElement implements Serializable {
     
