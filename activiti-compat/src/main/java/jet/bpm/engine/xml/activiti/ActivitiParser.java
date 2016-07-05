@@ -95,10 +95,12 @@ public class ActivitiParser implements Parser {
         private Set<VariableMapping> out;
 
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-            log.debug("startElement ['{}']", qName);
+        public void startElement(String uri, String qName, String localName, Attributes attributes) throws SAXException {
+            log.debug("startElement ['{}']", localName);
+            
+            localName = stripNamespace(localName);
 
-            switch (qName) {
+            switch (localName) {  
                 case "process":
                     processId = attributes.getValue("id");
                     processName = attributes.getValue("name");
@@ -171,8 +173,8 @@ public class ActivitiParser implements Parser {
                     id = attributes.getValue("id");
                     name = attributes.getValue("name");
                     
-                    String simple = attributes.getValue("activiti:expression");
-                    String delegate = attributes.getValue("activiti:delegateExpression");
+                    String simple = attributes.getValue("expression");
+                    String delegate = attributes.getValue("delegateExpression");
 
                     ExpressionType type = ExpressionType.NONE;
                     String expr = null;
@@ -190,7 +192,7 @@ public class ActivitiParser implements Parser {
                     children.add(st);
                     break;
 
-                case "activiti:executionListener":
+                case "executionListener":
                     if (listeners == null) {
                         listeners = new ArrayList<>();
                     }
@@ -214,14 +216,14 @@ public class ActivitiParser implements Parser {
                     listeners.add(sel);
                     break;
 
-                case "activiti:in":
+                case "in":
                     if (in == null) {
                         in = new HashSet<>();
                     }
                     in.add(parseVariableMapping(attributes));
                     break;
                     
-                case "activiti:out":
+                case "out":
                     if (out == null) {
                         out = new HashSet<>();
                     }
@@ -268,10 +270,12 @@ public class ActivitiParser implements Parser {
         }
 
         @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
-            log.debug("endElement ['{}']", qName);
+        public void endElement(String uri, String qName, String localName) throws SAXException {
+            log.debug("endElement ['{}']", localName);
+            
+            localName = stripNamespace(localName);
 
-            switch (qName) {
+            switch (localName) {
                 case "process":
                     process = new ProcessDefinition(processId, children);
                     process.setName(processName);
@@ -358,5 +362,18 @@ public class ActivitiParser implements Parser {
                     break;
             }
         }
+    }
+    
+    private static String stripNamespace(String s) {
+        if (s == null) {
+            return s;
+        }
+        
+        int i = s.indexOf(":");
+        if (i >= 0 && i + 1 < s.length()) {
+            return s.substring(i + 1);
+        }
+        
+        return s;
     }
 }
